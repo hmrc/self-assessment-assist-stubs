@@ -1,3 +1,13 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.selfassessmentassiststubs.controllers.MicroserviceHelloWorldController.hello
+GET         /greet                                                                      controllers.GreetingController.greet()
+
+POST 	    /fraud                                                                      controllers.CipFraudController.submitFraudInfo()
+# RDS
+POST        /rds/assessments/self-assement-assist                                       controllers.RdsController.generateReport()
+
+POST 	    /individuals/self-assement-assist/submission                                controllers.NrsController.submit()
+
+
+PUT         /*route                                                                     controllers.GenericController.unsupportedRequestHandler(route)
+DELETE      /*route                                                                     controllers.GenericController.unsupportedRequestHandler(route)
