@@ -31,7 +31,7 @@ class HealthEndpointIntegrationSpec
      with IntegrationPatience
      with GuiceOneServerPerSuite {
 
-  /*private val wsClient = app.injector.instanceOf[WSClient]
+  private val wsClient = app.injector.instanceOf[WSClient]
   private val baseUrl  = s"http://localhost:$port"
 
   override def fakeApplication(): Application =
@@ -49,5 +49,5 @@ class HealthEndpointIntegrationSpec
 
       response.status shouldBe 200
     }
-  }*/
+  }
 }
