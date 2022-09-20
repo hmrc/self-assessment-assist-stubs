@@ -5,6 +5,7 @@ GET         /greet                                                              
 POST 	    /fraud                                                                      controllers.CipFraudController.submitFraudInfo()
 # RDS
 POST        /rds/assessments/self-assement-assist                                       controllers.RdsController.generateReport()
+POST        /rds/assessments/self-assement-assist/acknowledge                           controllers.RdsController.acknowledgeReport()
 
 POST 	    /individuals/self-assement-assist/submission                                controllers.NrsController.submit()
 
