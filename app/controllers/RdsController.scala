@@ -140,6 +140,10 @@ class RdsController @Inject()(cc: ControllerComponents)
           |        {
           |            "name": "calculationID",
           |            "value": "537490b4-06e3-4fef-a555-6fd0877dc7ca"
+          |        },
+          |        {
+          |            "name": "correlationID",
+          |            "value": "5fht738957jfjf845jgjf855"
           |        }
           |        ]
           |       }
@@ -148,6 +152,40 @@ class RdsController @Inject()(cc: ControllerComponents)
           |
           |""".stripMargin
 
+  val retAcknowledgeReponse = s"""{
+                                 |  "links": [],
+                                 |  "version": 2,
+                                 |  "moduleId": "HMRC_ASSIST_ITSA_FINSUB_FEEDBACK_ACK",
+                                 |  "stepId": "execute",
+                                 |  "executionState": "completed",
+                                 |  "metadata": {
+                                 |    "module_id": "HMRC_ASSIST_ITSA_FINSUB_FEEDBACK_ACK",
+                                 |    "step_id": "execute"
+                                 |  },
+                                 |  "outputs": [
+                                 |    {
+                                 |      "name": "feedbackID",
+                                 |      "value": "a365cc12c845c057eb548febfa8048ba"
+                                 |    },
+                                 |    {
+                                 |      "name": "nino",
+                                 |      "value": "QQ123456A"
+                                 |    },
+                                 |    {
+                                 |      "name": "taxYear",
+                                 |      "value": 2022
+                                 |    },
+                                 |    {
+                                 |      "name": "responseCode",
+                                 |      "value": 200
+                                 |    },
+                                 |    {
+                                 |      "name": "response",
+                                 |      "value": "String"
+                                 |    }
+                                 |  ]
+                                 |}""".stripMargin
+
   def generateReport(): Action[JsValue] = Action.async(parse.json) {
     request => {
       logger.info(s"======Invoked RDS for report generation======")
@@ -155,6 +193,12 @@ class RdsController @Inject()(cc: ControllerComponents)
     }
   }
 
+  def acknowledgeReport(): Action[JsValue] = Action.async(parse.json) {
+    request => {
+      logger.info(s"======Invoked RDS for report generation======")
+      Future.successful(Ok(Json.parse(retAcknowledgeReponse)))
+    }
+  }
 }
 
 
