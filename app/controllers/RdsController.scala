@@ -138,8 +138,12 @@ class RdsController @Inject()(cc: ControllerComponents)
           |            "value": "a365cc12c845c057eb548febfa8048ba"
           |        },
           |        {
-          |            "name": "calculationID",
+          |            "name": "calculationId",
           |            "value": "537490b4-06e3-4fef-a555-6fd0877dc7ca"
+          |        },
+          |        {
+          |            "name": "correlationId",
+          |            "value": "490344b4-06e3-4fef-a444-5fd0566ec9co"
           |        }
           |        ]
           |       }
