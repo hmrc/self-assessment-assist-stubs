@@ -134,15 +134,15 @@ class RdsController @Inject()(cc: ControllerComponents)
           |        {
           |      "identifiers": [
           |        {
-          |            "name": "feedbackId",
+          |            "name": "feedbackID",
           |            "value": "a365cc12c845c057eb548febfa8048ba"
           |        },
           |        {
-          |            "name": "calculationId",
+          |            "name": "calculationID",
           |            "value": "537490b4-06e3-4fef-a555-6fd0877dc7ca"
           |        },
           |        {
-          |            "name": "correlationId",
+          |            "name": "correlationID",
           |            "value": "490344b4-06e3-4fef-a444-5fd0566ec9co"
           |        }
           |        ]
