@@ -134,7 +134,7 @@ class RdsController @Inject()(cc: ControllerComponents)
           |        {
           |      "identifiers": [
           |        {
-          |            "name": "feedbackID",
+          |            "name": "feedbackId",
           |            "value": "a365cc12c845c057eb548febfa8048ba"
           |        },
           |        {
