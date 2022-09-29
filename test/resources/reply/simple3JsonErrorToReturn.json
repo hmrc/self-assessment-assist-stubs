@@ -1,0 +1,38 @@
+{
+  "comment": "Simple json error to return",
+  "command": [
+    {
+      "key": {
+        "nino": "QR000001A",
+        "stage": "test",
+        "statuscode": 401,
+        "return": {
+          "code": "FORMAT_NINO",
+          "message": "The provided NINO is invalid"
+        }
+      }
+    },
+    {
+      "key": {
+        "nino": "QR000002A",
+        "stage": "test",
+        "statuscode": 402,
+        "return": {
+          "code": "FORMAT_NINO",
+          "message": "The provided NINO is invalid"
+        }
+      }
+    },
+    {
+      "key": {
+        "nino": "QR000003A",
+        "stage": "test",
+        "statuscode": 403,
+        "return": {
+          "code": "FORMAT_NINO",
+          "message": "The provided NINO is invalid"
+        }
+      }
+    }
+  ]
+}

@@ -16,23 +16,14 @@
 
 package utils
 
-import scala.util.{Random, Try}
+import scala.util.Random
 
-case class ReportReturnData(fileName:String, fileterKey:String="generateReport")  {
+case class AcknowledgeReturnData(fileName:String, fileterKey:String="acknowledge")  {
   val random = new Random()
   val jsonStore = new JsonStore(fileName, fileterKey)
 
   def get(nino:String) : Option[LookupValue] = {
     nino match {
-      case "QR000000A" => {
-        val pickFrom = Array(Some("QR000001A"), Some("QR000002A"), Some("QR000003A"))
-        val r = random.nextInt(pickFrom.length)
-        val sk:Option[String] = Try(pickFrom(r)).toOption.flatten
-
-        val k:Option[LookupValue] = sk.flatMap( x => jsonStore.get(x))
-        k
-
-      }
       case _ =>
         val s = jsonStore.get(nino)
         s

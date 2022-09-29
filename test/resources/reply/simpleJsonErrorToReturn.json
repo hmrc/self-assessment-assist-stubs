@@ -1,0 +1,16 @@
+{
+  "comment": "Simple json error to return",
+  "command": [
+    {
+      "key": {
+        "nino": "QQ000001A",
+        "stage": "test",
+        "statuscode": 200,
+        "return": {
+          "code": "FORMAT_NINO",
+          "message": "The provided NINO is invalid"
+        }
+      }
+    }
+  ]
+}

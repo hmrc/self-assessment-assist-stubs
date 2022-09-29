@@ -1,0 +1,71 @@
+{
+  "comment": "Simple json error to return",
+  "command": [
+    {
+      "key": {
+        "nino": "QR000001A",
+        "stage": "generateReport",
+        "statuscode": 401,
+        "return": {
+          "code": "FORMAT_NINO",
+          "message": "The provided NINO is invalid"
+        }
+      }
+    },
+    {
+      "key": {
+        "nino": "QR000002A",
+        "stage": "generateReport",
+        "statuscode": 402,
+        "return": {
+          "code": "FORMAT_NINO",
+          "message": "The provided NINO is invalid"
+        }
+      }
+    },
+    {
+      "key": {
+        "nino": "QR000003A",
+        "stage": "generateReport",
+        "statuscode": 403,
+        "return": {
+          "code": "FORMAT_NINO",
+          "message": "The provided NINO is invalid"
+        }
+      }
+    },
+    {
+      "key": {
+        "nino": "QR000004A",
+        "stage": "acknowledge",
+        "statuscode": 501,
+        "return": {
+          "code": "FORMAT_NINO",
+          "message": "The provided NINO is invalid"
+        }
+      }
+    },
+    {
+      "key": {
+        "nino": "QR000005A",
+        "stage": "acknowledge",
+        "statuscode": 502,
+        "return": {
+          "code": "FORMAT_NINO",
+          "message": "The provided NINO is invalid"
+        }
+      }
+    },
+    {
+      "key": {
+        "nino": "QR000006A",
+        "stage": "acknowledge",
+        "statuscode": 503,
+        "return": {
+          "code": "FORMAT_NINO",
+          "message": "The provided NINO is invalid"
+        }
+      }
+    }
+  ]
+}
