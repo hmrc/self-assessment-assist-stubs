@@ -59,12 +59,17 @@ class RdsController @Inject()(cc: ControllerComponents)
 
   def acknowledgeReport(): Action[JsValue] = Action.async(parse.json) {
     request => {
-      logger.info(s"======Invoked RDS for report generation======")
+      logger.info(s"======Invoked RDS for report acknowledge======")
 
-      val reportKey = acknowledgeStore.get("QQ123456A")
-      val json = reportKey match {
+      val ninoOption = getNinoFromRequest(request.body)
+      val json = ninoOption match {
         case None => Json.parse(error)
-        case Some(lookupValue) => lookupValue.jsonReturn
+        case Some(nino) =>
+          val reportKey = acknowledgeStore.get(nino)
+          reportKey match {
+            case None => Json.parse(error)
+            case Some(lookupValue) => lookupValue.jsonReturn
+          }
       }
       Future.successful(Ok(json))
     }
