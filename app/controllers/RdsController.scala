@@ -44,16 +44,16 @@ class RdsController @Inject()(cc: ControllerComponents)
       logger.info(s"======Invoked RDS for report generation======")
 
       val ninoOption = getNinoFromRequest(request.body)
-      val json = ninoOption match {
-        case None => Json.parse(error)
+      val statusJson = ninoOption match {
+        case None => (200, Json.parse(error))
         case Some(nino) =>
           val reportKey = reportRequestStore.get(nino)
           reportKey match {
-            case None => Json.parse(error)
-            case Some(lookupValue) => lookupValue.jsonReturn
+            case None => (200, Json.parse(error) )
+            case Some(lookupValue) => ( lookupValue.stausCode, lookupValue.jsonReturn)
           }
       }
-      Future.successful(Ok(json))
+      Future.successful(new Status(statusJson._1)(statusJson._2))
     }
   }
 
@@ -62,16 +62,16 @@ class RdsController @Inject()(cc: ControllerComponents)
       logger.info(s"======Invoked RDS for report acknowledge======")
 
       val ninoOption = getNinoFromRequest(request.body)
-      val json = ninoOption match {
-        case None => Json.parse(error)
+      val statusJson = ninoOption match {
+        case None => (200, Json.parse(error))
         case Some(nino) =>
           val reportKey = acknowledgeStore.get(nino)
           reportKey match {
-            case None => Json.parse(error)
-            case Some(lookupValue) => lookupValue.jsonReturn
+            case None => (200, Json.parse(error) )
+            case Some(lookupValue) => ( lookupValue.stausCode, lookupValue.jsonReturn)
           }
       }
-      Future.successful(Ok(json))
+      Future.successful(new Status(statusJson._1)(statusJson._2))
     }
   }
 
