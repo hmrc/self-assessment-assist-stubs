@@ -22,12 +22,11 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.Logging
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
 
 
 @Singleton()
 class CipFraudController @Inject()(cc: ControllerComponents)
-  extends BackendController(cc) with Logging{
+  extends BackendController(cc) with Logging {
 
   val retSubmissionSuccesful =
     s"""{
