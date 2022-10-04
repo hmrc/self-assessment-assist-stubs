@@ -31,22 +31,22 @@ class RdsController @Inject()(cc: ControllerComponents)
   extends BackendController(cc) with StubResource {
 
   //below store is used for generate report to map calculation id to feedback
-  val calcIdMappings:Map[String,CalculationIdDetails] = Map(
-    FeedbackOne.calculationID-> FeedbackOne,
-    FeedbackTwo.calculationID-> FeedbackTwo,
+  val calcIdMappings: Map[String, CalculationIdDetails] = Map(
+    FeedbackOne.calculationID -> FeedbackOne,
+    FeedbackTwo.calculationID -> FeedbackTwo,
     FeedbackThree.calculationID -> FeedbackThree,
-    FeedbackFour.calculationID-> FeedbackFour,
-    FeedbackFive.calculationID-> FeedbackFive
+    FeedbackFour.calculationID -> FeedbackFour,
+    FeedbackFive.calculationID -> FeedbackFive
   ).withDefaultValue(FeedbackForDefaultResponse)
 
   //below store is used to find feedback and correlation if mapping while accepting acknowledge request
   val feedbackIDAndCorrelationIDMapping = Map(
-    FeedbackOne.feedbackID-> FeedbackOne,
-    FeedbackTwo.feedbackID-> FeedbackTwo,
-    FeedbackThree.feedbackID-> FeedbackThree,
-    FeedbackFour.feedbackID-> FeedbackFour,
-    FeedbackFive.feedbackID-> FeedbackFive,
-    FeedbackForDefaultResponse.feedbackID-> FeedbackForDefaultResponse
+    FeedbackOne.feedbackID -> FeedbackOne,
+    FeedbackTwo.feedbackID -> FeedbackTwo,
+    FeedbackThree.feedbackID -> FeedbackThree,
+    FeedbackFour.feedbackID -> FeedbackFour,
+    FeedbackFive.feedbackID -> FeedbackFive,
+    FeedbackForDefaultResponse.feedbackID -> FeedbackForDefaultResponse
   )
 
   val error =
@@ -74,11 +74,11 @@ class RdsController @Inject()(cc: ControllerComponents)
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           val calculationIdDetails = calcIdMappings(rdsRequest.calculationId.toString)
-          try{
-           val response= loadSubmitResponseTemplate(rdsRequest.calculationId.toString,calculationIdDetails.feedbackID,calculationIdDetails.correlationID)
-            (200,response)
-          }catch {
-            case e: FileNotFoundException => (404,Json.parse(error))
+          try {
+            val response = loadSubmitResponseTemplate(rdsRequest.calculationId.toString, calculationIdDetails.feedbackID, calculationIdDetails.correlationID)
+            (200, response)
+          } catch {
+            case e: FileNotFoundException => (404, Json.parse(error))
           }
 
         case JsError(errors) => (400, Json.parse(invalidBodyError))
@@ -95,15 +95,15 @@ class RdsController @Inject()(cc: ControllerComponents)
       val statusJson = rdsAcknowledgeRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           try {
-              if(feedbackIDAndCorrelationIDMapping.contains(rdsRequest.feedbackId) &&
-                feedbackIDAndCorrelationIDMapping(rdsRequest.feedbackId).correlationID.equals(rdsRequest.correlationId)) {
-                val response= loadAckResponseTemplate(rdsRequest.feedbackId,rdsRequest.ninoValue)
-                (200,response)
-              }else {
-                (404,Json.parse(invalidBodyError))
-              }
-          }catch {
-            case e: FileNotFoundException => (404,Json.parse(error))
+            if (feedbackIDAndCorrelationIDMapping.contains(rdsRequest.feedbackId) &&
+              feedbackIDAndCorrelationIDMapping(rdsRequest.feedbackId).correlationID.equals(rdsRequest.correlationId)) {
+              val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue)
+              (200, response)
+            } else {
+              (404, Json.parse(invalidBodyError))
+            }
+          } catch {
+            case e: FileNotFoundException => (404, Json.parse(error))
           }
 
         case JsError(errors) => (400, Json.parse(invalidBodyError))

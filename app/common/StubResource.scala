@@ -21,52 +21,45 @@ import play.api.http.ContentTypes
 import play.api.libs.json.Json
 import play.api.mvc.Results
 
-import java.io.{File, FileInputStream, InputStream}
-import scala.io.Source
+import java.io.{File, FileInputStream}
 
 trait StubResource extends Results with ContentTypes with Logging {
 
-  def findResource(path: String): Option[String] = {
-    val fallbackFileName = s"resources/reply/default-response.json"
-    var file = new File(path)
-//    if(!file.isFile){
-//      file = new File(fallbackFileName)
-//    }
-    val absolutePath = file.getAbsolutePath
-    val stream = new FileInputStream(absolutePath)
-    val json = try {  Json.parse(stream) } finally { stream.close() }
-    Some(json.toString)
-  }
-
-  def loadSubmitResponseTemplate(calculationId:String,replaceFeedbackID:String,replaceCorrelationID:String) = {
+  def loadSubmitResponseTemplate(calculationId: String, replaceFeedbackID: String, replaceCorrelationID: String) = {
     val fileName = s"resources/response/submit/$calculationId-response.json"
-    val templateCotent = try{
+    val templateCotent =
       findResource(fileName).map(
-        _.replace("replaceFeedbackID",replaceFeedbackID)
-          .replace("replaceCalculationID",calculationId)
-          .replace("replaceCorrelationID",replaceCorrelationID))
-    }
+        _.replace("replaceFeedbackID", replaceFeedbackID)
+          .replace("replaceCalculationID", calculationId)
+          .replace("replaceCorrelationID", replaceCorrelationID))
+
 
     val parsedContent = templateCotent
       .map(Json.parse).getOrElse(throw new IllegalStateException("Response template parsing failed"))
     parsedContent
   }
 
-  def loadAckResponseTemplate(replaceFeedbackID:String,replaceNino:String) = {
+  def loadAckResponseTemplate(replaceFeedbackID: String, replaceNino: String) = {
     val fileName = s"resources/response/acknowledge/feedback-ack.json"
-    val templateCotent = try{
+    val templateCotent =
       findResource(fileName).map(
-        _.replace("replaceFeedbackID",replaceFeedbackID)
-          .replace("replaceNino",replaceNino))
-    }
+        _.replace("replaceFeedbackID", replaceFeedbackID)
+          .replace("replaceNino", replaceNino))
 
     val parsedContent = templateCotent
       .map(Json.parse).getOrElse(throw new IllegalStateException("Acknowledge template parsing failed"))
     parsedContent
   }
-//  private def readStreamToString(is: InputStream) = {
-//    try Source.fromInputStream(is).mkString
-//    finally is.close()
-//  }
 
+  def findResource(path: String): Option[String] = {
+    val file = new File(path)
+    val absolutePath = file.getAbsolutePath
+    val stream = new FileInputStream(absolutePath)
+    val json = try {
+      Json.parse(stream)
+    } finally {
+      stream.close()
+    }
+    Some(json.toString)
+  }
 }
