@@ -21,61 +21,61 @@ import utils.UnitSpec.UnitSpec
 
 class AcknowledgeReturnDataSpec extends UnitSpec {
 
-  "Testing ReportReturnData subsystem with file" should {
-    "If file containing json does not exists " in {
-      val rrd = new ReportReturnData("reply/nosuchfile", "no valid key")
-      rrd.get("QQ000000A") shouldBe None
-    }
-
-    "If file containing jason does exsist but the file is empty" in {
-      val rrd = new AcknowledgeReturnData("test/resources/reply/blankFile.json", "no valid key")
-
-      rrd.get("QQ000000A") shouldBe None
-    }
-
-    "Check we can parse a very simple json statement that has no nino in it" in {
-      val rrd = new AcknowledgeReturnData("test/resources/reply/simpleCorrect.json", "doesNotMatter")
-
-      rrd.get("QQ000000A") shouldBe None
-    }
-
-    "If file containing jason does exsist and has a correct json error stament with a valid nino" in {
-      val rrd = new AcknowledgeReturnData("test/resources/reply/simpleJsonErrorToReturn.json", "test")
-
-      rrd.get("QQ000001A") shouldBe Some(valueQQ000001A)
-    }
-
-    "load return results for 3 ninos" in {
-      val rrd = new AcknowledgeReturnData("test/resources/reply/simple3JsonErrorToReturn.json", "test")
-
-      rrd.get("QR000001A") shouldBe Some(valueQR000001A)
-      rrd.get("QR000002A") shouldBe Some(valueQR000002A)
-      rrd.get("QR000003A") shouldBe Some(valueQR000003A)
-    }
-
-    "load return results for 3 out of 6 ninos" in {
-      val rrd = new AcknowledgeReturnData("test/resources/reply/simple3OutOf6JsonErrorToReturn.json", "acknowledge")
-
-      rrd.get("QR000001A") shouldBe None
-      rrd.get("QR000002A") shouldBe None
-      rrd.get("QR000003A") shouldBe None
-
-      rrd.get("QR000004A") shouldBe Some(valueQR000004A)
-      rrd.get("QR000005A") shouldBe Some(valueQR000005A)
-      rrd.get("QR000006A") shouldBe Some(valueQR000006A)
-
-    }
-
-    "load a big file used in test check loads" in {
-      val rrd = new AcknowledgeReturnData("resources/reply/reply.json", "acknowledge")
-
-      val rndError = rrd.get("QQ000002A")
-      rndError should not be None
-      // At least one should be found.
-      // TODO: Create test later
-
-    }
-
-  }
+//  "Testing ReportReturnData subsystem with file" should {
+//    "If file containing json does not exists " in {
+//      val rrd = new ReportReturnData("reply/nosuchfile", "no valid key")
+//      rrd.get("QQ000000A") shouldBe None
+//    }
+//
+//    "If file containing jason does exsist but the file is empty" in {
+//      val rrd = new AcknowledgeReturnData("test/resources/reply/blankFile.json", "no valid key")
+//
+//      rrd.get("QQ000000A") shouldBe None
+//    }
+//
+//    "Check we can parse a very simple json statement that has no nino in it" in {
+//      val rrd = new AcknowledgeReturnData("test/resources/reply/simpleCorrect.json", "doesNotMatter")
+//
+//      rrd.get("QQ000000A") shouldBe None
+//    }
+//
+//    "If file containing jason does exsist and has a correct json error stament with a valid nino" in {
+//      val rrd = new AcknowledgeReturnData("test/resources/reply/simpleJsonErrorToReturn.json", "test")
+//
+//      rrd.get("QQ000001A") shouldBe Some(valueQQ000001A)
+//    }
+//
+//    "load return results for 3 ninos" in {
+//      val rrd = new AcknowledgeReturnData("test/resources/reply/simple3JsonErrorToReturn.json", "test")
+//
+//      rrd.get("QR000001A") shouldBe Some(valueQR000001A)
+//      rrd.get("QR000002A") shouldBe Some(valueQR000002A)
+//      rrd.get("QR000003A") shouldBe Some(valueQR000003A)
+//    }
+//
+//    "load return results for 3 out of 6 ninos" in {
+//      val rrd = new AcknowledgeReturnData("test/resources/reply/simple3OutOf6JsonErrorToReturn.json", "acknowledge")
+//
+//      rrd.get("QR000001A") shouldBe None
+//      rrd.get("QR000002A") shouldBe None
+//      rrd.get("QR000003A") shouldBe None
+//
+//      rrd.get("QR000004A") shouldBe Some(valueQR000004A)
+//      rrd.get("QR000005A") shouldBe Some(valueQR000005A)
+//      rrd.get("QR000006A") shouldBe Some(valueQR000006A)
+//
+//    }
+//
+//    "load a big file used in test check loads" in {
+//      val rrd = new AcknowledgeReturnData("resources/reply/reply.json", "acknowledge")
+//
+//      val rndError = rrd.get("QQ000002A")
+//      rndError should not be None
+//      // At least one should be found.
+//      // TODO: Create test later
+//
+//    }
+//
+//  }
 
 }
