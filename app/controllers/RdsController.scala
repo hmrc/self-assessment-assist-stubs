@@ -20,6 +20,7 @@ import common.StubResource
 import models.{CalculationIdDetails, FeedbackFive, FeedbackForDefaultResponse, FeedbackFour, FeedbackOne, FeedbackThree, FeedbackTwo, RdsRequest}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Request}
+import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.io.FileNotFoundException
@@ -69,6 +70,7 @@ class RdsController @Inject()(cc: ControllerComponents)
   def generateReport(): Action[JsValue] = Action.async(parse.json) {
     request: Request[JsValue] => {
       logger.info(s"======Invoked RDS stub for report generation======")
+      logger.info(s"content is ${request.body}")
       val rdsRequestValidationResult = request.body.validate[RdsRequest]
 
       val statusJson = rdsRequestValidationResult match {
@@ -76,9 +78,11 @@ class RdsController @Inject()(cc: ControllerComponents)
           val calculationIdDetails = calcIdMappings(rdsRequest.calculationId.toString)
           try {
             val response = loadSubmitResponseTemplate(rdsRequest.calculationId.toString, calculationIdDetails.feedbackID, calculationIdDetails.correlationID)
+            logger.info(s"sending response as $response")
             (200, response)
           } catch {
             case e: FileNotFoundException => (404, Json.parse(error))
+            case b: BadRequestException => (400, Json.parse(error))
           }
 
         case JsError(errors) => (400, Json.parse(invalidBodyError))
@@ -104,6 +108,7 @@ class RdsController @Inject()(cc: ControllerComponents)
             }
           } catch {
             case e: FileNotFoundException => (404, Json.parse(error))
+            case b: BadRequestException => (400, Json.parse(error))
           }
 
         case JsError(errors) => (400, Json.parse(invalidBodyError))
