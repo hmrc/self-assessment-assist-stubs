@@ -19,6 +19,7 @@ package models
 import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json._
 import models.RdsRequest.Input
+import uk.gov.hmrc.http.BadRequestException
 
 import java.util.UUID
 
@@ -26,19 +27,19 @@ case class RdsRequest(inputs: Seq[Input]) {
 
   def calculationId: UUID =
     inputs.find(_.name == "calculationId").map(_.value.toString).map(UUID.fromString)
-      .getOrElse(throw new RuntimeException("No 'calculationId' present."))
+      .getOrElse(throw new BadRequestException("No 'calculationId' present."))
 
   def ninoValue: String =
     inputs.find(_.name == "nino").map(_.value.toString)
-      .getOrElse(throw new RuntimeException("No 'nino' present."))
+      .getOrElse(throw new BadRequestException("No 'nino' present."))//TODO fix me later, not the right exception
 
   def feedbackId: String =
     inputs.find(_.name == "feedbackID").map(_.value.toString)
-      .getOrElse(throw new RuntimeException("No 'feedbackID' present."))
+      .getOrElse(throw new BadRequestException("No 'feedbackID' present."))
 
   def correlationId: String =
     inputs.find(_.name == "correlationID").map(_.value.toString)
-      .getOrElse(throw new RuntimeException("No 'correlationID' present."))
+      .getOrElse(throw new BadRequestException("No 'correlationID' present."))
 }
 
 object RdsRequest {
