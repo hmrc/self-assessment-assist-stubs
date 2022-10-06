@@ -26,7 +26,7 @@ import java.io.{File, FileInputStream}
 trait StubResource extends Results with ContentTypes with Logging {
 
   def loadSubmitResponseTemplate(calculationId: String, replaceFeedbackID: String, replaceCorrelationID: String) = {
-    val fileName = s"resources/response/submit/$calculationId-response.json"
+    val fileName = s"conf/response/submit/$calculationId-response.json"
     val templateCotent =
       findResource(fileName).map(
         _.replace("replaceFeedbackID", replaceFeedbackID)
@@ -40,7 +40,7 @@ trait StubResource extends Results with ContentTypes with Logging {
   }
 
   def loadAckResponseTemplate(replaceFeedbackID: String, replaceNino: String) = {
-    val fileName = s"resources/response/acknowledge/feedback-ack.json"
+    val fileName = s"conf/response/acknowledge/feedback-ack.json"
     val templateCotent =
       findResource(fileName).map(
         _.replace("replaceFeedbackID", replaceFeedbackID)

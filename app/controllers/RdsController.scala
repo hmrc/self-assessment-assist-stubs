@@ -82,7 +82,7 @@ class RdsController @Inject()(cc: ControllerComponents)
             (200, response)
           } catch {
             case e: FileNotFoundException => (404, Json.parse(error))
-            case b: BadRequestException => (400, Json.parse(error))
+            case b: BadRequestException => (400, Json.parse(invalidBodyError))
           }
 
         case JsError(errors) => (400, Json.parse(invalidBodyError))
