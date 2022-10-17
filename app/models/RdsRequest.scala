@@ -25,19 +25,19 @@ import java.util.UUID
 
 case class RdsRequest(inputs: Seq[Input]) {
 
-  def calculationId: UUID =
-    inputs.find(_.name == "calculationId").map(_.value.toString).map(UUID.fromString)
-      .getOrElse(throw new BadRequestException("No 'calculationId' present."))
+  def calculationID: UUID =
+    inputs.find(_.name == "calculationID").map(_.value.toString).map(UUID.fromString)
+      .getOrElse(throw new BadRequestException("No 'calculationID' present."))
 
   def ninoValue: String =
     inputs.find(_.name == "nino").map(_.value.toString)
       .getOrElse(throw new BadRequestException("No 'nino' present."))//TODO fix me later, not the right exception
 
-  def feedbackId: String =
+  def feedbackID: String =
     inputs.find(_.name == "feedbackID").map(_.value.toString)
       .getOrElse(throw new BadRequestException("No 'feedbackID' present."))
 
-  def correlationId: String =
+  def correlationID: String =
     inputs.find(_.name == "correlationID").map(_.value.toString)
       .getOrElse(throw new BadRequestException("No 'correlationID' present."))
 }

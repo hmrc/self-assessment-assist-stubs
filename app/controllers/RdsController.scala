@@ -75,9 +75,9 @@ class RdsController @Inject()(cc: ControllerComponents)
 
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
-          val calculationIdDetails = calcIdMappings(rdsRequest.calculationId.toString)
+          val calculationIDDetails = calcIdMappings(rdsRequest.calculationID.toString)
           try {
-            val response = loadSubmitResponseTemplate(rdsRequest.calculationId.toString, calculationIdDetails.feedbackID, calculationIdDetails.correlationID)
+            val response = loadSubmitResponseTemplate(rdsRequest.calculationID.toString, calculationIDDetails.feedbackID, calculationIDDetails.correlationID)
             logger.info(s"sending response as $response")
             (200, response)
           } catch {
@@ -99,9 +99,12 @@ class RdsController @Inject()(cc: ControllerComponents)
       val statusJson = rdsAcknowledgeRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           try {
-            if (feedbackIDAndCorrelationIDMapping.contains(rdsRequest.feedbackId) &&
-              feedbackIDAndCorrelationIDMapping(rdsRequest.feedbackId).correlationID.equals(rdsRequest.correlationId)) {
-              val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue)
+            val fb = feedbackIDAndCorrelationIDMapping.contains(rdsRequest.feedbackID)
+            val feedbackDetails = feedbackIDAndCorrelationIDMapping(rdsRequest.feedbackID)
+            val correlationID = feedbackDetails.correlationID
+            if  ( fb &&
+                  correlationID.equals(rdsRequest.correlationID) ) {
+              val response = loadAckResponseTemplate(rdsRequest.feedbackID, rdsRequest.ninoValue)
               (200, response)
             } else {
               (404, Json.parse(invalidBodyError))
