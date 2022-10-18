@@ -99,11 +99,8 @@ class RdsController @Inject()(cc: ControllerComponents)
       val statusJson = rdsAcknowledgeRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           try {
-            val fb = feedbackIDAndCorrelationIDMapping.contains(rdsRequest.feedbackID)
-            val feedbackDetails = feedbackIDAndCorrelationIDMapping(rdsRequest.feedbackID)
-            val correlationID = feedbackDetails.correlationID
-            if  ( fb &&
-                  correlationID.equals(rdsRequest.correlationID) ) {
+            if (feedbackIDAndCorrelationIDMapping.contains(rdsRequest.feedbackID) &&
+              feedbackIDAndCorrelationIDMapping(rdsRequest.feedbackID).correlationID.equals(rdsRequest.correlationID)){
               val response = loadAckResponseTemplate(rdsRequest.feedbackID, rdsRequest.ninoValue, "202")
               ( CREATED , response)
             } else {
