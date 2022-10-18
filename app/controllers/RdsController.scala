@@ -104,8 +104,8 @@ class RdsController @Inject()(cc: ControllerComponents)
             val correlationID = feedbackDetails.correlationID
             if  ( fb &&
                   correlationID.equals(rdsRequest.correlationID) ) {
-              val response = loadAckResponseTemplate(rdsRequest.feedbackID, rdsRequest.ninoValue)
-              (200, response)
+              val response = loadAckResponseTemplate(rdsRequest.feedbackID, rdsRequest.ninoValue, "202")
+              ( CREATED , response)
             } else {
               (404, Json.parse(invalidBodyError))
             }
