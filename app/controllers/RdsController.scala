@@ -17,7 +17,7 @@
 package controllers
 
 import common.StubResource
-import models.{CalculationIdDetails, FeedbackFive, FeedbackForDefaultResponse, FeedbackFour, FeedbackOne, FeedbackThree, FeedbackTwo, RdsRequest}
+import models.{CalculationIdDetails, FeedbackFive, FeedbackForDefaultResponse, FeedbackFour, FeedbackInvalidResponse, FeedbackOne, FeedbackThree, FeedbackTwo, RdsRequest}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.http.BadRequestException
@@ -37,7 +37,8 @@ class RdsController @Inject()(cc: ControllerComponents)
     FeedbackTwo.calculationID -> FeedbackTwo,
     FeedbackThree.calculationID -> FeedbackThree,
     FeedbackFour.calculationID -> FeedbackFour,
-    FeedbackFive.calculationID -> FeedbackFive
+    FeedbackFive.calculationID -> FeedbackFive,
+    FeedbackInvalidResponse.calculationID -> FeedbackInvalidResponse
   ).withDefaultValue(FeedbackForDefaultResponse)
 
   //below store is used to find feedback and correlation if mapping while accepting acknowledge request
@@ -47,6 +48,7 @@ class RdsController @Inject()(cc: ControllerComponents)
     FeedbackThree.feedbackID -> FeedbackThree,
     FeedbackFour.feedbackID -> FeedbackFour,
     FeedbackFive.feedbackID -> FeedbackFive,
+    FeedbackInvalidResponse.feedbackID-> FeedbackInvalidResponse,
     FeedbackForDefaultResponse.feedbackID -> FeedbackForDefaultResponse
   )
 
@@ -72,12 +74,17 @@ class RdsController @Inject()(cc: ControllerComponents)
       logger.info(s"======Invoked RDS stub for report generation======")
       logger.info(s"content is ${request.body}")
       val rdsRequestValidationResult = request.body.validate[RdsRequest]
-
+      logger.info(s"validation result  is ${rdsRequestValidationResult}")
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           val calculationIDDetails = calcIdMappings(rdsRequest.calculationID.toString)
+          logger.info(s"checking calculation $calculationIDDetails.calculationID")
           try {
-            val response = loadSubmitResponseTemplate(rdsRequest.calculationID.toString, calculationIDDetails.feedbackID, calculationIDDetails.correlationID)
+            val response =  if(calculationIDDetails.calculationID.equals(FeedbackInvalidResponse.calculationID)){
+                loadSubmitResponseTemplate(replaceFeedbackID=calculationIDDetails.feedbackID, replaceCorrelationID=calculationIDDetails.correlationID)
+            }else {
+                loadSubmitResponseTemplate(Some(rdsRequest.calculationID.toString), calculationIDDetails.feedbackID, calculationIDDetails.correlationID)
+            }
             logger.info(s"sending response as $response")
             (200, response)
           } catch {
