@@ -23,7 +23,7 @@
     },
     {
       "name": "responseCode",
-      "value": 200
+      "value": "replaceResponseCode"
     },
     {
       "name": "response",

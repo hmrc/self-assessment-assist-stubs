@@ -16,6 +16,7 @@
 
 package common
 
+import models.FeedbackInvalidResponse
 import play.api.Logging
 import play.api.http.ContentTypes
 import play.api.libs.json.Json
@@ -25,13 +26,24 @@ import java.io.{File, FileInputStream}
 
 trait StubResource extends Results with ContentTypes with Logging {
 
-  def loadSubmitResponseTemplate(calculationId: String, replaceFeedbackID: String, replaceCorrelationID: String) = {
-    val fileName = s"conf/response/submit/$calculationId-response.json"
-    val templateCotent =
-      findResource(fileName).map(
-        _.replace("replaceFeedbackID", replaceFeedbackID)
-          .replace("replaceCalculationID", calculationId)
-          .replace("replaceCorrelationID", replaceCorrelationID))
+  def loadSubmitResponseTemplate(calculationID: Option[String]=None, replaceFeedbackID: String, replaceCorrelationID: String) = {
+
+    val templateCotent = {
+      calculationID match {
+        case Some(x) =>
+          logger.info(s"loading file $x")
+          findResource(s"conf/response/submit/$x-response.json").map(
+          _.replace("replaceFeedbackID", replaceFeedbackID)
+            .replace("replaceCalculationID", x)
+            .replace("replaceCorrelationID", replaceCorrelationID))
+        case None =>
+          logger.info(s"loading invalid file scenario ${FeedbackInvalidResponse.calculationID}")
+          findResource(s"conf/response/submit/${FeedbackInvalidResponse.calculationID}-response.json").map(
+          _.replace("replaceFeedbackID", replaceFeedbackID)
+            .replace("replaceCorrelationID", replaceCorrelationID))
+      }
+
+    }
 
 
     val parsedContent = templateCotent
@@ -39,15 +51,17 @@ trait StubResource extends Results with ContentTypes with Logging {
     parsedContent
   }
 
-  def loadAckResponseTemplate(replaceFeedbackID: String, replaceNino: String) = {
+  def loadAckResponseTemplate(replaceFeedbackID: String, replaceNino: String, replaceResponseCode:String) = {
     val fileName = s"conf/response/acknowledge/feedback-ack.json"
     val templateCotent =
       findResource(fileName).map(
         _.replace("replaceFeedbackID", replaceFeedbackID)
-          .replace("replaceNino", replaceNino))
+          .replace("replaceNino", replaceNino)
+            .replace("replaceResponseCode", replaceResponseCode))
 
     val parsedContent = templateCotent
-      .map(Json.parse).getOrElse(throw new IllegalStateException("Acknowledge template parsing failed"))
+      .map(Json.parse)
+      .getOrElse(throw new IllegalStateException("Acknowledge template parsing failed"))
     parsedContent
   }
 

@@ -57,3 +57,9 @@ case object FeedbackForDefaultResponse extends CalculationIdDetails {
   override val feedbackID = "g365c0b4-06e3-4fef-a555-6fd0877dc7c"
   override val correlationID = "g5fht738957jfjf845jgjf855"
 }
+
+case object FeedbackInvalidResponse extends CalculationIdDetails {
+  override val calculationID = "999990b4-06e3-4fef-a555-6fd0877dc7ca"
+  override val feedbackID = "e365c0b4-06e3-4fef-a555-16fd0877dc7c"
+  override val correlationID = "efht738957jfjf845jgjf855"
+}
