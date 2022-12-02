@@ -77,6 +77,7 @@ class RdsController @Inject()(cc: ControllerComponents)
       logger.info(s"validation result  is ${rdsRequestValidationResult}")
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
+          val fraudRiskReportReasons = rdsRequest.fraudRiskReportReasons
           val calculationIDDetails = calcIdMappings(rdsRequest.calculationID.toString)
           logger.info(s"checking calculation $calculationIDDetails.calculationID")
           try {

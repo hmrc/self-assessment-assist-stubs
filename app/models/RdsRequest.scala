@@ -40,6 +40,11 @@ case class RdsRequest(inputs: Seq[Input]) {
   def correlationID: String =
     inputs.find(_.name == "correlationID").map(_.value.toString)
       .getOrElse(throw new BadRequestException("No 'correlationID' present."))
+
+  def fraudRiskReportReasons: Seq[Any] =
+    inputs.find(_.name == "fraudRiskReportReasons").map(r => Seq(r.value))
+      .getOrElse(throw new BadRequestException("The value of the field \"fraudRiskReportReasons\" must not be empty or missing."))
+
 }
 
 object RdsRequest {
@@ -132,6 +137,17 @@ object RdsRequest {
 
   }
 
+/*  object InputWithArray {
+
+    val reads: Reads[InputWithArray] =
+      (JsPath \ "name").read[String]
+        .and((JsPath \ "value").readWithDefault[Boolean](false))(InputWithBoolean.apply _)
+
+    val writes: Writes[InputWithArray] =
+      (JsPath \ "name").write[String]
+        .and((JsPath \ "value").write[Boolean])(unlift(InputWithBoolean.unapply))
+
+  }*/
   object ObjectPart {
 
     implicit val reads: Reads[ObjectPart] = {
