@@ -91,11 +91,11 @@ class AssessmentController @Inject()(cc: ControllerComponents)
          |    {
          |      "identifiers": [
          |        {
-         |          "name": "feedbackID",
+         |          "name": "feedbackId",
          |          "value": "123490b4-06e3-4fef-a555-6fd0877dc7ca"
          |        },
          |        {
-         |          "name": "calculationID",
+         |          "name": "calculationId",
          |          "value": "537490b4-06e3-4fef-a555-6fd0877dc7ca"
          |        }
          |      ]

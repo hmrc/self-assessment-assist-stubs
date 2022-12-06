@@ -16,7 +16,7 @@
 
 package common
 
-import models.FeedbackInvalidResponse
+import models.{FeedbackForDefaultResponse, FeedbackInvalidCalculationId, FeedbackMissingCalculationId}
 import play.api.Logging
 import play.api.http.ContentTypes
 import play.api.libs.json.Json
@@ -26,24 +26,25 @@ import java.io.{File, FileInputStream}
 
 trait StubResource extends Results with ContentTypes with Logging {
 
-  def loadSubmitResponseTemplate(calculationID: Option[String]=None, replaceFeedbackID: String, replaceCorrelationID: String) = {
+  def loadSubmitResponseTemplate(calculationId:String, replaceFeedbackId: String, replaceCorrelationId: String) = {
+    val templateCotent =
+      calculationId match {
+        case calcId@(FeedbackInvalidCalculationId.calculationId |
+                     FeedbackMissingCalculationId.calculationId | FeedbackForDefaultResponse.calculationId)=>
+          logger.info(s"loading invalid file scenario $calcId")
+          findResource(s"conf/response/submit/$calcId-response.json")map(
+          _.replace("replaceFeedbackId", replaceFeedbackId)
+            .replace("replaceCorrelationId", replaceCorrelationId))
 
-    val templateCotent = {
-      calculationID match {
-        case Some(x) =>
-          logger.info(s"loading file $x")
-          findResource(s"conf/response/submit/$x-response.json").map(
-          _.replace("replaceFeedbackID", replaceFeedbackID)
-            .replace("replaceCalculationID", x)
-            .replace("replaceCorrelationID", replaceCorrelationID))
-        case None =>
-          logger.info(s"loading invalid file scenario ${FeedbackInvalidResponse.calculationID}")
-          findResource(s"conf/response/submit/${FeedbackInvalidResponse.calculationID}-response.json").map(
-          _.replace("replaceFeedbackID", replaceFeedbackID)
-            .replace("replaceCorrelationID", replaceCorrelationID))
+        case calcId@_ =>
+          logger.info(s"loading file $calcId")
+          findResource(s"conf/response/submit/$calcId-response.json")map(
+            _.replace("replaceFeedbackId", replaceFeedbackId)
+              .replace("replaceCalculationId", calcId)
+              .replace("replaceCorrelationId", replaceCorrelationId))
       }
 
-    }
+
 
 
     val parsedContent = templateCotent
@@ -51,11 +52,11 @@ trait StubResource extends Results with ContentTypes with Logging {
     parsedContent
   }
 
-  def loadAckResponseTemplate(replaceFeedbackID: String, replaceNino: String, replaceResponseCode:String) = {
+  def loadAckResponseTemplate(replaceFeedbackId: String, replaceNino: String, replaceResponseCode:String) = {
     val fileName = s"conf/response/acknowledge/feedback-ack.json"
     val templateCotent =
       findResource(fileName).map(
-        _.replace("replaceFeedbackID", replaceFeedbackID)
+        _.replace("replaceFeedbackId", replaceFeedbackId)
           .replace("replaceNino", replaceNino)
             .replace("replaceResponseCode", replaceResponseCode))
 

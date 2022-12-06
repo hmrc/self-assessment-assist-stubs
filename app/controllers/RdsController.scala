@@ -17,7 +17,7 @@
 package controllers
 
 import common.StubResource
-import models.{CalculationIdDetails, FeedbackFive, FeedbackForDefaultResponse, FeedbackFour, FeedbackInvalidResponse, FeedbackOne, FeedbackThree, FeedbackTwo, RdsRequest}
+import models.{CalculationIdDetails, FeedbackFive, FeedbackForDefaultResponse, FeedbackFour, FeedbackFromRDS, FeedbackInvalidCalculationId, FeedbackMissingCalculationId, FeedbackOne, FeedbackThree, FeedbackTwo, RdsRequest}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.http.BadRequestException
@@ -33,30 +33,34 @@ class RdsController @Inject()(cc: ControllerComponents)
 
   //below store is used for generate report to map calculation id to feedback
   val calcIdMappings: Map[String, CalculationIdDetails] = Map(
-    FeedbackOne.calculationID -> FeedbackOne,
-    FeedbackTwo.calculationID -> FeedbackTwo,
-    FeedbackThree.calculationID -> FeedbackThree,
-    FeedbackFour.calculationID -> FeedbackFour,
-    FeedbackFive.calculationID -> FeedbackFive,
-    FeedbackInvalidResponse.calculationID -> FeedbackInvalidResponse
+    FeedbackOne.calculationId -> FeedbackOne,
+    FeedbackTwo.calculationId -> FeedbackTwo,
+    FeedbackThree.calculationId -> FeedbackThree,
+    FeedbackFour.calculationId -> FeedbackFour,
+    FeedbackFive.calculationId -> FeedbackFive,
+    FeedbackInvalidCalculationId.calculationId -> FeedbackInvalidCalculationId,
+    FeedbackMissingCalculationId.calculationId -> FeedbackMissingCalculationId,
+    FeedbackFromRDS.calculationId -> FeedbackFromRDS
   ).withDefaultValue(FeedbackForDefaultResponse)
 
   //below store is used to find feedback and correlation if mapping while accepting acknowledge request
-  val feedbackIDAndCorrelationIDMapping = Map(
-    FeedbackOne.feedbackID -> FeedbackOne,
-    FeedbackTwo.feedbackID -> FeedbackTwo,
-    FeedbackThree.feedbackID -> FeedbackThree,
-    FeedbackFour.feedbackID -> FeedbackFour,
-    FeedbackFive.feedbackID -> FeedbackFive,
-    FeedbackInvalidResponse.feedbackID-> FeedbackInvalidResponse,
-    FeedbackForDefaultResponse.feedbackID -> FeedbackForDefaultResponse
+  val feedbackIdAndCorrelationIdMapping = Map(
+    FeedbackOne.feedbackId -> FeedbackOne,
+    FeedbackTwo.feedbackId -> FeedbackTwo,
+    FeedbackThree.feedbackId -> FeedbackThree,
+    FeedbackFour.feedbackId -> FeedbackFour,
+    FeedbackFive.feedbackId -> FeedbackFive,
+    FeedbackInvalidCalculationId.feedbackId-> FeedbackInvalidCalculationId,
+    FeedbackForDefaultResponse.feedbackId -> FeedbackForDefaultResponse,
+    FeedbackMissingCalculationId.feedbackId -> FeedbackMissingCalculationId,
+    FeedbackFromRDS.calculationId -> FeedbackFromRDS
   )
 
   val error =
     s"""
        |{
        |  "code": "MATCHING_RESOURCE_NOT_FOUND",
-       |  "message": "The Calculation ID was not found at this time. You can try again later"
+       |  "message": "The Calculation Id was not found at this time. You can try again later"
        |  }
        |""".stripMargin
 
@@ -64,7 +68,7 @@ class RdsController @Inject()(cc: ControllerComponents)
     s"""
        |{
        |  "code": "BAD_REQUEST",
-       |  "message": "Invalid feedback/correlationid"
+       |  "message": "Invalid feedback/correlationId"
        |  }
        |""".stripMargin
 
@@ -72,28 +76,30 @@ class RdsController @Inject()(cc: ControllerComponents)
   def generateReport(): Action[JsValue] = Action.async(parse.json) {
     request: Request[JsValue] => {
       logger.info(s"======Invoked RDS stub for report generation======")
-      logger.info(s"content is ${request.body}")
+      //logger.info(s"content is ${request.body}")
       val rdsRequestValidationResult = request.body.validate[RdsRequest]
       logger.info(s"validation result  is ${rdsRequestValidationResult}")
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           val fraudRiskReportReasons = rdsRequest.fraudRiskReportReasons
-          val calculationIDDetails = calcIdMappings(rdsRequest.calculationID.toString)
-          logger.info(s"checking calculation $calculationIDDetails.calculationID")
+          val calculationIdDetails = calcIdMappings(rdsRequest.calculationId.toString)
+
           try {
-            val response =  if(calculationIDDetails.calculationID.equals(FeedbackInvalidResponse.calculationID)){
-                loadSubmitResponseTemplate(replaceFeedbackID=calculationIDDetails.feedbackID, replaceCorrelationID=calculationIDDetails.correlationID)
-            }else {
-                loadSubmitResponseTemplate(Some(rdsRequest.calculationID.toString), calculationIDDetails.feedbackID, calculationIDDetails.correlationID)
-            }
-            logger.info(s"sending response as $response")
-            (200, response)
+            val response =
+                loadSubmitResponseTemplate(
+                  calculationIdDetails.calculationId,
+                  calculationIdDetails.feedbackId,
+                  calculationIdDetails.correlationId
+                )
+            logger.info(s"sending response")
+            (CREATED, response)
           } catch {
-            case e: FileNotFoundException => (404, Json.parse(error))
-            case b: BadRequestException => (400, Json.parse(invalidBodyError))
+            case e: FileNotFoundException => (NOT_FOUND, Json.parse(error))
+            case b: BadRequestException => (BAD_REQUEST, Json.parse(invalidBodyError))
+            case _ => (INTERNAL_SERVER_ERROR, Json.parse(error))
           }
 
-        case JsError(errors) => (400, Json.parse(invalidBodyError))
+        case JsError(errors) => (BAD_REQUEST, Json.parse(invalidBodyError))
       }
 
       Future.successful(new Status(statusJson._1)(statusJson._2))
@@ -107,22 +113,22 @@ class RdsController @Inject()(cc: ControllerComponents)
       val statusJson = rdsAcknowledgeRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           try {
-            val fb = feedbackIDAndCorrelationIDMapping.contains(rdsRequest.feedbackID)
-            val feedbackDetails = feedbackIDAndCorrelationIDMapping(rdsRequest.feedbackID)
-            val correlationID = feedbackDetails.correlationID
+            val fb = feedbackIdAndCorrelationIdMapping.contains(rdsRequest.feedbackId)
+            val feedbackDetails = feedbackIdAndCorrelationIdMapping(rdsRequest.feedbackId)
+            val correlationId = feedbackDetails.correlationId
             if  ( fb &&
-                  correlationID.equals(rdsRequest.correlationID) ) {
-              val response = loadAckResponseTemplate(rdsRequest.feedbackID, rdsRequest.ninoValue, "202")
+                  correlationId.equals(rdsRequest.correlationId) ) {
+              val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "202")
               ( CREATED , response)
             } else {
-              (404, Json.parse(invalidBodyError))
+              (NOT_FOUND, Json.parse(invalidBodyError))
             }
           } catch {
-            case e: FileNotFoundException => (404, Json.parse(error))
-            case b: BadRequestException => (400, Json.parse(error))
+            case e: FileNotFoundException => (NOT_FOUND, Json.parse(error))
+            case b: BadRequestException => (BAD_REQUEST, Json.parse(error))
           }
 
-        case JsError(errors) => (400, Json.parse(invalidBodyError))
+        case JsError(errors) => (BAD_REQUEST, Json.parse(invalidBodyError))
       }
 
       Future.successful(new Status(statusJson._1)(statusJson._2))

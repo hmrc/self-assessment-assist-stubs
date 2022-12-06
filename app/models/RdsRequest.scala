@@ -25,21 +25,21 @@ import java.util.UUID
 
 case class RdsRequest(inputs: Seq[Input]) {
 
-  def calculationID: UUID =
-    inputs.find(_.name == "calculationID").map(_.value.toString).map(UUID.fromString)
-      .getOrElse(throw new BadRequestException("No 'calculationID' present."))
+  def calculationId: UUID =
+    inputs.find(_.name == "calculationId").map(_.value.toString).map(UUID.fromString)
+      .getOrElse(throw new BadRequestException("No 'calculationId' present."))
 
   def ninoValue: String =
     inputs.find(_.name == "nino").map(_.value.toString)
       .getOrElse(throw new BadRequestException("No 'nino' present."))//TODO fix me later, not the right exception
 
-  def feedbackID: String =
-    inputs.find(_.name == "feedbackID").map(_.value.toString)
-      .getOrElse(throw new BadRequestException("No 'feedbackID' present."))
+  def feedbackId: String =
+    inputs.find(_.name == "feedbackId").map(_.value.toString)
+      .getOrElse(throw new BadRequestException("No 'feedbackId' present."))
 
-  def correlationID: String =
-    inputs.find(_.name == "correlationID").map(_.value.toString)
-      .getOrElse(throw new BadRequestException("No 'correlationID' present."))
+  def correlationId: String =
+    inputs.find(_.name == "correlationId").map(_.value.toString)
+      .getOrElse(throw new BadRequestException("No 'correlationId' present."))
 
   def fraudRiskReportReasons: Seq[Any] =
     inputs.find(_.name == "fraudRiskReportReasons").map(r => Seq(r.value))
