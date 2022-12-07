@@ -16,9 +16,9 @@
 
 package controllers
 
+import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import utils.Logging
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future

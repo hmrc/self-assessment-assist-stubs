@@ -16,10 +16,10 @@
 
 package controllers
 
+import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import utils.Logging
 
 import javax.inject.{Inject, Singleton}
 
