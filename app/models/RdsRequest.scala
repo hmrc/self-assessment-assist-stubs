@@ -137,17 +137,6 @@ object RdsRequest {
 
   }
 
-/*  object InputWithArray {
-
-    val reads: Reads[InputWithArray] =
-      (JsPath \ "name").read[String]
-        .and((JsPath \ "value").readWithDefault[Boolean](false))(InputWithBoolean.apply _)
-
-    val writes: Writes[InputWithArray] =
-      (JsPath \ "name").write[String]
-        .and((JsPath \ "value").write[Boolean])(unlift(InputWithBoolean.unapply))
-
-  }*/
   object ObjectPart {
 
     implicit val reads: Reads[ObjectPart] = {
