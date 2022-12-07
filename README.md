@@ -2,6 +2,8 @@
 # self-assessment-assist-stubs
 
 This is a placeholder README.md for a new repository
+RDS reponse json files, refer the models under CalculationIdDetails for there usage.
+
 
 ### License
 
