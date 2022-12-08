@@ -15,13 +15,13 @@
         {
           "metadata": [
             {
-              "TITLE": "string"
-            },
-            {
               "MESSAGE": "string"
             },
             {
               "ACTION": "string"
+            },
+            {
+              "TITLE": "string"
             },
             {
               "LINKTITLE": "string"
@@ -37,25 +37,25 @@
         {
           "data": [
             [
-              "Expenses",
               "Your declared expenses appear incorrect (placeholder).",
               "Check Expenses",
+              "Expenses",
               "[Allowable Expenses]",
               "[www.itsa/incomecompliance/expenses.gov.uk]",
               "general/business_income_sources/expenses"
             ],
             [
-              "Capital Allowances",
               "You appear to have claimed a relief you are not entitled to (placeholder).",
               "Check Capital Allowances",
+              "Capital Allowances",
               "[Capital Allowance Guidance]",
               "[www.itsa/incomecompliance/allowances.gov.uk]",
               "general/business_income_sources/allowances"
             ],
             [
-              "Losses Carried Forward",
               "You appear to have claimed a previous year losses we have no record for (placeholder).",
               "Check Lossess Carried Forward",
+              "Losses Carried Forward",
               "[ITSA Guidance]",
               "[www.itsa/incomecompliance.gov.uk]",
               "general/losses_carried_forward"
@@ -70,13 +70,13 @@
         {
           "metadata": [
             {
-              "TITLE": "string"
-            },
-            {
               "MESSAGE": "string"
             },
             {
               "ACTION": "string"
+            },
+            {
+              "TITLE": "string"
             },
             {
               "LINKTITLE": "string"
@@ -92,17 +92,17 @@
         {
           "data": [
             [
-              "Non-Business Income Source",
               "You have declared family loan as a source of your income. There have been changes to the rules around non-business sources you may declare, please check the appropriate guidance to see how this impacts you.",
               "Check guidance",
+              "Non-Business Income Source",
               "[ITSA Guidance, Income Source Guidance]",
               "[www.itsa.gov.uk, www.itsa/incomesources.gov.uk]",
               "general/non_business_income_sources/income_source"
             ],
             [
-              "Turnover",
               "Your declared turnover of £80,000 appears to be lower than expected based on your income sources, please confirm all turnover is accounted for before submission.",
               "Check turnover",
+              "Turnover",
               "[Accounting for Income]",
               "[www.itsa/incomecompliance.gov.uk]",
               "general/total_declared_turnover"
