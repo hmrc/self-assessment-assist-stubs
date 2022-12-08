@@ -10,7 +10,7 @@
   },
   "outputs": [
     {
-      "name": "welshActions",
+      "name": "WelshActions",
       "value": [
         {
           "metadata": [
@@ -57,7 +57,7 @@
       ]
     },
     {
-      "name": "englishActions",
+      "name": "EnglishActions",
       "value": [
         {
           "metadata": [
@@ -126,12 +126,24 @@
       ]
     },
     {
-      "name": "feedbackID",
-      "value": "replaceFeedbackID"
+      "name": "feedbackId",
+      "value": "replaceFeedbackId"
     },
     {
-      "name": "correlationID",
-      "value": "replaceCorrelationID"
+      "name": "calculationId",
+      "value": "replaceCalculationId"
+    },
+    {
+      "name": "correlationId",
+      "value": "replaceCorrelationId"
+    },
+    {
+      "name": "responseMessage",
+      "value": "Feedback Generated"
+    },
+    {
+      "name": "Created_dttm",
+      "value": "2022-12-05T17:08:25.857"
     }
   ]
 }
