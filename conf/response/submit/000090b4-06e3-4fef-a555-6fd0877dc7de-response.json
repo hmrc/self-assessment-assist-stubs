@@ -10,7 +10,7 @@
   },
   "outputs": [
     {
-      "name": "welshActions",
+      "name": "WelshActions",
       "value": [
         {
           "metadata": [
@@ -42,7 +42,7 @@
       ]
     },
     {
-      "name": "englishActions",
+      "name": "EnglishActions",
       "value": [
         {
           "metadata": [
