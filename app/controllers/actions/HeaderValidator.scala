@@ -27,7 +27,7 @@ trait HeaderValidator {
   val API_KEY_HEADER = "X-API-Key"
   val TOKEN_HEADER = "Authorization"
   private val VALID_CONTENT_TYPE = "application/json"
-  private val VALID_API_KEY = "2880d8aa-4691-49a4-aa6a-99191a51b9ef"
+  private val VALID_API_KEY = "dummy-api-key"
 
   def isApiKeyValid(request: Request[_]): Boolean = {
     val tokenValue = request.headers.get(API_KEY_HEADER).getOrElse("Invalid")
