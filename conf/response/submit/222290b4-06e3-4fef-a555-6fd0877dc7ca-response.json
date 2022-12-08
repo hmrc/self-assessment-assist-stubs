@@ -15,13 +15,13 @@
         {
           "metadata": [
             {
-              "TITLE": "string"
-            },
-            {
               "MESSAGE": "string"
             },
             {
               "ACTION": "string"
+            },
+            {
+              "TITLE": "string"
             },
             {
               "LINKTITLE": "string"
@@ -37,9 +37,9 @@
         {
           "data": [
             [
-              "Ffynhonnell Incwm Di-Fusnes",
               "Rydych wedi datgan benthyciad teulu fel ffynhonnell eich incwm. Bu newidiadau i'r rheolau ynghylch ffynonellau nad ydynt yn ymwneud â busnes y gallwch eu datgan, darllenwch y canllawiau priodol i weld sut mae hyn yn effeithio arnoch chi.",
               "Gwirio Canllawiau",
+              "Ffynhonnell Incwm Di-Fusnes",
               "[Canllawiau ITSA, Arweiniad i Ffynonellau Incwm]",
               "[www.itsa/cym.gov.uk, www.itsa/incomesources.gov.uk]",
               "general/non_business_income_sources/income_source"
@@ -54,13 +54,13 @@
         {
           "metadata": [
             {
-              "TITLE": "string"
-            },
-            {
               "MESSAGE": "string"
             },
             {
               "ACTION": "string"
+            },
+            {
+              "TITLE": "string"
             },
             {
               "LINKTITLE": "string"
@@ -76,9 +76,9 @@
         {
           "data": [
             [
-              "Losses Carried Forward",
               "You appear to have claimed a previous year losses we have no record for (placeholder).",
               "Check Lossess Carried Forward",
+              "Losses Carried Forward",
               "[ITSA Guidance]",
               "[www.itsa/incomecompliance.gov.uk]",
               "general/losses_carried_forward"

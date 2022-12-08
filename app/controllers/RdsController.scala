@@ -110,6 +110,7 @@ class RdsController @Inject()(cc: ControllerComponents)
     request => {
       logger.info(s"======Invoked RDS for report acknowledge======")
       val rdsAcknowledgeRequestValidationResult = request.body.validate[RdsRequest]
+      logger.info(s"======validation success======")
       val statusJson = rdsAcknowledgeRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           try {
@@ -124,8 +125,12 @@ class RdsController @Inject()(cc: ControllerComponents)
               (NOT_FOUND, Json.parse(invalidBodyError))
             }
           } catch {
-            case e: FileNotFoundException => (NOT_FOUND, Json.parse(error))
-            case b: BadRequestException => (BAD_REQUEST, Json.parse(error))
+            case e: FileNotFoundException =>
+              logger.error(s"======FileNotFoundException $e======")
+              (NOT_FOUND, Json.parse(error))
+            case b: BadRequestException =>
+              logger.error(s"======BadRequestException $b======")
+              (BAD_REQUEST, Json.parse(error))
           }
 
         case JsError(errors) => (BAD_REQUEST, Json.parse(invalidBodyError))
