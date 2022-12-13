@@ -18,13 +18,12 @@ package controllers
 
 import base.SpecBase
 import controllers.actions.HeaderValidator
-import org.apache.commons.codec.digest.DigestUtils
 import play.api.http.Status.{ACCEPTED, BAD_REQUEST}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import utils.JsonUtils.{base64JsonFromFile, jsonFromFile}
+import utils.JsonUtils.jsonFromFile
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -38,7 +37,7 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
   val controller: NrsController = app.injector.instanceOf[NrsController]
 
   val v4UuidRegex: Regex = "^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[4][0-9A-Fa-f]{3}-[89ABab][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$".r
-  val uuidRet = (new UUID(0, 1)).toString
+  val uuidRet: String = new UUID(0, 1).toString
 
   private def onSubmit(value: JsValue, withValidHeaders: Boolean = true): Future[Result] = {
     val request: FakeRequest[JsValue] = if (withValidHeaders) {
@@ -80,7 +79,7 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
 //              true must be( true )
 //            }
 
-    "simple base64 encode hard coded" in {
+    "generate sha256 and base64 values for payload" in {
       val hashUtil: HashUtil = new HashUtil
       val payload = "{\"reportId\":\"a365c0b4-06e3-4fef-a555-16fd0877dc7c\"}"
       val sha = hashUtil.getHash(payload)
@@ -97,8 +96,7 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
       (json \ "metadata" \ "payloadSha256Checksum").as[String] must be("bb895fc5f392e75750784dc4cc3fe9d4055516dfe012c3ae3dc09764dfa19413")
     }
 
-
-    "return 202 with a UUID when a successful registration submission is received" in {
+    "return 202 with a UUID when an acknowledgement is received" in {
       val json = jsonFromFile("/a365c0b4-06e3-4fef-a555-16fd08770202-validNrsEventAcknowledgeIn.json")
 
       val result = onSubmit(json)
@@ -107,14 +105,13 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
 
       (contentAsJson(result) \ "nrSubmissionId").as[String] must be(uuidRet)
     }
-  }
 
-  "return 401 Unauthorised when invalid headers received" in {
-    val json = jsonFromFile("/a365c0b4-06e3-4fef-a555-16fd08770401-validNrsRegistrationEvent.json")
-    val result = onSubmit(json, withValidHeaders = false)
-    status(result) must be(UNAUTHORIZED)
+    "return 401 Unauthorised when invalid headers received" in {
+      val json = Json.parse(s"""{"test": "value"}""")
+      val result = onSubmit(json, withValidHeaders = false)
+      status(result) must be(UNAUTHORIZED)
+    }
   }
-
 
   "StubNonRepudiationServiceController onSubmit errors" should {
 

@@ -26,13 +26,14 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import java.io.FileNotFoundException
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 @Singleton()
 class RdsController @Inject()(cc: ControllerComponents)
   extends BackendController(cc) with StubResource {
 
   //below store is used for generate report to map calculation id to feedback
-  val calcIdMappings: Map[String, CalculationIdDetails] = Map(
+  private val calcIdMappings: Map[String, CalculationIdDetails] = Map(
     FeedbackOne.calculationId -> FeedbackOne,
     FeedbackTwo.calculationId -> FeedbackTwo,
     FeedbackThree.calculationId -> FeedbackThree,
@@ -44,7 +45,7 @@ class RdsController @Inject()(cc: ControllerComponents)
   ).withDefaultValue(FeedbackForDefaultResponse)
 
   //below store is used to find feedback and correlation if mapping while accepting acknowledge request
-  val feedbackIdAndCorrelationIdMapping = Map(
+  private val feedbackIdAndCorrelationIdMapping: Map[String, CalculationIdDetails] = Map(
     FeedbackOne.feedbackId -> FeedbackOne,
     FeedbackTwo.feedbackId -> FeedbackTwo,
     FeedbackThree.feedbackId -> FeedbackThree,
@@ -56,7 +57,7 @@ class RdsController @Inject()(cc: ControllerComponents)
     FeedbackFromRDS.calculationId -> FeedbackFromRDS
   )
 
-  val error =
+  private val error: String =
     s"""
        |{
        |  "code": "MATCHING_RESOURCE_NOT_FOUND",
@@ -64,7 +65,7 @@ class RdsController @Inject()(cc: ControllerComponents)
        |  }
        |""".stripMargin
 
-  val invalidBodyError =
+  private val invalidBodyError: String =
     s"""
        |{
        |  "code": "BAD_REQUEST",
@@ -94,12 +95,12 @@ class RdsController @Inject()(cc: ControllerComponents)
             logger.info(s"sending response")
             (CREATED, response)
           } catch {
-            case e: FileNotFoundException => (NOT_FOUND, Json.parse(error))
-            case b: BadRequestException => (BAD_REQUEST, Json.parse(invalidBodyError))
-            case _ => (INTERNAL_SERVER_ERROR, Json.parse(error))
+            case _: FileNotFoundException => (NOT_FOUND, Json.parse(error))
+            case _: BadRequestException => (BAD_REQUEST, Json.parse(invalidBodyError))
+            case NonFatal(_) => (INTERNAL_SERVER_ERROR, Json.parse(error))
           }
 
-        case JsError(errors) => (BAD_REQUEST, Json.parse(invalidBodyError))
+        case JsError(_) => (BAD_REQUEST, Json.parse(invalidBodyError))
       }
 
       Future.successful(new Status(statusJson._1)(statusJson._2))
@@ -133,7 +134,7 @@ class RdsController @Inject()(cc: ControllerComponents)
               (BAD_REQUEST, Json.parse(error))
           }
 
-        case JsError(errors) => (BAD_REQUEST, Json.parse(invalidBodyError))
+        case JsError(_) => (BAD_REQUEST, Json.parse(invalidBodyError))
       }
 
       Future.successful(new Status(statusJson._1)(statusJson._2))

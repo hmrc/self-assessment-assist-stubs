@@ -55,7 +55,6 @@
 
 package controllers
 
-import config.AppConfig
 import controllers.actions.HeaderValidatorAction
 import models.NRSSubmission
 import org.apache.commons.codec.binary.Base64
@@ -71,17 +70,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton()
-class NrsController @Inject()(appConfig:AppConfig, headerValidator: HeaderValidatorAction, cc: ControllerComponents)
+class NrsController @Inject()(headerValidator: HeaderValidatorAction,
+                              cc: ControllerComponents
+                             )
   extends BackendController(cc) with Logging {
 
-  final val ChecksumFailed = new Status(419)
-
-//  def submit(): Action[JsValue] = {
-//    appConfig.nrsOldBehaviour match {
-//      case true => OldBehaviourSubmit()
-//      case false => AllowTestingOfApiSubmit()
-//    }
-//  }
+  private final val ChecksumFailed = new Status(419)
 
   def requestSuccesfulFake = {
     val uuid = new UUID(0, 1)
@@ -98,7 +92,6 @@ class NrsController @Inject()(appConfig:AppConfig, headerValidator: HeaderValida
   def OldBehaviourSubmit(): Action[JsValue] = Action.async(parse.json) {
     request => {
       logger.info(s"[StubNonRepudiationServiceController] OldBehaviourSubmit Payload received: ${request.body}") //TODO make sure commented out.
-    logger.info(s"NRS request received")
       Future.successful(Ok(requestSuccesfulFake))  //TODO ACCEPT/OK for NRS
     }
   }
@@ -109,15 +102,13 @@ class NrsController @Inject()(appConfig:AppConfig, headerValidator: HeaderValida
         request.body.validate[NRSSubmission] match {
           case JsSuccess(value, _) =>
             if (validateChecksum(value)) {
-              logger.info(s"[StubNonRepudiationServiceController] Payload received: ${request.body}")
+              logger.debug(s"[StubNonRepudiationServiceController] Payload received: ${request.body}")
               getReportId(value) match {
                 case "a365c0b4-06e3-4fef-a555-16fd08770400" => BadRequest
-//                case "a365c0b4-06e3-4fef-a555-16fd08770401" => Unauthorized
                 case "a365c0b4-06e3-4fef-a555-16fd08770500" => InternalServerError(JsString("Internal NRS Submission API error"))
                 case "a365c0b4-06e3-4fef-a555-16fd08770502" => BadGateway
                 case "a365c0b4-06e3-4fef-a555-16fd08770503" => ServiceUnavailable
                 case "a365c0b4-06e3-4fef-a555-16fd08770504" => GatewayTimeout
-
                 case "a365c0b4-06e3-4fef-a555-16fd08770202" => Accepted(requestSuccesfulFake)
                 case _ => Accepted(requestSuccesfulFake)
               }
