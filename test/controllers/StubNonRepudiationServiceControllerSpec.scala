@@ -126,7 +126,6 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
 
     val errorInErrorOut = Seq(
       ("return 400 when invalid nrs json received", "/a365c0b4-06e3-4fef-a555-16fd08770400-invalidNrsEventAcknowledge.json", BAD_REQUEST),
-      //       ( "return 401 Unauthorised when invalid headers received", "/a365c0b4-06e3-4fef-a555-16fd08770401-validNrsRegistrationEvent.json", UNAUTHORIZED ) ,
       ("return 419 Checksum Failed received when decoded payload does match the sha/checksum", "/a365c0b4-06e3-4fef-a555-16fd08770419-RegistrationWithBadChecksumEvent.json", 419),
       ("return 500 when there is an internal server error", "/a365c0b4-06e3-4fef-a555-16fd08770500-nrsServiceErrorEvent.json", INTERNAL_SERVER_ERROR),
       ("return 502 when NRS returns a Bad Gateway error", "/a365c0b4-06e3-4fef-a555-16fd08770502-nrsBadGatewayEvent.json", BAD_GATEWAY),
