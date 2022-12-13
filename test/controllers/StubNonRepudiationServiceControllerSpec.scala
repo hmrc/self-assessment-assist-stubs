@@ -68,17 +68,17 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
   "StubNonRepudiationServiceController onSubmit" should {
 
     // Use this to quickly generate the payload data and checksum.
-    //        "Generate output" in {
-    //          val hashUtil: HashUtil = new HashUtil
-    //          val payload = "{\"xxxxxx\":\"a365c0b4-06e3-4fef-a555-16fd08770401\"}"
-    //          val payloadBase64 = hashUtil.encode(payload)
-    //          val payloadSha = hashUtil.getHash(payload)
-    //          println (s"payload original::${payload}")
-    //          println (s"payloadBase64::${payloadBase64}")
-    //          println (s"payloadSha::${payloadSha}")
-    //
-    //          true must be( true )
-    //        }
+//            "Generate output" in {
+//              val hashUtil: HashUtil = new HashUtil
+//              val payload = "{\"reportId\":\"a365c0b4-06e3-4fef-a555-16fd0877dc7c\"}"
+//              val payloadBase64 = hashUtil.encode(payload)
+//              val payloadSha = hashUtil.getHash(payload)
+//              println (s"payload original::${payload}")
+//              println (s"payloadBase64::${payloadBase64}")
+//              println (s"payloadSha::${payloadSha}")
+//
+//              true must be( true )
+//            }
 
     "simple base64 encode hard coded" in {
       val hashUtil: HashUtil = new HashUtil
