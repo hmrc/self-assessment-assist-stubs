@@ -1,0 +1,67 @@
+{
+  "payload": "eyJyZXBvcnRJZCI6ImEzNjVjMGI0LTA2ZTMtNGZlZi1hNTU1LTE2ZmQwODc3MDUwMiJ9",
+  "metadata": {
+    "businessId": "self-assessment-assist",
+    "notableEvent": "assist-report-acknowledged",
+    "payloadContentType": "application/json",
+    "payloadSha256Checksum": "4a522f94b40c641fe0f697d3ee88e191cc591bee455b6e64adac89c41468de18",
+    "userSubmissionTimestamp": "2022-12-09T11:33:03Z",
+    "identityData": {
+      "internalId": "Int-fddad356-ca6e-48ad-9e72-ce7637a26cef",
+      "externalId": "Ext-656de86e-ec85-4b4c-ac5d-daf0f5a89ee7",
+      "agentCode": "",
+      "credentials": {
+        "providerId": "123456789",
+        "providerType": "GovernmentGateway"
+      },
+      "confidenceLevel": 200,
+      "nino": "AA000000B",
+      "name": {
+        "name": "TestUser"
+      },
+      "email": "",
+      "agentInformation": {},
+      "groupIdentifier": "testGroupId-104e940e-05a0-4e63-8a6a-5ced736a8a0a",
+      "itmpName": {
+        "givenName": "Jane",
+        "middleName": "A",
+        "familyName": "Doe"
+      },
+      "itmpAddress": {
+        "line1": "1 Oxford Road",
+        "line2": "Town Centre",
+        "line3": "London",
+        "line4": "London",
+        "line5": "England",
+        "postCode": "NW2 3CD",
+        "countryName": "GREAT BRITAIN",
+        "countryCode": "GB"
+      },
+      "affinityGroup": "Individual",
+      "credentialStrength": "strong",
+      "loginTimes": {
+        "currentLogin": "2022-09-01T15:08:27.020Z"
+      }
+    },
+    "userAuthToken": "Bearer XXXXX",
+    "headerData": {
+      "Postman-Token": "f1afb499-ca68-4ea5-88af-cf69b3cf9e0d",
+      "Timeout-Access": "<function1>",
+      "Tls-Session-Info": "Session(1670584749822|SSL_NULL_WITH_NULL_NULL)",
+      "Connection": "keep-alive",
+      "Content-Length": "0",
+      "Accept": "application/vnd.hmrc.1.0+json",
+      "Cache-Control": "no-cache",
+      "Content-Type": "application/json",
+      "Authorization": "Bearer XXXXXX",
+      "Accept-Encoding": "gzip, deflate, br",
+      "User-Agent": "PostmanRuntime/7.29.2",
+      "Host": "localhost:8342",
+      "Raw-Request-URI": "/reports/acknowledge/AA000000B/a365c0b4-06e3-4fef-a555-16fd08770502/a5fht738957jfjf845jgjf855",
+      "Remote-Address": "0:0:0:0:0:0:0:1:50368"
+    },
+    "searchKeys": {
+      "reportId": "a365c0b4-06e3-4fef-a555-16fd08770502"
+    }
+  }
+}

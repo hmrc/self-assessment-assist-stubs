@@ -83,21 +83,23 @@ class NrsController @Inject()(appConfig:AppConfig, headerValidator: HeaderValida
     }
   }
 
+  def requestSuccesfulFake = {
+    val uuid = new UUID(0, 1)
+    val retSubmissionSuccesful =
+      s"""{
+         |"nrSubmissionId": "${uuid}"
+         |}""".stripMargin
+    val jsonParse = (Json.parse(retSubmissionSuccesful))
+    jsonParse
+  }
+
   //TODO eventually remove this behaviour() and only AllowTestingOfApiSubmit
   //TODO:Done to stop breaking tests.
   def OldBehaviourSubmit(): Action[JsValue] = Action.async(parse.json) {
     request => {
-      def requestSuccesfulFake = {
-        val uuid = new UUID(0, 1)
-        val retSubmissionSuccesful =
-          s"""{
-             |"reportSubmissionId": "${uuid}"
-             |}""".stripMargin
-        val jsonParse = (Json.parse(retSubmissionSuccesful))
-        jsonParse
-      }
+      logger.info(s"[StubNonRepudiationServiceController] OldBehaviourSubmit Payload received: ${request.body}") //TODO make sure commented out.
     logger.info(s"NRS request received")
-      Future.successful(Ok(requestSuccesfulFake))
+      Future.successful(Ok(requestSuccesfulFake))  //TODO ACCEPT/OK for NRS
     }
   }
 
@@ -108,13 +110,15 @@ class NrsController @Inject()(appConfig:AppConfig, headerValidator: HeaderValida
           case JsSuccess(value, _) =>
             if (validateChecksum(value)) {
               logger.info(s"[StubNonRepudiationServiceController] Payload received: ${request.body}")
-              getTrustCorrespondenceName(value) match {
-                case "NRS Bad Request" => BadRequest
-                case "NRS Bad Gateway" => BadGateway
-                case "NRS Unavailable" => ServiceUnavailable
-                case "NRS Gateway Timeout" => GatewayTimeout
-                case "NRS Error" => InternalServerError(JsString("Internal NRS Submission API error"))
-                case _ => Accepted(Json.parse(s"""{"nrSubmissionId": "${UUID.randomUUID()}"}"""))
+              getReportId(value) match {
+                case "a365c0b4-06e3-4fef-a555-16fd08770400" => BadRequest
+                case "a365c0b4-06e3-4fef-a555-16fd08770500" => InternalServerError(JsString("Internal NRS Submission API error"))
+                case "a365c0b4-06e3-4fef-a555-16fd08770502" => BadGateway
+                case "a365c0b4-06e3-4fef-a555-16fd08770503" => ServiceUnavailable
+                case "a365c0b4-06e3-4fef-a555-16fd08770504" => GatewayTimeout
+
+                case "a365c0b4-06e3-4fef-a555-16fd08770202" => Accepted(requestSuccesfulFake)
+                case _ => Accepted(requestSuccesfulFake)
               }
             } else {
               ChecksumFailed
@@ -132,8 +136,8 @@ class NrsController @Inject()(appConfig:AppConfig, headerValidator: HeaderValida
     submission.metadata.payloadSha256Checksum == hash
   }
 
-  private def getTrustCorrespondenceName(submission: NRSSubmission): String = {
-    (decodePayload(submission) \ "correspondence" \ "name").as[String]
+  private def getReportId(submission: NRSSubmission): String = {
+    (decodePayload(submission) \ "reportId").as[String]
   }
 
   private def decodePayload(submission: NRSSubmission): JsValue = {
