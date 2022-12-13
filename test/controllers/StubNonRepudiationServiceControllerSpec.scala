@@ -59,6 +59,7 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
     private def sha256: MessageDigest = MessageDigest.getInstance("SHA-256")
 
     def encode(value: String): String = Base64.getUrlEncoder.encodeToString(value.getBytes(StandardCharsets.UTF_8))
+
     //TODO ensure that service is using getUrlEncoder.
     def getHash(value: String): String = sha256.digest(value.getBytes()).map("%02x" format _).mkString
 
@@ -66,75 +67,58 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
 
   "StubNonRepudiationServiceController onSubmit" should {
 
-//        "Generate output" in {  //TODO remove when files done and create a little util to produce output at some time.
-//          val hashUtil: HashUtil = new HashUtil
-//          val payload = "{\"xxxxxx\":\"a365c0b4-06e3-4fef-a555-16fd08770401\"}"
-//          val payloadBase64 = hashUtil.encode(payload)
-//          val payloadSha = hashUtil.getHash(payload)
-//          println (s"payload original::${payload}")
-//          println (s"payloadBase64::${payloadBase64}")
-//          println (s"payloadSha::${payloadSha}")
-//
-//          true must be( true )
-//        }
+    // Use this to quickly generate the payload data and checksum.
+    //        "Generate output" in {
+    //          val hashUtil: HashUtil = new HashUtil
+    //          val payload = "{\"xxxxxx\":\"a365c0b4-06e3-4fef-a555-16fd08770401\"}"
+    //          val payloadBase64 = hashUtil.encode(payload)
+    //          val payloadSha = hashUtil.getHash(payload)
+    //          println (s"payload original::${payload}")
+    //          println (s"payloadBase64::${payloadBase64}")
+    //          println (s"payloadSha::${payloadSha}")
+    //
+    //          true must be( true )
+    //        }
 
-    if (false) {
-      "simple base64 encode hard coded" in {
-        val hashUtil: HashUtil = new HashUtil
-        val payload = "{\"reportId\":\"a365c0b4-06e3-4fef-a555-16fd0877dc7c\"}"
-        val sha = hashUtil.getHash(payload)
-        val base64 = hashUtil.encode(payload)
+    "simple base64 encode hard coded" in {
+      val hashUtil: HashUtil = new HashUtil
+      val payload = "{\"reportId\":\"a365c0b4-06e3-4fef-a555-16fd0877dc7c\"}"
+      val sha = hashUtil.getHash(payload)
+      val base64 = hashUtil.encode(payload)
 
-        sha must be("bb895fc5f392e75750784dc4cc3fe9d4055516dfe012c3ae3dc09764dfa19413")
-        base64 must be("eyJyZXBvcnRJZCI6ImEzNjVjMGI0LTA2ZTMtNGZlZi1hNTU1LTE2ZmQwODc3ZGM3YyJ9")
-      }
-
-      "check message payload(encode) payloadSha256Checksum(encode) can be read from file" in {
-        val json = jsonFromFile("/validNrsEventAcknowledgeChecksumShaIn.json")
-
-        (json \ "payload").as[String] must be("eyJyZXBvcnRJZCI6ImEzNjVjMGI0LTA2ZTMtNGZlZi1hNTU1LTE2ZmQwODc3ZGM3YyJ9")
-        (json \ "metadata" \ "payloadSha256Checksum").as[String] must be("bb895fc5f392e75750784dc4cc3fe9d4055516dfe012c3ae3dc09764dfa19413")
-      }
-
-
-      "return 202 with a UUID when a successful registration submission is received" in {
-        val json = jsonFromFile("/a365c0b4-06e3-4fef-a555-16fd08770202-validNrsEventAcknowledgeIn.json")
-
-        val result = onSubmit(json)
-
-        status(result) must be(ACCEPTED)
-
-        (contentAsJson(result) \ "nrSubmissionId").as[String] must be(uuidRet)
-      }
+      sha must be("bb895fc5f392e75750784dc4cc3fe9d4055516dfe012c3ae3dc09764dfa19413")
+      base64 must be("eyJyZXBvcnRJZCI6ImEzNjVjMGI0LTA2ZTMtNGZlZi1hNTU1LTE2ZmQwODc3ZGM3YyJ9")
     }
 
-    "return 401 Unauthorised when invalid headers received" in {
-      val json = jsonFromFile("/a365c0b4-06e3-4fef-a555-16fd08770401-validNrsRegistrationEvent.json")
-      val result = onSubmit(json, withValidHeaders = false)
-      status(result) must be(UNAUTHORIZED)
+    "check message payload(encode) payloadSha256Checksum(encode) can be read from file" in {
+      val json = jsonFromFile("/validNrsEventAcknowledgeChecksumShaIn.json")
+
+      (json \ "payload").as[String] must be("eyJyZXBvcnRJZCI6ImEzNjVjMGI0LTA2ZTMtNGZlZi1hNTU1LTE2ZmQwODc3ZGM3YyJ9")
+      (json \ "metadata" \ "payloadSha256Checksum").as[String] must be("bb895fc5f392e75750784dc4cc3fe9d4055516dfe012c3ae3dc09764dfa19413")
+    }
+
+
+    "return 202 with a UUID when a successful registration submission is received" in {
+      val json = jsonFromFile("/a365c0b4-06e3-4fef-a555-16fd08770202-validNrsEventAcknowledgeIn.json")
+
+      val result = onSubmit(json)
+
+      status(result) must be(ACCEPTED)
+
+      (contentAsJson(result) \ "nrSubmissionId").as[String] must be(uuidRet)
     }
   }
 
+  "return 401 Unauthorised when invalid headers received" in {
+    val json = jsonFromFile("/a365c0b4-06e3-4fef-a555-16fd08770401-validNrsRegistrationEvent.json")
+    val result = onSubmit(json, withValidHeaders = false)
+    status(result) must be(UNAUTHORIZED)
+  }
 
-
-    //    "return 202 with a UUID when a successful variation submission is received" in {
-//      val json = jsonFromFile("/validVariationEvent.json")
-//      val result = onSubmit(json)
-//      status(result) must be(ACCEPTED)
-//      (contentAsJson(result) \ "nrSubmissionId").as[String] must fullyMatch regex v4UuidRegex
-//    }
-//
-//    "return 202 with a UUID when a successful non tax variation submission is received" in {
-//      val json = jsonFromFile("/validNonTaxVariationEvent.json")
-//      val result = onSubmit(json)
-//      status(result) must be(ACCEPTED)
-//      (contentAsJson(result) \ "nrSubmissionId").as[String] must fullyMatch regex v4UuidRegex
-//    }
-//
 
   "StubNonRepudiationServiceController onSubmit errors" should {
 
-    def runTest(description:String, filename:String, submitStateRet:Int ): Unit = {
+    def runTest(description: String, filename: String, submitStateRet: Int): Unit = {
       s"Test::${description}" in {
         val json = jsonFromFile(filename)
         val result = onSubmit(json)
@@ -143,15 +127,15 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
       }
     }
 
-     val errorInErrorOut = Seq(
-       ( "return 400 when invalid nrs json received", "/a365c0b4-06e3-4fef-a555-16fd08770400-invalidNrsEventAcknowledge.json", BAD_REQUEST ) ,
-//       ( "return 401 Unauthorised when invalid headers received", "/a365c0b4-06e3-4fef-a555-16fd08770401-validNrsRegistrationEvent.json", UNAUTHORIZED ) ,
-       ( "return 419 Checksum Failed received when decoded payload does match the sha/checksum","/a365c0b4-06e3-4fef-a555-16fd08770419-RegistrationWithBadChecksumEvent.json",419) ,
-       ("return 500 when there is an internal server error","/a365c0b4-06e3-4fef-a555-16fd08770500-nrsServiceErrorEvent.json",INTERNAL_SERVER_ERROR) ,
-       ("return 502 when NRS returns a Bad Gateway error","/a365c0b4-06e3-4fef-a555-16fd08770502-nrsBadGatewayEvent.json",BAD_GATEWAY) ,
-       ("return 503 when NRS is unavailable","/a365c0b4-06e3-4fef-a555-16fd08770503-nrsServiceUnavailableEvent.json",SERVICE_UNAVAILABLE) ,
-       ("return 504 when NRS gateway times out","/a365c0b4-06e3-4fef-a555-16fd08770504-nrsGatewayTimeoutEvent.json",GATEWAY_TIMEOUT)
-     )
+    val errorInErrorOut = Seq(
+      ("return 400 when invalid nrs json received", "/a365c0b4-06e3-4fef-a555-16fd08770400-invalidNrsEventAcknowledge.json", BAD_REQUEST),
+      //       ( "return 401 Unauthorised when invalid headers received", "/a365c0b4-06e3-4fef-a555-16fd08770401-validNrsRegistrationEvent.json", UNAUTHORIZED ) ,
+      ("return 419 Checksum Failed received when decoded payload does match the sha/checksum", "/a365c0b4-06e3-4fef-a555-16fd08770419-RegistrationWithBadChecksumEvent.json", 419),
+      ("return 500 when there is an internal server error", "/a365c0b4-06e3-4fef-a555-16fd08770500-nrsServiceErrorEvent.json", INTERNAL_SERVER_ERROR),
+      ("return 502 when NRS returns a Bad Gateway error", "/a365c0b4-06e3-4fef-a555-16fd08770502-nrsBadGatewayEvent.json", BAD_GATEWAY),
+      ("return 503 when NRS is unavailable", "/a365c0b4-06e3-4fef-a555-16fd08770503-nrsServiceUnavailableEvent.json", SERVICE_UNAVAILABLE),
+      ("return 504 when NRS gateway times out", "/a365c0b4-06e3-4fef-a555-16fd08770504-nrsGatewayTimeoutEvent.json", GATEWAY_TIMEOUT)
+    )
 
     errorInErrorOut.foreach(args => (runTest _).tupled(args))
 
