@@ -76,12 +76,12 @@ class NrsController @Inject()(appConfig:AppConfig, headerValidator: HeaderValida
 
   final val ChecksumFailed = new Status(419)
 
-  def submit(): Action[JsValue] = {
-    appConfig.nrsOldBehaviour match {
-      case true => OldBehaviourSubmit()
-      case false => AllowTestingOfApiSubmit()
-    }
-  }
+//  def submit(): Action[JsValue] = {
+//    appConfig.nrsOldBehaviour match {
+//      case true => OldBehaviourSubmit()
+//      case false => AllowTestingOfApiSubmit()
+//    }
+//  }
 
   def requestSuccesfulFake = {
     val uuid = new UUID(0, 1)
@@ -103,7 +103,7 @@ class NrsController @Inject()(appConfig:AppConfig, headerValidator: HeaderValida
     }
   }
 
-  def AllowTestingOfApiSubmit(): Action[JsValue] = {
+  def submit(): Action[JsValue] = {
     headerValidator.async(parse.json) { implicit request: Request[JsValue] =>
       Future {
         request.body.validate[NRSSubmission] match {
@@ -112,6 +112,7 @@ class NrsController @Inject()(appConfig:AppConfig, headerValidator: HeaderValida
               logger.info(s"[StubNonRepudiationServiceController] Payload received: ${request.body}")
               getReportId(value) match {
                 case "a365c0b4-06e3-4fef-a555-16fd08770400" => BadRequest
+//                case "a365c0b4-06e3-4fef-a555-16fd08770401" => Unauthorized
                 case "a365c0b4-06e3-4fef-a555-16fd08770500" => InternalServerError(JsString("Internal NRS Submission API error"))
                 case "a365c0b4-06e3-4fef-a555-16fd08770502" => BadGateway
                 case "a365c0b4-06e3-4fef-a555-16fd08770503" => ServiceUnavailable

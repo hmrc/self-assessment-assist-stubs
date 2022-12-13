@@ -7,7 +7,10 @@ POST 	    /fraud                                                                
 POST        /rds/assessments/self-assessment-assist                                       controllers.RdsController.generateReport()
 POST        /rds/assessments/self-assessment-assist/acknowledge                           controllers.RdsController.acknowledgeReport()
 
-POST 	    /individuals/self-assessment-assist/submission/report                         controllers.NrsController.submit()
+POST 	    /individuals/self-assessment-assist/submission/report                         controllers.NrsController.OldBehaviourSubmit()
+# TODO Delete when QA ok.
+
+POST 	    /submission                                                                   controllers.NrsController.submit()
 
 
 PUT         /*route                                                                     controllers.GenericController.unsupportedRequestHandler(route)

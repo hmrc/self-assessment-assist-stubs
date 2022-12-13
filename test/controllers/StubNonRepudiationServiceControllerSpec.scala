@@ -66,17 +66,17 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
 
   "StubNonRepudiationServiceController onSubmit" should {
 
-    //    "Generate output" in {  //TODO remove when files done and create a little util to produce output at some time.
-    //      val hashUtil: HashUtil = new HashUtil
-    //      val payload = "{\"reportId\":\"a365c0b4-06e3-4fef-a555-16fd08770504\"}"
-    //      val payloadBase64 = hashUtil.encode(payload)
-    //      val payloadSha = hashUtil.getHash(payload)
-    //      println (s"payload original::${payload}")
-    //      println (s"payloadBase64::${payloadBase64}")
-    //      println (s"payloadSha::${payloadSha}")
-    //
-    //      true must be( true )
-    //    }
+//        "Generate output" in {  //TODO remove when files done and create a little util to produce output at some time.
+//          val hashUtil: HashUtil = new HashUtil
+//          val payload = "{\"xxxxxx\":\"a365c0b4-06e3-4fef-a555-16fd08770401\"}"
+//          val payloadBase64 = hashUtil.encode(payload)
+//          val payloadSha = hashUtil.getHash(payload)
+//          println (s"payload original::${payload}")
+//          println (s"payloadBase64::${payloadBase64}")
+//          println (s"payloadSha::${payloadSha}")
+//
+//          true must be( true )
+//        }
 
     if (false) {
       "simple base64 encode hard coded" in {
@@ -107,6 +107,12 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
         (contentAsJson(result) \ "nrSubmissionId").as[String] must be(uuidRet)
       }
     }
+
+    "return 401 Unauthorised when invalid headers received" in {
+      val json = jsonFromFile("/a365c0b4-06e3-4fef-a555-16fd08770401-validNrsRegistrationEvent.json")
+      val result = onSubmit(json, withValidHeaders = false)
+      status(result) must be(UNAUTHORIZED)
+    }
   }
 
 
@@ -133,18 +139,17 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
         val json = jsonFromFile(filename)
         val result = onSubmit(json)
         status(result) must be(submitStateRet)
-        (contentAsJson(result) \ "nrSubmissionId").as[String] must be(uuidRet)
 
       }
     }
 
      val errorInErrorOut = Seq(
        ( "return 400 when invalid nrs json received", "/a365c0b4-06e3-4fef-a555-16fd08770400-invalidNrsEventAcknowledge.json", BAD_REQUEST ) ,
-       ( "return 401 Unauthorised when invalid headers received", "/a365c0b4-06e3-4fef-a555-16fd08770401-validNrsRegistrationEvent.json", UNAUTHORIZED ),
-//       ( "return 419 Page Expired when Checksum Failed received","/a365c0b4-06e3-4fef-a555-16fd08770419-RegistrationWithBadChecksumEvent.json",419),
-       ("return 500 when there is an internal server error","/a365c0b4-06e3-4fef-a555-16fd08770500-nrsServiceErrorEvent.json",INTERNAL_SERVER_ERROR),
-       ("return 502 when NRS returns a Bad Gateway error","/a365c0b4-06e3-4fef-a555-16fd08770502-nrsBadGatewayEvent.json",BAD_GATEWAY),
-       ("return 503 when NRS is unavailable","/a365c0b4-06e3-4fef-a555-16fd08770503-nrsServiceUnavailableEvent.json",SERVICE_UNAVAILABLE),
+//       ( "return 401 Unauthorised when invalid headers received", "/a365c0b4-06e3-4fef-a555-16fd08770401-validNrsRegistrationEvent.json", UNAUTHORIZED ) ,
+       ( "return 419 Checksum Failed received when decoded payload does match the sha/checksum","/a365c0b4-06e3-4fef-a555-16fd08770419-RegistrationWithBadChecksumEvent.json",419) ,
+       ("return 500 when there is an internal server error","/a365c0b4-06e3-4fef-a555-16fd08770500-nrsServiceErrorEvent.json",INTERNAL_SERVER_ERROR) ,
+       ("return 502 when NRS returns a Bad Gateway error","/a365c0b4-06e3-4fef-a555-16fd08770502-nrsBadGatewayEvent.json",BAD_GATEWAY) ,
+       ("return 503 when NRS is unavailable","/a365c0b4-06e3-4fef-a555-16fd08770503-nrsServiceUnavailableEvent.json",SERVICE_UNAVAILABLE) ,
        ("return 504 when NRS gateway times out","/a365c0b4-06e3-4fef-a555-16fd08770504-nrsGatewayTimeoutEvent.json",GATEWAY_TIMEOUT)
      )
 
