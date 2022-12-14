@@ -14,45 +14,6 @@
  * limitations under the License.
  */
 
-//package controllers
-//
-//import play.api.libs.json.{JsValue, Json}
-//import play.api.mvc.{Action, ControllerComponents}
-//import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-//
-//import java.util.UUID
-//import javax.inject.{Inject, Singleton}
-//import scala.concurrent.Future
-//
-//@Singleton()
-//class NrsController @Inject()(cc: ControllerComponents)
-//  extends BackendController(cc) with Logging{
-//
-//  def submit(): Action[JsValue] = Action.async(parse.json) {
-//    request => {
-//      def requestSuccesfulFake = {
-//        val uuid = new UUID(0, 1)
-//        val retSubmissionSuccesful =
-//          s"""{
-//             |"reportSubmissionId": "${uuid}"
-//             |}""".stripMargin
-//        val jsonParse = (Json.parse(retSubmissionSuccesful))
-//        jsonParse
-//      }
-//    logger.info(s"NRS request received")
-//      Future.successful(Ok(requestSuccesfulFake))
-//    }
-//  }
-//
-//}
-//
-
-
-/*
- * Copyright 2022 HM Revenue & Customs
- *
- */
-
 package controllers
 
 import controllers.actions.HeaderValidatorAction
@@ -77,14 +38,9 @@ class NrsController @Inject()(headerValidator: HeaderValidatorAction,
 
   private final val ChecksumFailed = new Status(419)
 
-  def requestSuccesfulFake = {
-    val uuid = new UUID(0, 1)
-    val retSubmissionSuccesful =
-      s"""{
-         |"nrSubmissionId": "${uuid}"
-         |}""".stripMargin
-    val jsonParse = (Json.parse(retSubmissionSuccesful))
-    jsonParse
+  private def requestSuccessfulFake: JsValue = {
+    val uuid = UUID.randomUUID()
+    Json.obj("nrSubmissionId" -> s"$uuid")
   }
 
 
@@ -101,8 +57,8 @@ class NrsController @Inject()(headerValidator: HeaderValidatorAction,
                 case "a365c0b4-06e3-4fef-a555-16fd08770502" => BadGateway
                 case "a365c0b4-06e3-4fef-a555-16fd08770503" => ServiceUnavailable
                 case "a365c0b4-06e3-4fef-a555-16fd08770504" => GatewayTimeout
-                case "a365c0b4-06e3-4fef-a555-16fd08770202" => Accepted(requestSuccesfulFake)
-                case _ => Accepted(requestSuccesfulFake)
+                case "a365c0b4-06e3-4fef-a555-16fd08770202" => Accepted(requestSuccessfulFake)
+                case _ => Accepted(requestSuccessfulFake)
               }
             } else {
               ChecksumFailed
