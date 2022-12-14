@@ -15,7 +15,8 @@
  */
 
 package utils
-object Main {
+
+object GenerateBase64andSha256Hash {
 
   // Use this to quickly generate the payload data and checksum.
   def main( args:Array[String]): Unit = {
