@@ -21,13 +21,10 @@ import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-//??? Where is it getting its execeution context??????
-
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
-class GenericController @Inject()(cc: ControllerComponents)
+class GenericController @Inject()(cc: ControllerComponents)(implicit ec: ExecutionContext)
   extends BackendController(cc) {
 
   def unsupportedRequestHandler(id: String): Action[JsValue] = Action.async(parse.json) {

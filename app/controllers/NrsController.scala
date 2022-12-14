@@ -26,14 +26,13 @@ import utils.HashUtil
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
 class NrsController @Inject()(headerValidator: HeaderValidatorAction,
                               hashUtil: HashUtil,
                               cc: ControllerComponents
-                             )
+                             )(implicit ec: ExecutionContext)
   extends BackendController(cc) with Logging {
 
   private final val ChecksumFailed = new Status(419)
