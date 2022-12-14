@@ -27,10 +27,10 @@ import javax.inject.{Inject, Singleton}
 class HashUtil @Inject()() {
 
   def encode(value: String): String =
-    Base64.encodeBase64URLSafeString(value.getBytes(StandardCharsets.UTF_8))
+    Base64.encodeBase64String(value.getBytes(StandardCharsets.UTF_8))
   def decode(payload: String): JsValue =
     Json.parse(new String(Base64.decodeBase64(payload)))
-  def getHash(value: String): String = DigestUtils.sha256Hex(value)
+  def getSha256Hex(value: String): String = DigestUtils.sha256Hex(value)
 
 }
 

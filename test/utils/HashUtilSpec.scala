@@ -26,7 +26,7 @@ class HashUtilSpec extends SpecBase {
 
     "generate sha256 and base64 values for a given payload" in {
       val payload = "{\"reportId\":\"a365c0b4-06e3-4fef-a555-16fd0877dc7c\"}"
-      val sha = hashUtil.getHash(payload)
+      val sha = hashUtil.getSha256Hex(payload)
       val base64 = hashUtil.encode(payload)
 
       sha must be("bb895fc5f392e75750784dc4cc3fe9d4055516dfe012c3ae3dc09764dfa19413")

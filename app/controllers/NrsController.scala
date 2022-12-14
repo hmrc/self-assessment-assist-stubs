@@ -69,7 +69,7 @@ class NrsController @Inject()(headerValidator: HeaderValidatorAction,
 
   private def validChecksum(submission: NRSSubmission): Boolean = {
     val payload = Json.stringify(hashUtil.decode(submission.payload))
-    val hash = hashUtil.getHash(payload)
+    val hash = hashUtil.getSha256Hex(payload)
 
     submission.metadata.payloadSha256Checksum == hash
   }
