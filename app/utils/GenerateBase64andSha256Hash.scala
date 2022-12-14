@@ -24,11 +24,8 @@ object GenerateBase64andSha256Hash {
     val hashUtil: HashUtil = new HashUtil
     val payload = "{\"reportId\":\"a365c0b4-06e3-4fef-a555-16fd0877dc7c\"}"
 
-    val payloadBase64 = hashUtil.encode(payload)
-    val payloadSha = hashUtil.getHash(payload)
-    println (s"payload original::${payload}")
-    println (s"payloadBase64::${payloadBase64}")
-    println (s"payloadSha::${payloadSha}")
+    hashUtil.encode(payload)
+    hashUtil.getHash(payload)
 
     ()
   }

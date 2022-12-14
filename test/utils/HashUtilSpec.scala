@@ -20,10 +20,11 @@ import base.SpecBase
 
 class HashUtilSpec extends SpecBase {
 
+  private val hashUtil: HashUtil = app.injector.instanceOf[HashUtil]
+
   "HashUtil" must {
 
     "generate sha256 and base64 values for a given payload" in {
-      val hashUtil: HashUtil = new HashUtil
       val payload = "{\"reportId\":\"a365c0b4-06e3-4fef-a555-16fd0877dc7c\"}"
       val sha = hashUtil.getHash(payload)
       val base64 = hashUtil.encode(payload)

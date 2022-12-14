@@ -18,12 +18,11 @@ package controllers
 
 import controllers.actions.HeaderValidatorAction
 import models.NRSSubmission
-import org.apache.commons.codec.binary.Base64
-import org.apache.commons.codec.digest.DigestUtils
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import utils.HashUtil
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
@@ -32,6 +31,7 @@ import scala.concurrent.Future
 
 @Singleton()
 class NrsController @Inject()(headerValidator: HeaderValidatorAction,
+                              hashUtil: HashUtil,
                               cc: ControllerComponents
                              )
   extends BackendController(cc) with Logging {
@@ -43,13 +43,12 @@ class NrsController @Inject()(headerValidator: HeaderValidatorAction,
     Json.obj("nrSubmissionId" -> s"$uuid")
   }
 
-
   def submit(): Action[JsValue] = {
     headerValidator.async(parse.json) { implicit request: Request[JsValue] =>
       Future {
         request.body.validate[NRSSubmission] match {
           case JsSuccess(value, _) =>
-            if (validateChecksum(value)) {
+            if (validChecksum(value)) {
               logger.debug(s"[StubNonRepudiationServiceController] Payload received: ${request.body}")
               getReportId(value) match {
                 case "a365c0b4-06e3-4fef-a555-16fd08770400" => BadRequest
@@ -69,18 +68,14 @@ class NrsController @Inject()(headerValidator: HeaderValidatorAction,
     }
   }
 
-  private def validateChecksum(submission: NRSSubmission): Boolean = {
-    val payload = decodePayload(submission).toString
-    val hash = DigestUtils.sha256Hex(payload)
+  private def validChecksum(submission: NRSSubmission): Boolean = {
+    val payload = Json.stringify(hashUtil.decode(submission.payload))
+    val hash = hashUtil.getHash(payload)
 
     submission.metadata.payloadSha256Checksum == hash
   }
 
   private def getReportId(submission: NRSSubmission): String = {
-    (decodePayload(submission) \ "reportId").as[String]
-  }
-
-  private def decodePayload(submission: NRSSubmission): JsValue = {
-    Json.parse(new String(Base64.decodeBase64(submission.payload)))
+    (hashUtil.decode(submission.payload) \ "reportId").as[String]
   }
 }
