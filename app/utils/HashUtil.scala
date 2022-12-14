@@ -30,7 +30,7 @@ class HashUtil @Inject()() {
     Base64.encodeBase64String(value.getBytes(StandardCharsets.UTF_8))
   def decode(payload: String): JsValue =
     Json.parse(new String(Base64.decodeBase64(payload)))
-  def getSha256Hex(value: String): String = DigestUtils.sha256Hex(value)
+  def getHash(value: String): String = DigestUtils.sha256Hex(value)
 
 }
 
