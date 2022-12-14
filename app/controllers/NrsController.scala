@@ -87,14 +87,6 @@ class NrsController @Inject()(headerValidator: HeaderValidatorAction,
     jsonParse
   }
 
-  //TODO eventually remove this behaviour() and only AllowTestingOfApiSubmit
-  //TODO:Done to stop breaking tests.
-  def OldBehaviourSubmit(): Action[JsValue] = Action.async(parse.json) {
-    request => {
-      logger.info(s"[StubNonRepudiationServiceController] OldBehaviourSubmit Payload received: ${request.body}") //TODO make sure commented out.
-      Future.successful(Ok(requestSuccesfulFake))  //TODO ACCEPT/OK for NRS
-    }
-  }
 
   def submit(): Action[JsValue] = {
     headerValidator.async(parse.json) { implicit request: Request[JsValue] =>

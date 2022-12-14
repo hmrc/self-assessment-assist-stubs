@@ -90,7 +90,7 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
     }
 
     "check message payload(encode) payloadSha256Checksum(encode) can be read from file" in {
-      val json = jsonFromFile("/validNrsEventAcknowledgeChecksumShaIn.json")
+      val json = jsonFromFile("/validNrsEventAcknowledgeChecksumSha.json")
 
       (json \ "payload").as[String] must be("eyJyZXBvcnRJZCI6ImEzNjVjMGI0LTA2ZTMtNGZlZi1hNTU1LTE2ZmQwODc3ZGM3YyJ9")
       (json \ "metadata" \ "payloadSha256Checksum").as[String] must be("bb895fc5f392e75750784dc4cc3fe9d4055516dfe012c3ae3dc09764dfa19413")
@@ -102,7 +102,6 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
       val result = onSubmit(json)
 
       status(result) must be(ACCEPTED)
-
       (contentAsJson(result) \ "nrSubmissionId").as[String] must be(uuidRet)
     }
 

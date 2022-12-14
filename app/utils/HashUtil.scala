@@ -15,21 +15,20 @@
  */
 
 package utils
-object Main {
 
-  // Use this to quickly generate the payload data and checksum.
-  def main( args:Array[String]): Unit = {
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
+import java.util.Base64
+import javax.inject.{Inject, Singleton}
 
-    val hashUtil: HashUtil = new HashUtil
-    val payload = "{\"reportId\":\"a365c0b4-06e3-4fef-a555-16fd0877dc7c\"}"
+@Singleton
+class HashUtil @Inject()() {
 
-    val payloadBase64 = hashUtil.encode(payload)
-    val payloadSha = hashUtil.getHash(payload)
-    println (s"payload original::${payload}")
-    println (s"payloadBase64::${payloadBase64}")
-    println (s"payloadSha::${payloadSha}")
+  private def sha256: MessageDigest = MessageDigest.getInstance("SHA-256")
 
-    ()
-  }
+  def encode(value: String): String = Base64.getUrlEncoder.encodeToString(value.getBytes(StandardCharsets.UTF_8))
+
+  def getHash(value: String): String = sha256.digest(value.getBytes()).map("%02x" format _).mkString
 
 }
+
