@@ -71,27 +71,28 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
     }
   }
 
-  "StubNonRepudiationServiceController onSubmit errors" should {
+  "StubNonRepudiationServiceController when error occurs onSubmit" should {
 
-    def runTest(description: String, filename: String, submitStateRet: Int): Unit = {
-      s"Test::${description}" in {
-        val json = jsonFromFile(filename)
+    def runTest(harness: TestHarness): Unit = {
+      s"${harness.name}" in {
+        val json = jsonFromFile(harness.resourcePath)
         val result = onSubmit(json)
-        status(result) must be(submitStateRet)
-
+        status(result) must be(harness.response)
       }
     }
 
-    val errorInErrorOut = Seq(
-      ("return 400 when invalid nrs json received", "/a365c0b4-06e3-4fef-a555-16fd08770400-invalidNrsEventAcknowledge.json", BAD_REQUEST),
-      ("return 419 Checksum Failed received when decoded payload does match the sha/checksum", "/a365c0b4-06e3-4fef-a555-16fd08770419-RegistrationWithBadChecksumEvent.json", 419),
-      ("return 500 when there is an internal server error", "/a365c0b4-06e3-4fef-a555-16fd08770500-nrsServiceErrorEvent.json", INTERNAL_SERVER_ERROR),
-      ("return 502 when NRS returns a Bad Gateway error", "/a365c0b4-06e3-4fef-a555-16fd08770502-nrsBadGatewayEvent.json", BAD_GATEWAY),
-      ("return 503 when NRS is unavailable", "/a365c0b4-06e3-4fef-a555-16fd08770503-nrsServiceUnavailableEvent.json", SERVICE_UNAVAILABLE),
-      ("return 504 when NRS gateway times out", "/a365c0b4-06e3-4fef-a555-16fd08770504-nrsGatewayTimeoutEvent.json", GATEWAY_TIMEOUT)
+    case class TestHarness(name: String, resourcePath: String, response: Int)
+
+    val errorTests = Seq(
+      TestHarness("return 400 when invalid nrs json received", "/a365c0b4-06e3-4fef-a555-16fd08770400-invalidNrsEventAcknowledge.json", BAD_REQUEST),
+      TestHarness("return 419 Checksum Failed received when decoded payload does match the sha/checksum", "/a365c0b4-06e3-4fef-a555-16fd08770419-RegistrationWithBadChecksumEvent.json", 419),
+      TestHarness("return 500 when there is an internal server error", "/a365c0b4-06e3-4fef-a555-16fd08770500-nrsServiceErrorEvent.json", INTERNAL_SERVER_ERROR),
+      TestHarness("return 502 when NRS returns a Bad Gateway error", "/a365c0b4-06e3-4fef-a555-16fd08770502-nrsBadGatewayEvent.json", BAD_GATEWAY),
+      TestHarness("return 503 when NRS is unavailable", "/a365c0b4-06e3-4fef-a555-16fd08770503-nrsServiceUnavailableEvent.json", SERVICE_UNAVAILABLE),
+      TestHarness("return 504 when NRS gateway times out", "/a365c0b4-06e3-4fef-a555-16fd08770504-nrsGatewayTimeoutEvent.json", GATEWAY_TIMEOUT)
     )
 
-    errorInErrorOut.foreach(args => (runTest _).tupled(args))
+    errorTests.foreach(runTest)
 
   }
 }
