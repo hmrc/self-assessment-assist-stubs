@@ -10,7 +10,7 @@
   },
   "outputs": [
     {
-      "name": "correlationId",
+      "name": "correlationChkId",
       "value": "8F367D834A06AB54F1E7B045C5246EB31226DF324AEF11831502A392F94A0726"
     },
     {
@@ -26,11 +26,15 @@
       "value": "replaceNino"
     },
     {
+      "name": "taxYear",
+      "value": 2022
+    },
+    {
       "name": "responseCode",
       "value": "replaceResponseCode"
     },
     {
-      "name": "responseMessage",
+      "name": "response",
       "value": "String"
     }
   ]
