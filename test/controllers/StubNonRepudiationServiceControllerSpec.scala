@@ -46,22 +46,39 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
     controller.submit().apply(request)
   }
 
-  "StubNonRepudiationServiceController onSubmit" should {
+  "StubNonRepudiationServiceController onSubmit" when {
+
+    "auditing the report sent to the user" must {
+
+      "return 202 with a UUID when an acknowledgement is received" in {
+        val json = jsonFromFile("/a365c0b4-06e3-4fef-a555-16fd08770202-validNrsEventReportOut.json")
+
+        val result = onSubmit(json)
+
+        status(result) must be(ACCEPTED)
+        (contentAsJson(result) \ "nrSubmissionId").as[String] must fullyMatch regex v4UuidRegex
+      }
+
+    }
+
+    "acknowledging the report" must {
+
+      "return 202 with a UUID when a report is sent" in {
+        val json = jsonFromFile("/a365c0b4-06e3-4fef-a555-16fd08770202-validNrsEventAcknowledgeIn.json")
+
+        val result = onSubmit(json)
+
+        status(result) must be(ACCEPTED)
+        (contentAsJson(result) \ "nrSubmissionId").as[String] must fullyMatch regex v4UuidRegex
+      }
+
+    }
 
     "check message payload(encode) payloadSha256Checksum(encode) can be read from file" in {
       val json = jsonFromFile("/validNrsEventAcknowledgeChecksumSha.json")
 
       (json \ "payload").as[String] must be("eyJyZXBvcnRJZCI6ImEzNjVjMGI0LTA2ZTMtNGZlZi1hNTU1LTE2ZmQwODc3ZGM3YyJ9")
       (json \ "metadata" \ "payloadSha256Checksum").as[String] must be("bb895fc5f392e75750784dc4cc3fe9d4055516dfe012c3ae3dc09764dfa19413")
-    }
-
-    "return 202 with a UUID when an acknowledgement is received" in {
-      val json = jsonFromFile("/a365c0b4-06e3-4fef-a555-16fd08770202-validNrsEventAcknowledgeIn.json")
-
-      val result = onSubmit(json)
-
-      status(result) must be(ACCEPTED)
-      (contentAsJson(result) \ "nrSubmissionId").as[String] must fullyMatch regex v4UuidRegex
     }
 
     "return 401 Unauthorised when invalid headers received" in {
@@ -71,7 +88,7 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
     }
   }
 
-  "StubNonRepudiationServiceController when error occurs onSubmit" should {
+  "StubNonRepudiationServiceController when error occurs onSubmit" must {
 
     def runTest(harness: TestHarness): Unit = {
       s"${harness.name}" in {

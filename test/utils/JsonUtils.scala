@@ -32,6 +32,6 @@ object JsonUtils {
 
   def base64JsonFromFile(path: String): String = {
     val submissionPayload = jsonFromFile(path)
-    Base64.encodeBase64URLSafeString(Json.toBytes(submissionPayload))
+    Base64.encodeBase64String(Json.toBytes(submissionPayload))
   }
 }

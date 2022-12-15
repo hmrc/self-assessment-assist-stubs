@@ -1,8 +1,8 @@
 {
   "payload": "eyJ4eHh4eHgiOiJhMzY1YzBiNC0wNmUzLTRmZWYtYTU1NS0xNmZkMDg3NzA0MDEifQ==",
   "metadata": {
-    "businessId": "self-assessment-assist",
-    "notableEvent": "assist-report-acknowledged",
+    "businessId": "saa",
+    "notableEvent": "saa-report-acknowledged",
     "payloadContentType": "application/json",
     "payloadSha256Checksum": "04e729c61817bf00dc6f974b3ac039fdb752d70f35f39dfb4413114daccc7464",
     "userSubmissionTimestamp": "2022-12-09T11:33:03Z",
