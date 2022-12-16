@@ -73,6 +73,21 @@ case object FeedbackMissingCalculationId extends CalculationIdDetails {
 
 case object FeedbackFromRDS extends CalculationIdDetails {
   override val calculationId = "666690b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "a665c0b4-06e3-4fef-a555-16fd0877dc7c"
+//  override val feedbackId = "a665c0b4-06e3-4fef-a555-16fd0877dc7c"
+  override val feedbackId = "b365c0b4-06e3-4fef-a555-16fd0877dc7c"
+  override val correlationId = "mfht938957jfjf845jgjf999"
+}
+
+case object FeedbackHttp201ResponseCode204 extends CalculationIdDetails {
+  override val calculationId = "620490b4-06e3-4fef-a555-6fd0877dc7ca"
+  //  override val feedbackId = "a665c0b4-06e3-4fef-a555-16fd0877dc7c"
+  override val feedbackId = "c204c0b4-06e3-4fef-a555-16fd0877dc7c"
+  override val correlationId = "mfht938957jfjf845jgjf999"
+}
+
+case object FeedbackHttp201ResponseCode404 extends CalculationIdDetails {
+  override val calculationId = "640490b4-06e3-4fef-a555-6fd0877dc7ca"
+  //  override val feedbackId = "a665c0b4-06e3-4fef-a555-16fd0877dc7c"
+  override val feedbackId = "c404c0b4-06e3-4fef-a555-16fd0877dc7c"
   override val correlationId = "mfht938957jfjf845jgjf999"
 }

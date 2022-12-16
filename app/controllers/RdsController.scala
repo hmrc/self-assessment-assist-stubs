@@ -17,7 +17,7 @@
 package controllers
 
 import common.StubResource
-import models.{CalculationIdDetails, FeedbackFive, FeedbackForDefaultResponse, FeedbackFour, FeedbackFromRDS, FeedbackInvalidCalculationId, FeedbackMissingCalculationId, FeedbackOne, FeedbackThree, FeedbackTwo, RdsRequest}
+import models.{CalculationIdDetails, FeedbackFive, FeedbackForDefaultResponse, FeedbackFour, FeedbackFromRDS, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackInvalidCalculationId, FeedbackMissingCalculationId, FeedbackOne, FeedbackThree, FeedbackTwo, RdsRequest}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.http.BadRequestException
@@ -40,7 +40,9 @@ class RdsController @Inject()(cc: ControllerComponents)
     FeedbackFive.calculationId -> FeedbackFive,
     FeedbackInvalidCalculationId.calculationId -> FeedbackInvalidCalculationId,
     FeedbackMissingCalculationId.calculationId -> FeedbackMissingCalculationId,
-    FeedbackFromRDS.calculationId -> FeedbackFromRDS
+    FeedbackFromRDS.calculationId -> FeedbackFromRDS,
+    FeedbackHttp201ResponseCode204.calculationId -> FeedbackHttp201ResponseCode204,
+    FeedbackHttp201ResponseCode404.calculationId -> FeedbackHttp201ResponseCode404
   ).withDefaultValue(FeedbackForDefaultResponse)
 
   //below store is used to find feedback and correlation if mapping while accepting acknowledge request
@@ -53,7 +55,9 @@ class RdsController @Inject()(cc: ControllerComponents)
     FeedbackInvalidCalculationId.feedbackId-> FeedbackInvalidCalculationId,
     FeedbackForDefaultResponse.feedbackId -> FeedbackForDefaultResponse,
     FeedbackMissingCalculationId.feedbackId -> FeedbackMissingCalculationId,
-    FeedbackFromRDS.calculationId -> FeedbackFromRDS
+    FeedbackFromRDS.feedbackId -> FeedbackFromRDS,
+    FeedbackHttp201ResponseCode204.feedbackId -> FeedbackHttp201ResponseCode204,
+    FeedbackHttp201ResponseCode404.feedbackId -> FeedbackHttp201ResponseCode404
   )
 
   val error =
@@ -114,6 +118,7 @@ class RdsController @Inject()(cc: ControllerComponents)
       val statusJson = rdsAcknowledgeRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           try {
+            logger.info(s"======checking key ${rdsRequest.feedbackId} in $feedbackIdAndCorrelationIdMapping======")
             val fb = feedbackIdAndCorrelationIdMapping.contains(rdsRequest.feedbackId)
             val feedbackDetails = feedbackIdAndCorrelationIdMapping(rdsRequest.feedbackId)
             val correlationId = feedbackDetails.correlationId
