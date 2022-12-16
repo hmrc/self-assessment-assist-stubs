@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package config
+package utils
 
+import org.apache.commons.codec.binary.Base64
+import org.apache.commons.codec.digest.DigestUtils
+import play.api.libs.json.{JsValue, Json}
+
+import java.nio.charset.StandardCharsets
 import javax.inject.{Inject, Singleton}
-import play.api.Configuration
 
 @Singleton
-class AppConfig @Inject()(config: Configuration) {
+class HashUtil @Inject()() {
 
-  val appName: String = config.get[String]("appName")
+  def encode(value: String): String =
+    Base64.encodeBase64String(value.getBytes(StandardCharsets.UTF_8))
+  def decode(payload: String): JsValue =
+    Json.parse(new String(Base64.decodeBase64(payload)))
+  def getSha256Hex(value: String): String = DigestUtils.sha256Hex(value)
 
 }
+

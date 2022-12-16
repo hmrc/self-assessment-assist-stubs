@@ -16,9 +16,9 @@
 
 package controllers
 
+import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import utils.Logging
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
@@ -36,7 +36,7 @@ import scala.concurrent.Future
 
 @Singleton()
 class AssessmentController @Inject()(cc: ControllerComponents)
-  extends BackendController(cc) with Logging{
+  extends BackendController(cc) with Logging {
 
   def generate(): Action[AnyContent] = Action.async {
     logger.info(s"======Invoked AssessmentController======")
