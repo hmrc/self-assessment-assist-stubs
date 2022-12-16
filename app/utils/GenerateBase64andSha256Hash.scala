@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package config
+package utils
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
+object GenerateBase64andSha256Hash {
 
-@Singleton
-class AppConfig @Inject()(config: Configuration) {
+  // Use this to quickly generate the payload data and checksum.
+  def main( args:Array[String]): Unit = {
 
-  val appName: String = config.get[String]("appName")
+    val hashUtil: HashUtil = new HashUtil
+    val payload = "{\"reportId\":\"a365c0b4-06e3-4fef-a555-16fd0877dc7c\"}"
+
+    hashUtil.encode(payload)
+    hashUtil.getSha256Hex(payload)
+
+    ()
+  }
 
 }

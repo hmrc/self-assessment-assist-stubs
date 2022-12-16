@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-package utils
+package base
 
-import play.api.Logger
+/*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ */
 
-trait Logging {
-  lazy val logger: Logger = Logger(this.getClass)
-}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+
+abstract class SpecBase extends AnyWordSpec with Matchers with GuiceOneServerPerSuite with BeforeAndAfterEach

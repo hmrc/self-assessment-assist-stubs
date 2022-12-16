@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-package config
+package utils
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
+import org.apache.commons.codec.binary.Base64
+import play.api.libs.json._
 
-@Singleton
-class AppConfig @Inject()(config: Configuration) {
+import scala.io.Source
 
-  val appName: String = config.get[String]("appName")
+object JsonUtils {
 
+  def jsonFromFile(path: String): JsValue = {
+    val resource = Source.fromURL(getClass.getResource(path))
+    val json = Json.parse(resource.mkString)
+    resource.close()
+    json
+  }
+
+  def base64JsonFromFile(path: String): String = {
+    val submissionPayload = jsonFromFile(path)
+    Base64.encodeBase64String(Json.toBytes(submissionPayload))
+  }
 }
