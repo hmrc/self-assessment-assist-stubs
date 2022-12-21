@@ -14,86 +14,40 @@
  * limitations under the License.
  */
 
-//package controllers
-//
-//import play.api.libs.json.{JsValue, Json}
-//import play.api.mvc.{Action, ControllerComponents}
-//import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-//
-//import java.util.UUID
-//import javax.inject.{Inject, Singleton}
-//import scala.concurrent.Future
-//
-//@Singleton()
-//class NrsController @Inject()(cc: ControllerComponents)
-//  extends BackendController(cc) with Logging{
-//
-//  def submit(): Action[JsValue] = Action.async(parse.json) {
-//    request => {
-//      def requestSuccesfulFake = {
-//        val uuid = new UUID(0, 1)
-//        val retSubmissionSuccesful =
-//          s"""{
-//             |"reportSubmissionId": "${uuid}"
-//             |}""".stripMargin
-//        val jsonParse = (Json.parse(retSubmissionSuccesful))
-//        jsonParse
-//      }
-//    logger.info(s"NRS request received")
-//      Future.successful(Ok(requestSuccesfulFake))
-//    }
-//  }
-//
-//}
-//
-
-
-/*
- * Copyright 2022 HM Revenue & Customs
- *
- */
-
 package controllers
 
 import controllers.actions.HeaderValidatorAction
 import models.NRSSubmission
-import org.apache.commons.codec.binary.Base64
-import org.apache.commons.codec.digest.DigestUtils
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import utils.HashUtil
 
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
 class NrsController @Inject()(headerValidator: HeaderValidatorAction,
+                              hashUtil: HashUtil,
                               cc: ControllerComponents
-                             )
+                             )(implicit ec: ExecutionContext)
   extends BackendController(cc) with Logging {
 
   private final val ChecksumFailed = new Status(419)
 
-  def requestSuccesfulFake = {
-    val uuid = new UUID(0, 1)
-    val retSubmissionSuccesful =
-      s"""{
-         |"nrSubmissionId": "${uuid}"
-         |}""".stripMargin
-    val jsonParse = (Json.parse(retSubmissionSuccesful))
-    jsonParse
+  private def requestSuccessfulFake: JsValue = {
+    val uuid = UUID.randomUUID()
+    Json.obj("nrSubmissionId" -> s"$uuid")
   }
-
 
   def submit(): Action[JsValue] = {
     headerValidator.async(parse.json) { implicit request: Request[JsValue] =>
       Future {
         request.body.validate[NRSSubmission] match {
           case JsSuccess(value, _) =>
-            if (validateChecksum(value)) {
+            if (validChecksum(value)) {
               logger.debug(s"[StubNonRepudiationServiceController] Payload received: ${request.body}")
               getReportId(value) match {
                 case "a365c0b4-06e3-4fef-a555-16fd08770400" => BadRequest
@@ -101,8 +55,8 @@ class NrsController @Inject()(headerValidator: HeaderValidatorAction,
                 case "a365c0b4-06e3-4fef-a555-16fd08770502" => BadGateway
                 case "a365c0b4-06e3-4fef-a555-16fd08770503" => ServiceUnavailable
                 case "a365c0b4-06e3-4fef-a555-16fd08770504" => GatewayTimeout
-                case "a365c0b4-06e3-4fef-a555-16fd08770202" => Accepted(requestSuccesfulFake)
-                case _ => Accepted(requestSuccesfulFake)
+                case "a365c0b4-06e3-4fef-a555-16fd08770202" => Accepted(requestSuccessfulFake)
+                case _ => Accepted(requestSuccessfulFake)
               }
             } else {
               ChecksumFailed
@@ -113,18 +67,14 @@ class NrsController @Inject()(headerValidator: HeaderValidatorAction,
     }
   }
 
-  private def validateChecksum(submission: NRSSubmission): Boolean = {
-    val payload = decodePayload(submission).toString
-    val hash = DigestUtils.sha256Hex(payload)
+  private def validChecksum(submission: NRSSubmission): Boolean = {
+    val payload = Json.stringify(hashUtil.decode(submission.payload))
+    val hash = hashUtil.getSha256Hex(payload)
 
     submission.metadata.payloadSha256Checksum == hash
   }
 
   private def getReportId(submission: NRSSubmission): String = {
-    (decodePayload(submission) \ "reportId").as[String]
-  }
-
-  private def decodePayload(submission: NRSSubmission): JsValue = {
-    Json.parse(new String(Base64.decodeBase64(submission.payload)))
+    (hashUtil.decode(submission.payload) \ "reportId").as[String]
   }
 }

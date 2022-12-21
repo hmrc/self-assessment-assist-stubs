@@ -36,7 +36,7 @@ import scala.concurrent.Future
 
 @Singleton()
 class AssessmentController @Inject()(cc: ControllerComponents)
-  extends BackendController(cc) with Logging{
+  extends BackendController(cc) with Logging {
 
   def generate(): Action[AnyContent] = Action.async {
     logger.info(s"======Invoked AssessmentController======")

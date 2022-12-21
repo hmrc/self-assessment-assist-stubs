@@ -24,10 +24,4 @@ class AppConfig @Inject()(config: Configuration) {
 
   val appName: String = config.get[String]("appName")
 
-  val nrsOldBehaviour = config.get[Option[Boolean]]("microservice.services.non-repudiation.nrsOldBehaviour").getOrElse(true)
-
-  val auditingEnabled: Boolean = config.get[Boolean]("auditing.enabled")
-  val graphiteHost: String =
-    config.get[String]("microservice.metrics.graphite.host")
-
 }
