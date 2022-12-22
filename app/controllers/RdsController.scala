@@ -139,7 +139,6 @@ class RdsController @Inject()(cc: ControllerComponents)
       val statusJson = rdsAcknowledgeRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           try {
-            logger.info(s"======checking key ${rdsRequest.feedbackId} in $feedbackIdAndCorrelationIdMapping======")
             val fb = feedbackIdAndCorrelationIdMapping.contains(rdsRequest.feedbackId)
             val feedbackDetails = feedbackIdAndCorrelationIdMapping(rdsRequest.feedbackId)
             val correlationId = feedbackDetails.correlationId
