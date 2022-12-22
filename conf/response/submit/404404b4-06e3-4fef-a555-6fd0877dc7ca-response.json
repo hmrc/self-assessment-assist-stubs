@@ -99,7 +99,7 @@
     },
     {
       "name": "responseMessage",
-      "value": "No feedback applicable"
+      "value": "This is RDS unavailable scenario test, the request should fail and this body should not be generated"
     }
   ]
 }

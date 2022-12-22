@@ -17,7 +17,7 @@
 package controllers
 
 import common.StubResource
-import models.{CalculationIdDetails, FeedbackFive, FeedbackForDefaultResponse, FeedbackFour, FeedbackFromRDS, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackInvalidCalculationId, FeedbackMissingCalculationId, FeedbackOne, FeedbackThree, FeedbackTwo, RdsRequest}
+import models.{CalculationIdDetails, FeedbackFiveHttp201ResponseCode201, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackInvalidCalculationId, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsRequest}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.http.BadRequestException
@@ -34,29 +34,29 @@ class RdsController @Inject()(cc: ControllerComponents)
 
   //below store is used for generate report to map calculation id to feedback
   private val calcIdMappings: Map[String, CalculationIdDetails] = Map(
-    FeedbackOne.calculationId -> FeedbackOne,
-    FeedbackTwo.calculationId -> FeedbackTwo,
-    FeedbackThree.calculationId -> FeedbackThree,
-    FeedbackFour.calculationId -> FeedbackFour,
-    FeedbackFive.calculationId -> FeedbackFive,
+    FeedbackOneHttp201ResponseCode201.calculationId -> FeedbackOneHttp201ResponseCode201,
+    FeedbackTwoHttp201ResponseCode201.calculationId -> FeedbackTwoHttp201ResponseCode201,
+    FeedbackThreeHttp201ResponseCode201.calculationId -> FeedbackThreeHttp201ResponseCode201,
+    FeedbackFourHttp201ResponseCode201.calculationId -> FeedbackFourHttp201ResponseCode201,
+    FeedbackFiveHttp201ResponseCode201.calculationId -> FeedbackFiveHttp201ResponseCode201,
     FeedbackInvalidCalculationId.calculationId -> FeedbackInvalidCalculationId,
     FeedbackMissingCalculationId.calculationId -> FeedbackMissingCalculationId,
-    FeedbackFromRDS.calculationId -> FeedbackFromRDS,
+    FeedbackFromRDSDevHttp201ResponseCode201.calculationId -> FeedbackFromRDSDevHttp201ResponseCode201,
     FeedbackHttp201ResponseCode204.calculationId -> FeedbackHttp201ResponseCode204,
     FeedbackHttp201ResponseCode404.calculationId -> FeedbackHttp201ResponseCode404
   ).withDefaultValue(FeedbackForDefaultResponse)
 
   //below store is used to find feedback and correlation if mapping while accepting acknowledge request
   private val feedbackIdAndCorrelationIdMapping: Map[String, CalculationIdDetails] = Map(
-    FeedbackOne.feedbackId -> FeedbackOne,
-    FeedbackTwo.feedbackId -> FeedbackTwo,
-    FeedbackThree.feedbackId -> FeedbackThree,
-    FeedbackFour.feedbackId -> FeedbackFour,
-    FeedbackFive.feedbackId -> FeedbackFive,
+    FeedbackOneHttp201ResponseCode201.feedbackId -> FeedbackOneHttp201ResponseCode201,
+    FeedbackTwoHttp201ResponseCode201.feedbackId -> FeedbackTwoHttp201ResponseCode201,
+    FeedbackThreeHttp201ResponseCode201.feedbackId -> FeedbackThreeHttp201ResponseCode201,
+    FeedbackFourHttp201ResponseCode201.feedbackId -> FeedbackFourHttp201ResponseCode201,
+    FeedbackFiveHttp201ResponseCode201.feedbackId -> FeedbackFiveHttp201ResponseCode201,
     FeedbackInvalidCalculationId.feedbackId-> FeedbackInvalidCalculationId,
     FeedbackForDefaultResponse.feedbackId -> FeedbackForDefaultResponse,
     FeedbackMissingCalculationId.feedbackId -> FeedbackMissingCalculationId,
-    FeedbackFromRDS.feedbackId -> FeedbackFromRDS,
+    FeedbackFromRDSDevHttp201ResponseCode201.feedbackId -> FeedbackFromRDSDevHttp201ResponseCode201,
     FeedbackHttp201ResponseCode204.feedbackId -> FeedbackHttp201ResponseCode204,
     FeedbackHttp201ResponseCode404.feedbackId -> FeedbackHttp201ResponseCode404
   )
@@ -77,6 +77,21 @@ class RdsController @Inject()(cc: ControllerComponents)
        |  }
        |""".stripMargin
 
+  private val rdsNotAvailableError: String =
+    s"""
+       |{
+       |  "code": "NOT_FOUND",
+       |  "message": "Scenario to mimic non availabilty of RDS"
+       |  }
+       |""".stripMargin
+
+  private val rdsRequestTimeoutError: String =
+    s"""
+       |{
+       |  "code": "REQUEST_TIMEOUT",
+       |  "message": "RDS request timeout"
+       |  }
+       |""".stripMargin
 
   def generateReport(): Action[JsValue] = Action.async(parse.json) {
     request: Request[JsValue] => {
@@ -87,21 +102,26 @@ class RdsController @Inject()(cc: ControllerComponents)
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           val fraudRiskReportReasons = rdsRequest.fraudRiskReportReasons
-          val calculationIdDetails = calcIdMappings(rdsRequest.calculationId.toString)
-
-          try {
-            val response =
-                loadSubmitResponseTemplate(
-                  calculationIdDetails.calculationId,
-                  calculationIdDetails.feedbackId,
-                  calculationIdDetails.correlationId
-                )
-            logger.info(s"sending response")
-            (CREATED, response)
-          } catch {
-            case _: FileNotFoundException => (NOT_FOUND, Json.parse(error))
-            case _: BadRequestException => (BAD_REQUEST, Json.parse(invalidBodyError))
-            case NonFatal(_) => (INTERNAL_SERVER_ERROR, Json.parse(error))
+          rdsRequest.calculationId.toString match {
+            case "640090b4-06e3-4fef-a555-6fd0877dc7ca" => (BAD_REQUEST,Json.parse(invalidBodyError))
+            case "404404b4-06e3-4fef-a555-6fd0877dc7ca" => (NOT_FOUND,Json.parse(rdsNotAvailableError))
+            case "408408b4-06e3-4fef-a555-6fd0877dc7ca" => (REQUEST_TIMEOUT,Json.parse(rdsNotAvailableError))
+            case _ =>
+              val calculationIdDetails = calcIdMappings(rdsRequest.calculationId.toString)
+              try {
+                val response =
+                  loadSubmitResponseTemplate(
+                    calculationIdDetails.calculationId,
+                    calculationIdDetails.feedbackId,
+                    calculationIdDetails.correlationId
+                  )
+                logger.info(s"sending response")
+                (CREATED, response)
+              } catch {
+                case _: FileNotFoundException => (NOT_FOUND, Json.parse(error))
+                case _: BadRequestException => (BAD_REQUEST, Json.parse(invalidBodyError))
+                case NonFatal(_) => (INTERNAL_SERVER_ERROR, Json.parse(error))
+              }
           }
 
         case JsError(_) => (BAD_REQUEST, Json.parse(invalidBodyError))

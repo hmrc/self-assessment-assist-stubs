@@ -95,11 +95,11 @@
     },
     {
       "name": "responseCode",
-      "value": "404"
+      "value": "408"
     },
     {
       "name": "responseMessage",
-      "value": "No feedback applicable"
+      "value": "This is Timeout scenario, should fail before this body"
     }
   ]
 }
