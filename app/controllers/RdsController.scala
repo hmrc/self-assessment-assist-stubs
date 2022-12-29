@@ -139,6 +139,7 @@ class RdsController @Inject()(cc: ControllerComponents)
       val statusJson = rdsAcknowledgeRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           try {
+            logger.info(s"====== success path======")
             val fb = feedbackIdAndCorrelationIdMapping.contains(rdsRequest.feedbackId)
             val feedbackDetails = feedbackIdAndCorrelationIdMapping(rdsRequest.feedbackId)
             val correlationId = feedbackDetails.correlationId
@@ -147,7 +148,8 @@ class RdsController @Inject()(cc: ControllerComponents)
               val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "202")
               ( CREATED , response)
             } else {
-              (NOT_FOUND, Json.parse(invalidBodyError))
+              logger.info(s"====== returning not found ======")
+              (BAD_REQUEST, Json.parse(invalidBodyError))
             }
           } catch {
             case e: FileNotFoundException =>
