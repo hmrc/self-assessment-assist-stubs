@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,4 +86,10 @@ case object FeedbackHttp201ResponseCode404 extends CalculationIdDetails {
   override val calculationId = "640490b4-06e3-4fef-a555-6fd0877dc7ca"
   override val feedbackId = "c404c0b4-06e3-4fef-a555-16fd0877dc7c"
   override val correlationId = "mfht938957jfjf845jgjf999"
+}
+
+case object FeedbackSevenNRSFailureHttp201ResponseCode201 extends CalculationIdDetails {
+  override val calculationId = "777790b4-06e3-4fef-a555-6fd0877dc7ca"
+  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770500"
+  override val correlationId = "a5fht738957jfjf845jgjf777"
 }
