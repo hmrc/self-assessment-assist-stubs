@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ class NrsController @Inject()(headerValidator: HeaderValidatorAction,
   def submit(): Action[JsValue] = {
     headerValidator.async(parse.json) { implicit request: Request[JsValue] =>
       Future {
+        logger.info(s"NRS request is ${request.body}")
         request.body.validate[NRSSubmission] match {
           case JsSuccess(value, _) =>
             if (validChecksum(value)) {

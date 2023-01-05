@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package controllers
 
 import common.StubResource
-import models.{CalculationIdDetails, FeedbackFiveHttp201ResponseCode201, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackInvalidCalculationId, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsRequest}
+import models.{CalculationIdDetails, FeedbackFiveHttp201ResponseCode201, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackInvalidCalculationId, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsRequest}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.http.BadRequestException
@@ -43,7 +43,9 @@ class RdsController @Inject()(cc: ControllerComponents)
     FeedbackMissingCalculationId.calculationId -> FeedbackMissingCalculationId,
     FeedbackFromRDSDevHttp201ResponseCode201.calculationId -> FeedbackFromRDSDevHttp201ResponseCode201,
     FeedbackHttp201ResponseCode204.calculationId -> FeedbackHttp201ResponseCode204,
-    FeedbackHttp201ResponseCode404.calculationId -> FeedbackHttp201ResponseCode404
+    FeedbackHttp201ResponseCode404.calculationId -> FeedbackHttp201ResponseCode404,
+    FeedbackSevenNRSFailureHttp201ResponseCode201.calculationId -> FeedbackSevenNRSFailureHttp201ResponseCode201
+
   ).withDefaultValue(FeedbackForDefaultResponse)
 
   //below store is used to find feedback and correlation if mapping while accepting acknowledge request
@@ -58,7 +60,8 @@ class RdsController @Inject()(cc: ControllerComponents)
     FeedbackMissingCalculationId.feedbackId -> FeedbackMissingCalculationId,
     FeedbackFromRDSDevHttp201ResponseCode201.feedbackId -> FeedbackFromRDSDevHttp201ResponseCode201,
     FeedbackHttp201ResponseCode204.feedbackId -> FeedbackHttp201ResponseCode204,
-    FeedbackHttp201ResponseCode404.feedbackId -> FeedbackHttp201ResponseCode404
+    FeedbackHttp201ResponseCode404.feedbackId -> FeedbackHttp201ResponseCode404,
+    FeedbackSevenNRSFailureHttp201ResponseCode201.feedbackId -> FeedbackSevenNRSFailureHttp201ResponseCode201
   )
 
   private val error: String =
@@ -139,6 +142,7 @@ class RdsController @Inject()(cc: ControllerComponents)
       val statusJson = rdsAcknowledgeRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           try {
+            logger.info(s"====== success path======")
             val fb = feedbackIdAndCorrelationIdMapping.contains(rdsRequest.feedbackId)
             val feedbackDetails = feedbackIdAndCorrelationIdMapping(rdsRequest.feedbackId)
             val correlationId = feedbackDetails.correlationId
@@ -147,7 +151,8 @@ class RdsController @Inject()(cc: ControllerComponents)
               val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "202")
               ( CREATED , response)
             } else {
-              (NOT_FOUND, Json.parse(invalidBodyError))
+              logger.info(s"====== returning not found ======")
+              (BAD_REQUEST, Json.parse(invalidBodyError))
             }
           } catch {
             case e: FileNotFoundException =>
