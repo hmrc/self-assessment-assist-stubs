@@ -30,6 +30,13 @@ class CipFraudController @Inject()(cc: ControllerComponents)
 
   val retSubmissionSuccesful =
     s"""{
+       |  "riskScore": 0,
+       |  "riskCorrelationId": "123e4567-e89b-12d3-a456-426614174000",
+       |  "reasons": [
+       |    "UTR 0128925978251 is 3 hops from a something risky. The average UTR is 4.7 hops from something risky.",
+       |    "DEVICE_ID e171dda8-bd00-415b-962b-b169b8b777a4 has been previously marked as Fraud. The average DEVICE_ID is 5.1 hops from something risky",
+       |    "NINO AB182561B is 2 hops from something risky. The average NINO is 3.1 hops from something risky."
+       |  ]
        |}""".stripMargin
 
   def submitFraudInfo(): Action[JsValue] = Action(parse.json) {
