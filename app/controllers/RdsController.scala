@@ -99,9 +99,7 @@ class RdsController @Inject()(cc: ControllerComponents)
   def generateReport(): Action[JsValue] = Action.async(parse.json) {
     request: Request[JsValue] => {
       logger.info(s"======Invoked RDS stub for report generation======")
-      //logger.info(s"content is ${request.body}")
       val rdsRequestValidationResult = request.body.validate[RdsRequest]
-      logger.info(s"validation result  is ${rdsRequestValidationResult}")
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           val fraudRiskReportReasons = rdsRequest.fraudRiskReportReasons
