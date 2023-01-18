@@ -148,6 +148,10 @@
     {
       "name": "Created_dttm",
       "value": "2022-12-05T17:08:25.857"
+    },
+    {
+      "name": "calculationTimestamp",
+      "value": "2019-02-15T09:35:15.094Z"
     }
   ]
 }

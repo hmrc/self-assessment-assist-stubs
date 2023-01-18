@@ -100,6 +100,10 @@
     {
       "name": "responseMessage",
       "value": "This is RDS unavailable scenario test, the request should fail and this body should not be generated"
+    },
+    {
+      "name": "calculationTimestamp",
+      "value": "2019-02-15T09:35:15.094Z"
     }
   ]
 }
