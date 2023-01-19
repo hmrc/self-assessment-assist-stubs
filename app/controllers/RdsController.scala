@@ -17,7 +17,7 @@
 package controllers
 
 import common.StubResource
-import models.{CalculationIdDetails, FeedbackFiveHttp201ResponseCode201, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackInvalidCalculationId, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsRequest}
+import models.{CalculationIdDetails, FeedbackAcknowledgeForbiddenHttp201ResponseCode401, FeedbackFiveHttp201ResponseCode201, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackInvalidCalculationId, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsRequest}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.http.BadRequestException
@@ -62,7 +62,7 @@ class RdsController @Inject()(cc: ControllerComponents)
     FeedbackHttp201ResponseCode204.feedbackId -> FeedbackHttp201ResponseCode204,
     FeedbackHttp201ResponseCode404.feedbackId -> FeedbackHttp201ResponseCode404,
     FeedbackSevenNRSFailureHttp201ResponseCode201.feedbackId -> FeedbackSevenNRSFailureHttp201ResponseCode201
-  )
+  ).withDefaultValue(FeedbackAcknowledgeForbiddenHttp201ResponseCode401)
 
   private val error: String =
     s"""
@@ -75,7 +75,7 @@ class RdsController @Inject()(cc: ControllerComponents)
   private val invalidBodyError: String =
     s"""
        |{
-       |  "code": "BAD_REQUEST",
+       |  "code": "FORBIDDEN",
        |  "message": "Invalid feedback/correlationId"
        |  }
        |""".stripMargin
@@ -141,16 +141,16 @@ class RdsController @Inject()(cc: ControllerComponents)
         case JsSuccess(rdsRequest, _) =>
           try {
             logger.info(s"====== success path======")
-            val fb = feedbackIdAndCorrelationIdMapping.contains(rdsRequest.feedbackId)
-            val feedbackDetails = feedbackIdAndCorrelationIdMapping(rdsRequest.feedbackId)
-            val correlationId = feedbackDetails.correlationId
-            if  ( fb &&
-                  correlationId.equals(rdsRequest.correlationId) ) {
-              val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "202")
+            def feedbackDetails = feedbackIdAndCorrelationIdMapping(rdsRequest.feedbackId)
+            def correlationId = feedbackDetails.correlationId
+            if  (feedbackDetails.feedbackId.equals(rdsRequest.feedbackId) && correlationId.equals(rdsRequest.correlationId) ) {
+              val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "202",s"conf/response/acknowledge/feedback-ack.json")
               ( CREATED , response)
             } else {
-              logger.info(s"====== returning not found ======")
-              (BAD_REQUEST, Json.parse(invalidBodyError))
+              logger.info(s"====== combination not found ======")
+              val fileName = s"conf/response/acknowledge/ack-resp-invalid-report-correlationid-combination.json"
+              val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "401",fileName)
+              (CREATED, response)
             }
           } catch {
             case e: FileNotFoundException =>

@@ -52,8 +52,7 @@ trait StubResource extends Results with ContentTypes with Logging {
     parsedContent
   }
 
-  def loadAckResponseTemplate(replaceFeedbackId: String, replaceNino: String, replaceResponseCode:String) = {
-    val fileName = s"conf/response/acknowledge/feedback-ack.json"
+  def loadAckResponseTemplate(replaceFeedbackId: String, replaceNino: String, replaceResponseCode:String,fileName:String) = {
     val templateCotent =
       findResource(fileName).map(
         _.replace("replaceFeedbackId", replaceFeedbackId)

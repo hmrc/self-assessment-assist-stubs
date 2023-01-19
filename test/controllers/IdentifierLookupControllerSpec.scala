@@ -18,15 +18,12 @@ package controllers
 
 import base.SpecBase
 import controllers.actions.HeaderValidator
-import play.api.http.Status.{ACCEPTED, BAD_REQUEST}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import utils.JsonUtils.jsonFromFile
 
 import scala.concurrent.Future
-import scala.util.matching.Regex
 
 class IdentifierLookupControllerSpec extends SpecBase with HeaderValidator {
 
