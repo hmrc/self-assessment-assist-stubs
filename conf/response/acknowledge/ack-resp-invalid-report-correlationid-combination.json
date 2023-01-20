@@ -1,0 +1,33 @@
+{
+  "links": [],
+  "version": 2,
+  "moduleId": "HMRC_ASSIST_ITSA_FINSUB_FEEDBACK_ACK",
+  "stepId": "execute",
+  "executionState": "completed",
+  "metadata": {
+    "module_id": "HMRC_ASSIST_ITSA_FINSUB_FEEDBACK_ACK",
+    "step_id": "execute"
+  },
+  "outputs": [
+    {
+      "name": "createdDttm",
+      "value": "2023-01-19T18:05:26.612"
+    },
+    {
+      "name": "feedbackId",
+      "value": "replaceFeedbackId"
+    },
+    {
+      "name": "nino",
+      "value": "replaceNino"
+    },
+    {
+      "name": "responseCode",
+      "value": "replaceResponseCode"
+    },
+    {
+      "name": "responseMessage",
+      "value": "The validation for feedback ID replaceFeedbackId did not match our records"
+    }
+  ]
+}
