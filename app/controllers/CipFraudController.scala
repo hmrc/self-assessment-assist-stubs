@@ -16,12 +16,15 @@
 
 package controllers
 
+import models.FraudRiskRequest
 import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 
 @Singleton()
@@ -39,11 +42,24 @@ class CipFraudController @Inject()(cc: ControllerComponents)
        |  ]
        |}""".stripMargin
 
-  def submitFraudInfo(): Action[JsValue] = Action(parse.json) {
-    request => {
-      logger.info(s"======Invoked CipFraudController======")
-      Ok(Json.parse(retSubmissionSuccesful))
-    }
+  val failureResponse =
+    s"""{"nino":["Invalid nino, expected a string with 9 digits test failure scenario"]}""".stripMargin
+
+  def submitFraudInfo(): Action[JsValue] = Action.async(parse.json) {
+    implicit request =>
+      Future {
+        logger.info(s"======Invoked CipFraudController======")
+        request.body.validate[FraudRiskRequest] match {
+          case JsSuccess(value, _) => value.nino match {
+            case Some("AA088213C") => InternalServerError
+            case Some("JL530692C") =>
+              logger.error(s"======CipFraudController returning error to mimic failure======")
+              BadRequest(failureResponse)
+            case _ => Ok(Json.parse(retSubmissionSuccesful))
+          }
+          case JsError(errors) => BadRequest(errors.toString())
+        }
+      }
   }
 }
 
