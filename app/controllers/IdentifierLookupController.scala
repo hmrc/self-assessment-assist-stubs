@@ -20,6 +20,7 @@ import play.api.Logging
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import utils.CommonData.ninoMtdIdPairs
 
 import javax.inject.{Inject, Singleton}
 
@@ -33,14 +34,6 @@ class IdentifierLookupController @Inject()(cc: ControllerComponents)
        |  "mtdbsa": "$mtditid"
        |}""".stripMargin
   }
-
-  val ninoMtdIdPairs = Map(
-    "NJ070957A" -> "XFIT00618912478",
-    "MS475730B" -> "XCIT00840041559",
-    "WS504231C" -> "XBIT00219774624",
-    "XT181899C" -> "XDIT00734159815",
-    "JL530692C" -> "XQIT00731178134"
-  )
 
   def lookup(nino: String): Action[AnyContent] = Action {
     request => {
