@@ -17,11 +17,12 @@
 package controllers
 
 import common.StubResource
-import models.{CalculationIdDetails, FeedbackAcknowledgeForbiddenHttp201ResponseCode401, FeedbackFiveHttp201ResponseCode201, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackInvalidCalculationId, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsRequest}
+import models.{CalculationIdDetails, FeedbackAcknowledgeForbiddenHttp201ResponseCode401, FeedbackFiveHttp201ResponseCode201, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackReqWithInvalidCalculationId, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsRequest}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.http.BadRequestException
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import utils.CommonData.{calcIdMappings, feedbackIdAndCorrelationIdMapping}
 
 import java.io.FileNotFoundException
 import javax.inject.{Inject, Singleton}
@@ -32,37 +33,7 @@ import scala.util.control.NonFatal
 class RdsController @Inject()(cc: ControllerComponents)
   extends BackendController(cc) with StubResource {
 
-  //below store is used for generate report to map calculation id to feedback
-  private val calcIdMappings: Map[String, CalculationIdDetails] = Map(
-    FeedbackOneHttp201ResponseCode201.calculationId -> FeedbackOneHttp201ResponseCode201,
-    FeedbackTwoHttp201ResponseCode201.calculationId -> FeedbackTwoHttp201ResponseCode201,
-    FeedbackThreeHttp201ResponseCode201.calculationId -> FeedbackThreeHttp201ResponseCode201,
-    FeedbackFourHttp201ResponseCode201.calculationId -> FeedbackFourHttp201ResponseCode201,
-    FeedbackFiveHttp201ResponseCode201.calculationId -> FeedbackFiveHttp201ResponseCode201,
-    FeedbackInvalidCalculationId.calculationId -> FeedbackInvalidCalculationId,
-    FeedbackMissingCalculationId.calculationId -> FeedbackMissingCalculationId,
-    FeedbackFromRDSDevHttp201ResponseCode201.calculationId -> FeedbackFromRDSDevHttp201ResponseCode201,
-    FeedbackHttp201ResponseCode204.calculationId -> FeedbackHttp201ResponseCode204,
-    FeedbackHttp201ResponseCode404.calculationId -> FeedbackHttp201ResponseCode404,
-    FeedbackSevenNRSFailureHttp201ResponseCode201.calculationId -> FeedbackSevenNRSFailureHttp201ResponseCode201
 
-  ).withDefaultValue(FeedbackForDefaultResponse)
-
-  //below store is used to find feedback and correlation if mapping while accepting acknowledge request
-  private val feedbackIdAndCorrelationIdMapping: Map[String, CalculationIdDetails] = Map(
-    FeedbackOneHttp201ResponseCode201.feedbackId -> FeedbackOneHttp201ResponseCode201,
-    FeedbackTwoHttp201ResponseCode201.feedbackId -> FeedbackTwoHttp201ResponseCode201,
-    FeedbackThreeHttp201ResponseCode201.feedbackId -> FeedbackThreeHttp201ResponseCode201,
-    FeedbackFourHttp201ResponseCode201.feedbackId -> FeedbackFourHttp201ResponseCode201,
-    FeedbackFiveHttp201ResponseCode201.feedbackId -> FeedbackFiveHttp201ResponseCode201,
-    FeedbackInvalidCalculationId.feedbackId-> FeedbackInvalidCalculationId,
-    FeedbackForDefaultResponse.feedbackId -> FeedbackForDefaultResponse,
-    FeedbackMissingCalculationId.feedbackId -> FeedbackMissingCalculationId,
-    FeedbackFromRDSDevHttp201ResponseCode201.feedbackId -> FeedbackFromRDSDevHttp201ResponseCode201,
-    FeedbackHttp201ResponseCode204.feedbackId -> FeedbackHttp201ResponseCode204,
-    FeedbackHttp201ResponseCode404.feedbackId -> FeedbackHttp201ResponseCode404,
-    FeedbackSevenNRSFailureHttp201ResponseCode201.feedbackId -> FeedbackSevenNRSFailureHttp201ResponseCode201
-  ).withDefaultValue(FeedbackAcknowledgeForbiddenHttp201ResponseCode401)
 
   private val error: String =
     s"""
@@ -99,6 +70,7 @@ class RdsController @Inject()(cc: ControllerComponents)
   def generateReport(): Action[JsValue] = Action.async(parse.json) {
     request: Request[JsValue] => {
       logger.info(s"======Invoked RDS stub for report generation======")
+      logger.info(s"RDS request ${request.body}")
       val rdsRequestValidationResult = request.body.validate[RdsRequest]
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>

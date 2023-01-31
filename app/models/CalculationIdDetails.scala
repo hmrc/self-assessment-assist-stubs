@@ -58,8 +58,8 @@ case object FeedbackForDefaultResponse extends CalculationIdDetails {
   override val correlationId = "g5fht738957jfjf845jgjf855"
 }
 
-case object FeedbackInvalidCalculationId extends CalculationIdDetails {
-  override val calculationId = "999990b4-06e3-4fef-a555-6fd0877dc7ca"
+case object FeedbackReqWithInvalidCalculationId extends CalculationIdDetails {
+  override val calculationId = "640090b4-06e3-4fef-a555-6fd0877dc7ca"
   override val feedbackId = "579800fe-06e3-4fef-a555-16fd0877dc7c"
   override val correlationId = "efht938957jfjf845jgjf999"
 }
@@ -97,5 +97,17 @@ case object FeedbackSevenNRSFailureHttp201ResponseCode201 extends CalculationIdD
 case object FeedbackAcknowledgeForbiddenHttp201ResponseCode401 extends CalculationIdDetails {
   override val calculationId = "740190b4-06e3-4fef-a555-6fd0877dc7ca"
   override val feedbackId = "f065r0b4-06e3-4fef-a555-16fd08770500"
+  override val correlationId = "a5fht738957jfjf845jgjf777"
+}
+
+case object RdsNotAvailable404 extends CalculationIdDetails {
+  override val calculationId = "404404b4-06e3-4fef-a555-6fd0877dc7ca"
+  override val feedbackId = "f065r0b4-06e3-4fef-a555-16fd04040500"
+  override val correlationId = "a5fht738957jfjf845jgjf777"
+}
+
+case object RdsTimeout408 extends CalculationIdDetails {
+  override val calculationId = "408408b4-06e3-4fef-a555-6fd0877dc7ca"
+  override val feedbackId = "f065r0b4-06e3-4fef-a555-16fd04080500"
   override val correlationId = "a5fht738957jfjf845jgjf777"
 }

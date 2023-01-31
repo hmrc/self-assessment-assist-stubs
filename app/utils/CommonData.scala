@@ -16,6 +16,8 @@
 
 package utils
 
+import models.{CalculationIdDetails, FeedbackAcknowledgeForbiddenHttp201ResponseCode401, FeedbackFiveHttp201ResponseCode201, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackReqWithInvalidCalculationId, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsNotAvailable404, RdsTimeout408}
+
 object CommonData {
   val ninoMtdIdPairs = Map(
     "NJ070957A" -> "XFIT00618912478",
@@ -25,4 +27,39 @@ object CommonData {
     "JL530692C" -> "XQIT00731178134",
     "AA088213C" -> "XQIT00731172134"
   )
+
+  //below store is used for generate report to map calculation id to feedback
+   val calcIdMappings: Map[String, CalculationIdDetails] = Map(
+    FeedbackOneHttp201ResponseCode201.calculationId -> FeedbackOneHttp201ResponseCode201,
+    FeedbackTwoHttp201ResponseCode201.calculationId -> FeedbackTwoHttp201ResponseCode201,
+    FeedbackThreeHttp201ResponseCode201.calculationId -> FeedbackThreeHttp201ResponseCode201,
+    FeedbackFourHttp201ResponseCode201.calculationId -> FeedbackFourHttp201ResponseCode201,
+    FeedbackFiveHttp201ResponseCode201.calculationId -> FeedbackFiveHttp201ResponseCode201,
+    FeedbackReqWithInvalidCalculationId.calculationId -> FeedbackReqWithInvalidCalculationId,
+    FeedbackMissingCalculationId.calculationId -> FeedbackMissingCalculationId,
+    FeedbackFromRDSDevHttp201ResponseCode201.calculationId -> FeedbackFromRDSDevHttp201ResponseCode201,
+    FeedbackHttp201ResponseCode204.calculationId -> FeedbackHttp201ResponseCode204,
+    FeedbackHttp201ResponseCode404.calculationId -> FeedbackHttp201ResponseCode404,
+    FeedbackSevenNRSFailureHttp201ResponseCode201.calculationId -> FeedbackSevenNRSFailureHttp201ResponseCode201,
+     RdsNotAvailable404.calculationId -> RdsNotAvailable404,
+     RdsTimeout408.calculationId -> RdsTimeout408
+  ).withDefaultValue(FeedbackForDefaultResponse)
+
+  //below store is used to find feedback and correlation if mapping while accepting acknowledge request
+   val feedbackIdAndCorrelationIdMapping: Map[String, CalculationIdDetails] = Map(
+    FeedbackOneHttp201ResponseCode201.feedbackId -> FeedbackOneHttp201ResponseCode201,
+    FeedbackTwoHttp201ResponseCode201.feedbackId -> FeedbackTwoHttp201ResponseCode201,
+    FeedbackThreeHttp201ResponseCode201.feedbackId -> FeedbackThreeHttp201ResponseCode201,
+    FeedbackFourHttp201ResponseCode201.feedbackId -> FeedbackFourHttp201ResponseCode201,
+    FeedbackFiveHttp201ResponseCode201.feedbackId -> FeedbackFiveHttp201ResponseCode201,
+    FeedbackReqWithInvalidCalculationId.feedbackId-> FeedbackReqWithInvalidCalculationId,
+    FeedbackForDefaultResponse.feedbackId -> FeedbackForDefaultResponse,
+    FeedbackMissingCalculationId.feedbackId -> FeedbackMissingCalculationId,
+    FeedbackFromRDSDevHttp201ResponseCode201.feedbackId -> FeedbackFromRDSDevHttp201ResponseCode201,
+    FeedbackHttp201ResponseCode204.feedbackId -> FeedbackHttp201ResponseCode204,
+    FeedbackHttp201ResponseCode404.feedbackId -> FeedbackHttp201ResponseCode404,
+    FeedbackSevenNRSFailureHttp201ResponseCode201.feedbackId -> FeedbackSevenNRSFailureHttp201ResponseCode201,
+     RdsNotAvailable404.feedbackId -> RdsNotAvailable404,
+     RdsTimeout408.feedbackId -> RdsTimeout408
+  ).withDefaultValue(FeedbackAcknowledgeForbiddenHttp201ResponseCode401)
 }
