@@ -17,7 +17,7 @@
 package controllers
 
 import common.StubResource
-import models.{CalculationIdDetails, FeedbackAcknowledgeForbiddenHttp201ResponseCode401, FeedbackFiveHttp201ResponseCode201, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackReqWithInvalidCalculationId, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsRequest}
+import models.{FeedbackForBadRequest, RdsNotAvailable404, RdsRequest, RdsTimeout408}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.http.BadRequestException
@@ -70,7 +70,6 @@ class RdsController @Inject()(cc: ControllerComponents)
   def generateReport(): Action[JsValue] = Action.async(parse.json) {
     request: Request[JsValue] => {
       logger.info(s"======Invoked RDS stub for report generation======")
-      logger.info(s"RDS request ${request.body}")
       val rdsRequestValidationResult = request.body.validate[RdsRequest]
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
@@ -78,7 +77,7 @@ class RdsController @Inject()(cc: ControllerComponents)
           rdsRequest.calculationId.toString match {
             case "640090b4-06e3-4fef-a555-6fd0877dc7ca" => (BAD_REQUEST,Json.parse(invalidBodyError))
             case "404404b4-06e3-4fef-a555-6fd0877dc7ca" => (NOT_FOUND,Json.parse(rdsNotAvailableError))
-            case "408408b4-06e3-4fef-a555-6fd0877dc7ca" => (REQUEST_TIMEOUT,Json.parse(rdsNotAvailableError))
+            case "408408b4-06e3-4fef-a555-6fd0877dc7ca" => (REQUEST_TIMEOUT,Json.parse(rdsRequestTimeoutError))
             case _ =>
               val calculationIdDetails = calcIdMappings(rdsRequest.calculationId.toString)
               try {
@@ -114,15 +113,19 @@ class RdsController @Inject()(cc: ControllerComponents)
           try {
             logger.info(s"====== success path======")
             def feedbackDetails = feedbackIdAndCorrelationIdMapping(rdsRequest.feedbackId)
-            def correlationId = feedbackDetails.correlationId
-            if  (feedbackDetails.feedbackId.equals(rdsRequest.feedbackId) && correlationId.equals(rdsRequest.correlationId) ) {
-              val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "202",s"conf/response/acknowledge/feedback-ack.json")
-              ( CREATED , response)
-            } else {
-              logger.info(s"====== combination not found ======")
-              val fileName = s"conf/response/acknowledge/ack-resp-invalid-report-correlationid-combination.json"
-              val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "401",fileName)
-              (CREATED, response)
+
+            (feedbackDetails.feedbackId,feedbackDetails.correlationId) match {
+              case(FeedbackForBadRequest.feedbackId,_)  => (BAD_REQUEST, Json.parse(invalidBodyError))
+              case(RdsNotAvailable404.feedbackId,_)     => (NOT_FOUND, Json.parse(rdsNotAvailableError))
+              case(RdsTimeout408.feedbackId,_)          => (REQUEST_TIMEOUT, Json.parse(rdsRequestTimeoutError))
+              case (feedbackId,correlationId) if (rdsRequest.feedbackId.equals(feedbackId) && rdsRequest.correlationId.equals(correlationId))=>
+                val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "202",s"conf/response/acknowledge/feedback-ack.json")
+                (CREATED, response)
+              case(_,_)                                 =>
+                  logger.info(s"====== combination not found ======")
+                  val fileName = s"conf/response/acknowledge/ack-resp-invalid-report-correlationid-combination.json"
+                  val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "401",fileName)
+                  (CREATED, response)
             }
           } catch {
             case e: FileNotFoundException =>

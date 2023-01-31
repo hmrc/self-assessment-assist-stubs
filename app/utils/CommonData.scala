@@ -16,7 +16,7 @@
 
 package utils
 
-import models.{CalculationIdDetails, FeedbackAcknowledgeForbiddenHttp201ResponseCode401, FeedbackFiveHttp201ResponseCode201, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackReqWithInvalidCalculationId, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsNotAvailable404, RdsTimeout408}
+import models.{CalculationIdDetails, FeedbackAcknowledgeForbiddenHttp201ResponseCode401, FeedbackFiveHttp201ResponseCode201, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackForBadRequest, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsNotAvailable404, RdsTimeout408}
 
 object CommonData {
   val ninoMtdIdPairs = Map(
@@ -35,7 +35,7 @@ object CommonData {
     FeedbackThreeHttp201ResponseCode201.calculationId -> FeedbackThreeHttp201ResponseCode201,
     FeedbackFourHttp201ResponseCode201.calculationId -> FeedbackFourHttp201ResponseCode201,
     FeedbackFiveHttp201ResponseCode201.calculationId -> FeedbackFiveHttp201ResponseCode201,
-    FeedbackReqWithInvalidCalculationId.calculationId -> FeedbackReqWithInvalidCalculationId,
+    FeedbackForBadRequest.calculationId -> FeedbackForBadRequest,
     FeedbackMissingCalculationId.calculationId -> FeedbackMissingCalculationId,
     FeedbackFromRDSDevHttp201ResponseCode201.calculationId -> FeedbackFromRDSDevHttp201ResponseCode201,
     FeedbackHttp201ResponseCode204.calculationId -> FeedbackHttp201ResponseCode204,
@@ -52,7 +52,7 @@ object CommonData {
     FeedbackThreeHttp201ResponseCode201.feedbackId -> FeedbackThreeHttp201ResponseCode201,
     FeedbackFourHttp201ResponseCode201.feedbackId -> FeedbackFourHttp201ResponseCode201,
     FeedbackFiveHttp201ResponseCode201.feedbackId -> FeedbackFiveHttp201ResponseCode201,
-    FeedbackReqWithInvalidCalculationId.feedbackId-> FeedbackReqWithInvalidCalculationId,
+    FeedbackForBadRequest.feedbackId-> FeedbackForBadRequest,
     FeedbackForDefaultResponse.feedbackId -> FeedbackForDefaultResponse,
     FeedbackMissingCalculationId.feedbackId -> FeedbackMissingCalculationId,
     FeedbackFromRDSDevHttp201ResponseCode201.feedbackId -> FeedbackFromRDSDevHttp201ResponseCode201,

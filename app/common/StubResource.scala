@@ -16,7 +16,7 @@
 
 package common
 
-import models.{FeedbackForDefaultResponse, FeedbackReqWithInvalidCalculationId, FeedbackMissingCalculationId}
+import models.{FeedbackForDefaultResponse, FeedbackForBadRequest, FeedbackMissingCalculationId}
 import play.api.Logging
 import play.api.http.ContentTypes
 import play.api.libs.json.Json
@@ -29,7 +29,7 @@ trait StubResource extends Results with ContentTypes with Logging {
   def loadSubmitResponseTemplate(calculationId:String, replaceFeedbackId: String, replaceCorrelationId: String) = {
     val templateCotent =
       calculationId match {
-        case calcId@(FeedbackReqWithInvalidCalculationId.calculationId |
+        case calcId@(FeedbackForBadRequest.calculationId |
                      FeedbackMissingCalculationId.calculationId | FeedbackForDefaultResponse.calculationId)=>
           logger.info(s"loading invalid file scenario $calcId")
           findResource(s"conf/response/submit/$calcId-response.json")map(
