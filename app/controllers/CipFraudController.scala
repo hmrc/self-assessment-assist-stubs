@@ -23,12 +23,11 @@ import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 @Singleton()
-class CipFraudController @Inject()(cc: ControllerComponents)
+class CipFraudController @Inject()(cc: ControllerComponents)(implicit ec: ExecutionContext)
   extends BackendController(cc) with Logging {
 
   val retSubmissionSuccesful =
