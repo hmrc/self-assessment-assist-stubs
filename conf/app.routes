@@ -9,6 +9,8 @@ POST        /rds/assessments/self-assessment-assist/acknowledge                 
 
 POST 	    /submission                                                                 controllers.NrsController.submit()
 
+POST 	    /interaction-data/store-interactions                                        controllers.IfsController.submit()
+
 GET         /mtd-identifier-lookup/nino/:nino                                           controllers.IdentifierLookupController.lookup(nino: String)
 
 PUT         /*route                                                                     controllers.GenericController.unsupportedRequestHandler(route)
