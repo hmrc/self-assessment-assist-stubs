@@ -88,12 +88,12 @@
       ]
     },
     {
-      "name": "typeIDs",
+      "name": "typeId",
       "value": [
         {
           "metadata": [
             {
-              "typeID": "string"
+              "TYPEID": "string"
             }
           ]
         },
