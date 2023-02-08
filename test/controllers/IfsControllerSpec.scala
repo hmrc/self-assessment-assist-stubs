@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{IFRequest, IFRequestPayload, IFRequestPayloadAction}
+import models.{IFRequest, IFRequestPayload, IFRequestPayloadAction, Messages}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -45,7 +45,7 @@ class IfsControllerSpec extends SpecBase{
         Map("agentReferenceNumber" -> "12345"),
         Map("calculationTimestamp" -> "2019-02-15T09:35:15.094Z")
       ),
-      payload = Some(Seq(IFRequestPayload(
+      payload = Some(Messages(Some(Seq(IFRequestPayload(
         messageId = "messageId",
         englishAction = IFRequestPayloadAction(
           title = "title",
@@ -61,7 +61,7 @@ class IfsControllerSpec extends SpecBase{
           path = "TODO - path",
           links = None
         )))
-      ))
+      ))))
 
     val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/interaction-data/store-interactions").withBody(Json.toJson(req)).withHeaders(("X-API-Key", "dummy-api-key"),("Content-Type", "application/json") )
     controller.submit().apply(fakeRequest)
