@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.HeaderValidatorAction
-import models.{Error, IFRequest}
+import models.{Error, FeedbackFiveHttp201ResponseCode201, FeedbackForBadRequest, FeedbackFourHttp201ResponseCode201, FeedbackMissingCalculationId, IFRequest}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request}
@@ -41,13 +41,23 @@ class IfsController @Inject()(headerValidator: HeaderValidatorAction,
     headerValidator.async(parse.json) { implicit request: Request[JsValue] =>
       Future {
         request.body.validate[IFRequest] match {
-          case JsSuccess(value, _) => value.metadata.find(_.contains("calculationId")) match {
-            case Some(value) => value.get("calculationId") match {
-              case Some("404404b4-06e3-4fef-a555-6fd0877dc7ca") => BadRequest(Json.toJson(invalidCorrelationId))
-              case Some("408408b4-06e3-4fef-a555-6fd0877dc7ca") => ServiceUnavailable(Json.toJson(serviceUnavailable))
+          case JsSuccess(value, _)  if (value.eventName == "AcknowledgeReport") =>
+            value.feedbackId match {
+              case FeedbackFourHttp201ResponseCode201.feedbackId => ServiceUnavailable(Json.toJson(serviceUnavailable))
+              case FeedbackFiveHttp201ResponseCode201.feedbackId => BadRequest(Json.toJson(invalidPayload))
               case _ => NoContent
             }
-            case _ => BadRequest(Json.toJson(invalidPayload))
+
+          case JsSuccess(value, _) => value.metadata.find(_.contains("calculationId")) match {
+            case Some(value) => value.get("calculationId") match {
+              case Some(FeedbackFiveHttp201ResponseCode201.calculationId) => BadRequest(Json.toJson(invalidCorrelationId))
+              case Some(FeedbackFourHttp201ResponseCode201.calculationId) => ServiceUnavailable(Json.toJson(serviceUnavailable))
+              case _ => NoContent
+            }
+            case _ => value.eventName match {
+              case "GenerateReport" => BadRequest(Json.toJson(invalidPayload))
+              case _ => BadRequest(Json.toJson(invalidPayload))
+            }
           }
           case _ => BadRequest(Json.toJson(invalidPayload))
         }
