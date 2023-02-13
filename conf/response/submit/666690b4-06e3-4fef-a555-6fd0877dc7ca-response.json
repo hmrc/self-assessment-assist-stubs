@@ -118,6 +118,25 @@
     {
       "name": "calculationTimestamp",
       "value": "2019-02-15T09:35:15.094Z"
+    },
+    {
+      "name": "typeId",
+      "value": [
+        {
+          "metadata": [
+            {
+              "TYPEID": "string"
+            }
+          ]
+        },
+        {
+          "data": [
+            [
+              "Test001.v01"
+            ]
+          ]
+        }
+      ]
     }
   ]
 }
