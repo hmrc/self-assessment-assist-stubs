@@ -42,7 +42,8 @@ object CommonData {
     FeedbackHttp201ResponseCode404.calculationId -> FeedbackHttp201ResponseCode404,
     FeedbackSevenNRSFailureHttp201ResponseCode201.calculationId -> FeedbackSevenNRSFailureHttp201ResponseCode201,
      RdsNotAvailable404.calculationId -> RdsNotAvailable404,
-     RdsTimeout408.calculationId -> RdsTimeout408
+     RdsTimeout408.calculationId -> RdsTimeout408,
+     FeedbackAcknowledgeForbiddenHttp201ResponseCode401.calculationId -> FeedbackAcknowledgeForbiddenHttp201ResponseCode401
   ).withDefaultValue(FeedbackForDefaultResponse)
 
   //below store is used to find feedback and correlation if mapping while accepting acknowledge request
@@ -53,13 +54,13 @@ object CommonData {
     FeedbackFourHttp201ResponseCode201.feedbackId -> FeedbackFourHttp201ResponseCode201,
     FeedbackFiveHttp201ResponseCode201.feedbackId -> FeedbackFiveHttp201ResponseCode201,
     FeedbackForBadRequest.feedbackId-> FeedbackForBadRequest,
-    FeedbackForDefaultResponse.feedbackId -> FeedbackForDefaultResponse,
     FeedbackMissingCalculationId.feedbackId -> FeedbackMissingCalculationId,
     FeedbackFromRDSDevHttp201ResponseCode201.feedbackId -> FeedbackFromRDSDevHttp201ResponseCode201,
     FeedbackHttp201ResponseCode204.feedbackId -> FeedbackHttp201ResponseCode204,
     FeedbackHttp201ResponseCode404.feedbackId -> FeedbackHttp201ResponseCode404,
     FeedbackSevenNRSFailureHttp201ResponseCode201.feedbackId -> FeedbackSevenNRSFailureHttp201ResponseCode201,
      RdsNotAvailable404.feedbackId -> RdsNotAvailable404,
-     RdsTimeout408.feedbackId -> RdsTimeout408
-  ).withDefaultValue(FeedbackAcknowledgeForbiddenHttp201ResponseCode401)
+     RdsTimeout408.feedbackId -> RdsTimeout408,
+     FeedbackAcknowledgeForbiddenHttp201ResponseCode401.feedbackId -> FeedbackAcknowledgeForbiddenHttp201ResponseCode401
+  ).withDefaultValue(FeedbackForDefaultResponse)
 }
