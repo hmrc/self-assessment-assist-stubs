@@ -29,7 +29,6 @@ class IdentifierLookupControllerSpec extends SpecBase with HeaderValidator {
 
   private val controller: IdentifierLookupController = app.injector.instanceOf[IdentifierLookupController]
 
-
   private def onSubmit(nino: String): Future[Result] = {
     val request: FakeRequest[AnyContent] = FakeRequest("GET", s"/mtd-identifier-lookup/nino/$nino")
 
@@ -44,7 +43,7 @@ class IdentifierLookupControllerSpec extends SpecBase with HeaderValidator {
         val result = onSubmit("NJ070957A")
         val expectedResponse = Json.parse(
           s"""{
-             |  "mtdbsa": "XFIT00618912478"
+             |  "mtdbsa": "123456789012345"
              |}""".stripMargin
         )
 
