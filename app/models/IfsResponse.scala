@@ -17,8 +17,6 @@
 package models
 
 import play.api.libs.json.{Json, Writes}
-import play.api.http.{ContentTypeOf, ContentTypes, Writeable}
-import play.api.libs.json.Writes
 
 
 case class IfsResponse(ifsResponse: String)

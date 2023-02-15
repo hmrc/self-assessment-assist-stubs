@@ -71,6 +71,7 @@ class RdsController @Inject()(cc: ControllerComponents)
     request: Request[JsValue] => {
       logger.info(s"======Invoked RDS stub for report generation======")
       val rdsRequestValidationResult = request.body.validate[RdsRequest]
+      @annotation.nowarn
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           val fraudRiskReportReasons = rdsRequest.fraudRiskReportReasons
