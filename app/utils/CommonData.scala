@@ -20,7 +20,7 @@ import models.{CalculationIdDetails, FeedbackAcknowledgeForbiddenHttp201Response
 
 object CommonData {
   val ninoMtdIdPairs = Map(
-    "NJ070957A" -> "XFIT00618912478",
+    "NJ070957A" -> "123456789012345",
     "MS475730B" -> "XCIT00840041559",
     "WS504231C" -> "XBIT00219774624",
     "XT181899C" -> "XDIT00734159815",
