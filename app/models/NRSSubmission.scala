@@ -38,7 +38,7 @@ case class SearchKeys(searchKey: String)
 
 object SearchKeys {
   implicit val reads: Reads[SearchKeys] =
-    (__ \ 'reportId).read[String]
+    (__ \ "reportId").read[String]
       .map(SearchKeys(_))
 
   implicit val writes: OWrites[SearchKeys] = Json.writes[SearchKeys]

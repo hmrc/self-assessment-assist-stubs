@@ -71,13 +71,14 @@ class RdsController @Inject()(cc: ControllerComponents)
     request: Request[JsValue] => {
       logger.info(s"======Invoked RDS stub for report generation======")
       val rdsRequestValidationResult = request.body.validate[RdsRequest]
+      @annotation.nowarn
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
           val fraudRiskReportReasons = rdsRequest.fraudRiskReportReasons
           rdsRequest.calculationId.toString match {
-            case "640090b4-06e3-4fef-a555-6fd0877dc7ca" => (BAD_REQUEST,Json.parse(invalidBodyError))
-            case "404404b4-06e3-4fef-a555-6fd0877dc7ca" => (NOT_FOUND,Json.parse(rdsNotAvailableError))
-            case "408408b4-06e3-4fef-a555-6fd0877dc7ca" => (REQUEST_TIMEOUT,Json.parse(rdsRequestTimeoutError))
+            case FeedbackForBadRequest.calculationId => (BAD_REQUEST,Json.parse(invalidBodyError))
+            case RdsNotAvailable404.calculationId => (NOT_FOUND,Json.parse(rdsNotAvailableError))
+            case RdsTimeout408.calculationId => (REQUEST_TIMEOUT,Json.parse(rdsRequestTimeoutError))
             case _ =>
               val calculationIdDetails = calcIdMappings(rdsRequest.calculationId.toString)
               try {
