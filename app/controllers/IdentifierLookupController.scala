@@ -38,9 +38,7 @@ class IdentifierLookupController @Inject()(cc: ControllerComponents)
   def lookup(nino: String): Action[AnyContent] = Action {
     request => {
       logger.info(s"======Invoked identifier lookup controller ======")
-      ninoMtdIdPairs.get(nino).fold(
-        InternalServerError("")
-      )(mtdid => Ok(Json.parse(responseBody(mtdid))))
+      Ok(Json.parse(responseBody(ninoMtdIdPairs.getOrElse(nino,"123456789012345"))))
     }
   }
 }

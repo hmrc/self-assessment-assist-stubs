@@ -55,8 +55,13 @@ class IdentifierLookupControllerSpec extends SpecBase with HeaderValidator {
     "provided with an unknown NINO" must {
       "return a 500" in {
         val result = onSubmit("NJ070959A")
-
-        status(result) must be(INTERNAL_SERVER_ERROR)
+        val expectedResponse = Json.parse(
+          s"""{
+             |  "mtdbsa": "123456789012345"
+             |}""".stripMargin
+        )
+        status(result) must be(OK)
+        contentAsJson(result) must be(expectedResponse)
       }
     }
   }
