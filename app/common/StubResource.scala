@@ -30,7 +30,7 @@ trait StubResource extends Results with ContentTypes with Logging {
     val templateCotent =
       calculationId match {
         case calcId@(FeedbackForBadRequest.calculationId |
-                     FeedbackMissingCalculationId.calculationId | FeedbackForDefaultResponse.calculationId)=>
+                     FeedbackMissingCalculationId.calculationId)=>
           logger.info(s"loading invalid file scenario $calcId")
           findResource(s"conf/response/submit/$calcId-response.json")map(
           _.replace("replaceFeedbackId", replaceFeedbackId)
