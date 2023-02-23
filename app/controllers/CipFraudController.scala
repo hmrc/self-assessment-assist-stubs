@@ -51,6 +51,7 @@ class CipFraudController @Inject()(cc: ControllerComponents)(implicit ec: Execut
         request.body.validate[FraudRiskRequest] match {
           case JsSuccess(value, _) => value.nino match {
             case Some("AA088213C") => InternalServerError
+            case Some("ME636062B") => RequestTimeout
             case Some("JL530692C") =>
               logger.error(s"======CipFraudController returning error to mimic failure======")
               BadRequest(failureResponse)
