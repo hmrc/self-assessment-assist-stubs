@@ -16,7 +16,7 @@
 
 package common
 
-import models.{FeedbackForDefaultResponse, FeedbackForBadRequest, FeedbackMissingCalculationId}
+import models.{FeedbackForBadRequest, FeedbackMissingCalculationId}
 import play.api.Logging
 import play.api.http.ContentTypes
 import play.api.libs.json.Json
