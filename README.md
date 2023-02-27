@@ -39,6 +39,9 @@ Then go to http://localhost:9680/api-documentation/docs/openapi/preview and ente
 ```
 http://localhost:8342/api/conf/1.0/application.yaml
 ```
+## Runbook
+
+You can access the ITSA/HMRC Assist Runbook [here](https://confluence.tools.tax.service.gov.uk/pages/viewpage.action?pageId=519668164)
 
 ## Support and Reporting Issues
 
