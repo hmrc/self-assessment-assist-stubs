@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import common.StubResource
-import models.{FeedbackForBadRequest, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackOneHttp201ResponseCode201,  RdsNotAvailable404, RdsTimeout408}
+import models.{FeedbackForBadRequest, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackOneHttp201ResponseCode201, RdsInternalServerError500, RdsNotAvailable404, RdsServiceNotAvailable503, RdsTimeout408}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -240,6 +240,36 @@ class RdsControllerSpec extends SpecBase with StubResource{
                                              |  }
                                              |""".stripMargin)
         status(result) must be(REQUEST_TIMEOUT)
+        contentAsJson(result) must be(expectedResponse)
+      }
+    }
+
+    "provided with an valid request, but RDS has internal server error" must {
+      "return a INTERNAL_SERVER_ERROR" in {
+        val calculationIdUnderTest = calcIdMappings(RdsInternalServerError500.calculationId)
+        val result = callGenerateReport(Json.parse(generateReportRequestBody.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
+        val expectedResponse = Json.parse(s"""
+                                             |{
+                                             |  "code": "INTERNAL_SERVER_ERROR",
+                                             |  "message": "RDS internal server error"
+                                             |  }
+                                             |""".stripMargin)
+        status(result) must be(INTERNAL_SERVER_ERROR)
+        contentAsJson(result) must be(expectedResponse)
+      }
+    }
+
+    "provided with an valid request, but RDS service is not available" must {
+      "return a SERVICE_UNAVAIALBLE" in {
+        val calculationIdUnderTest = calcIdMappings(RdsServiceNotAvailable503.calculationId)
+        val result = callGenerateReport(Json.parse(generateReportRequestBody.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
+        val expectedResponse = Json.parse(s"""
+                                             |{
+                                             |  "code": "SERVICE_UNAVAIALBLE",
+                                             |  "message": "RDS service not available error"
+                                             |  }
+                                             |""".stripMargin)
+        status(result) must be(SERVICE_UNAVAILABLE)
         contentAsJson(result) must be(expectedResponse)
       }
     }
