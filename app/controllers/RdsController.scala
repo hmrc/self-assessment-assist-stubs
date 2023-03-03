@@ -17,7 +17,7 @@
 package controllers
 
 import common.StubResource
-import models.{FeedbackForBadRequest, RdsNotAvailable404, RdsRequest, RdsTimeout408}
+import models.{FeedbackForBadRequest, RdsInternalServerError500, RdsNotAvailable404, RdsRequest, RdsServiceNotAvailable503, RdsTimeout408}
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.http.BadRequestException
@@ -67,6 +67,22 @@ class RdsController @Inject()(cc: ControllerComponents)
        |  }
        |""".stripMargin
 
+  private val rdsInternalServerError: String =
+    s"""
+       |{
+       |  "code": "INTERNAL_SERVER_ERROR",
+       |  "message": "RDS internal server error"
+       |  }
+       |""".stripMargin
+
+  private val rdsServiceUnvailableError: String =
+    s"""
+       |{
+       |  "code": "SERVICE_UNAVAIALBLE",
+       |  "message": "RDS service not available error"
+       |  }
+       |""".stripMargin
+
   def generateReport(): Action[JsValue] = Action.async(parse.json) {
     request: Request[JsValue] => {
       logger.info(s"======Invoked RDS stub for report generation======")
@@ -79,6 +95,8 @@ class RdsController @Inject()(cc: ControllerComponents)
             case FeedbackForBadRequest.calculationId => (BAD_REQUEST,Json.parse(invalidBodyError))
             case RdsNotAvailable404.calculationId => (NOT_FOUND,Json.parse(rdsNotAvailableError))
             case RdsTimeout408.calculationId => (REQUEST_TIMEOUT,Json.parse(rdsRequestTimeoutError))
+            case RdsInternalServerError500.calculationId => (INTERNAL_SERVER_ERROR,Json.parse(rdsInternalServerError))
+            case RdsServiceNotAvailable503.calculationId => (SERVICE_UNAVAILABLE,Json.parse(rdsServiceUnvailableError))
             case _ =>
               val calculationIdDetails = calcIdMappings(rdsRequest.calculationId.toString)
               try {
@@ -116,9 +134,11 @@ class RdsController @Inject()(cc: ControllerComponents)
             def feedbackDetails = feedbackIdAndCorrelationIdMapping(rdsRequest.feedbackId)
 
             (feedbackDetails.feedbackId,feedbackDetails.correlationId) match {
-              case(FeedbackForBadRequest.feedbackId,_)  => (BAD_REQUEST, Json.parse(invalidBodyError))
-              case(RdsNotAvailable404.feedbackId,_)     => (NOT_FOUND, Json.parse(rdsNotAvailableError))
-              case(RdsTimeout408.feedbackId,_)          => (REQUEST_TIMEOUT, Json.parse(rdsRequestTimeoutError))
+              case(FeedbackForBadRequest.feedbackId,_)      => (BAD_REQUEST, Json.parse(invalidBodyError))
+              case(RdsNotAvailable404.feedbackId,_)         => (NOT_FOUND, Json.parse(rdsNotAvailableError))
+              case(RdsTimeout408.feedbackId,_)              => (REQUEST_TIMEOUT, Json.parse(rdsRequestTimeoutError))
+              case(RdsInternalServerError500.feedbackId,_)  => (INTERNAL_SERVER_ERROR, Json.parse(rdsInternalServerError))
+              case(RdsServiceNotAvailable503.feedbackId,_)  => (SERVICE_UNAVAILABLE, Json.parse(rdsServiceUnvailableError))
               case (feedbackId,correlationId) if (rdsRequest.feedbackId.equals(feedbackId) && rdsRequest.correlationId.equals(correlationId))=>
                 val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "202",s"conf/response/acknowledge/feedback-ack.json")
                 (CREATED, response)

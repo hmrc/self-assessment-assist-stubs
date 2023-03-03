@@ -16,7 +16,7 @@
 
 package utils
 
-import models.{CalculationIdDetails, FeedbackAcknowledgeForbiddenHttp201ResponseCode401, FeedbackFiveHttp201ResponseCode201, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackForBadRequest, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsNotAvailable404, RdsTimeout408}
+import models.{CalculationIdDetails, FeedbackAcknowledgeForbiddenHttp201ResponseCode401, FeedbackFiveHttp201ResponseCode201, FeedbackForBadRequest, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, RdsInternalServerError500, RdsNotAvailable404, RdsServiceNotAvailable503, RdsTimeout408}
 
 object CommonData {
   val ninoMtdIdPairs = Map(
@@ -43,6 +43,8 @@ object CommonData {
     FeedbackSevenNRSFailureHttp201ResponseCode201.calculationId -> FeedbackSevenNRSFailureHttp201ResponseCode201,
      RdsNotAvailable404.calculationId -> RdsNotAvailable404,
      RdsTimeout408.calculationId -> RdsTimeout408,
+     RdsInternalServerError500.calculationId -> RdsInternalServerError500,
+     RdsServiceNotAvailable503.calculationId -> RdsServiceNotAvailable503,
      FeedbackAcknowledgeForbiddenHttp201ResponseCode401.calculationId -> FeedbackAcknowledgeForbiddenHttp201ResponseCode401
   ).withDefaultValue(FeedbackForDefaultResponse)
 
@@ -61,6 +63,8 @@ object CommonData {
     FeedbackSevenNRSFailureHttp201ResponseCode201.feedbackId -> FeedbackSevenNRSFailureHttp201ResponseCode201,
      RdsNotAvailable404.feedbackId -> RdsNotAvailable404,
      RdsTimeout408.feedbackId -> RdsTimeout408,
+     RdsInternalServerError500.feedbackId -> RdsInternalServerError500,
+     RdsServiceNotAvailable503.feedbackId -> RdsServiceNotAvailable503,
      FeedbackAcknowledgeForbiddenHttp201ResponseCode401.feedbackId -> FeedbackAcknowledgeForbiddenHttp201ResponseCode401
   ).withDefaultValue(FeedbackForDefaultResponse)
 }
