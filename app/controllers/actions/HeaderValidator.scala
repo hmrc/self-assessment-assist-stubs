@@ -28,10 +28,16 @@ trait HeaderValidator {
   val TOKEN_HEADER = "Authorization"
   private val VALID_CONTENT_TYPE = "application/json"
   private val VALID_API_KEY = "dummy-api-key"
+  private val VALID_TOKEN_VALUE = "dummy-api-key"
 
   def isApiKeyValid(request: Request[_]): Boolean = {
     val tokenValue = request.headers.get(API_KEY_HEADER).getOrElse("Invalid")
     tokenValue.contains(VALID_API_KEY)
+  }
+
+  def isAuthTokenValid(request: Request[_]): Boolean = {
+    val tokenValue = request.headers.get(TOKEN_HEADER).getOrElse("Invalid")
+    tokenValue.contains(VALID_TOKEN_VALUE)
   }
 
   def isContentTypeValid(request: Request[_]): Boolean = {
@@ -41,6 +47,22 @@ trait HeaderValidator {
 }
 
 class HeaderValidatorAction @Inject()(parser: BodyParsers.Default)
+                                     (implicit val ec: ExecutionContext) extends ActionBuilderImpl(parser) with HeaderValidator {
+
+  override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
+
+    val (isValidAuth, requestValid) = (isAuthTokenValid(request), isContentTypeValid(request))
+
+    if (isValidAuth && requestValid) {
+      block(request)
+    } else {
+
+      Future.successful(Results.Unauthorized)
+    }
+  }
+}
+
+class NrsHeaderValidatorAction @Inject()(parser: BodyParsers.Default)
                                      (implicit val ec: ExecutionContext) extends ActionBuilderImpl(parser) with HeaderValidator {
 
   override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
