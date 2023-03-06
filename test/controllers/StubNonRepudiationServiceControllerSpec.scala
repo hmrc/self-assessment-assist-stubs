@@ -18,6 +18,7 @@ package controllers
 
 import base.SpecBase
 import controllers.actions.HeaderValidator
+import models.NrsInternalServerError
 import play.api.http.Status.{ACCEPTED, BAD_REQUEST}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
@@ -103,7 +104,7 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
     val errorTests = Seq(
       TestHarness("return 400 when invalid nrs json received", "/a365c0b4-06e3-4fef-a555-16fd08770400-invalidNrsEventAcknowledge.json", BAD_REQUEST),
       TestHarness("return 419 Checksum Failed received when decoded payload does match the sha/checksum", "/a365c0b4-06e3-4fef-a555-16fd08770419-RegistrationWithBadChecksumEvent.json", 419),
-      TestHarness("return 500 when there is an internal server error", "/a365c0b4-06e3-4fef-a555-16fd08770500-nrsServiceErrorEvent.json", INTERNAL_SERVER_ERROR),
+      TestHarness("return 500 when there is an internal server error", s"/${NrsInternalServerError.feedbackId}-nrsServiceErrorEvent.json", INTERNAL_SERVER_ERROR),
       TestHarness("return 502 when NRS returns a Bad Gateway error", "/a365c0b4-06e3-4fef-a555-16fd08770502-nrsBadGatewayEvent.json", BAD_GATEWAY),
       TestHarness("return 503 when NRS is unavailable", "/a365c0b4-06e3-4fef-a555-16fd08770503-nrsServiceUnavailableEvent.json", SERVICE_UNAVAILABLE),
       TestHarness("return 504 when NRS gateway times out", "/a365c0b4-06e3-4fef-a555-16fd08770504-nrsGatewayTimeoutEvent.json", GATEWAY_TIMEOUT)

@@ -123,3 +123,34 @@ case object RdsServiceNotAvailable503 extends CalculationIdDetails {
   override val feedbackId = "f065r0b4-06e3-4fef-a555-16fd05030500"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
+
+case object NrsBadRequest extends CalculationIdDetails {
+  override val calculationId = "503503b4-06e3-4fef-a555-6fd0877dc7ba"
+  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770400"
+  override val correlationId = "a5fht738957jfjf503jgjf777"
+}
+case object NrsInternalServerError extends CalculationIdDetails {
+  override val calculationId = "503503b4-06e3-4fef-a555-6fd0877dc7ba"
+  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08775500"
+  override val correlationId = "a5fht738957jfjf503jgjf777"
+}
+case object NrsBadGateway extends CalculationIdDetails {
+  override val calculationId = "503503b4-06e3-4fef-a555-6fd0877dc7ba"
+  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770502"
+  override val correlationId = "a5fht738957jfjf503jgjf777"
+}
+case object NrsServiceUnavailable extends CalculationIdDetails {
+  override val calculationId = "503503b4-06e3-4fef-a555-6fd0877dc7ba"
+  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770503"
+  override val correlationId = "a5fht738957jfjf503jgjf777"
+}
+case object NrsGatewayTimeout extends CalculationIdDetails {
+  override val calculationId = "503503b4-06e3-4fef-a555-6fd0877dc7ba"
+  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770504"
+  override val correlationId = "a5fht738957jfjf503jgjf777"
+}
+case object NrsAccepted extends CalculationIdDetails {
+  override val calculationId = "503503b4-06e3-4fef-a555-6fd0877dc7ba"
+  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770202"
+  override val correlationId = "a5fht738957jfjf503jgjf777"
+}
