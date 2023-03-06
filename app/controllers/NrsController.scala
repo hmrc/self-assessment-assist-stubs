@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.HeaderValidatorAction
+import controllers.actions.NrsHeaderValidatorAction
 import models.NRSSubmission
 import play.api.Logging
 import play.api.libs.json._
@@ -29,7 +29,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
-class NrsController @Inject()(headerValidator: HeaderValidatorAction,
+class NrsController @Inject()(headerValidator: NrsHeaderValidatorAction,
                               hashUtil: HashUtil,
                               cc: ControllerComponents
                              )(implicit ec: ExecutionContext)
