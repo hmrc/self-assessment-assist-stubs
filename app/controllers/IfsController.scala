@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.HeaderValidatorAction
-import models.{Error, FeedbackFiveHttp201ResponseCode201, FeedbackFourHttp201ResponseCode201, IFRequest}
+import models.{Error, IFRequest, IfsServiceBadRequest400, IfsServiceInternalServiceError500, IfsServiceNotAvailable503, IfsServiceRequestTimeout408}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request}
@@ -43,15 +43,17 @@ class IfsController @Inject()(headerValidator: HeaderValidatorAction,
         request.body.validate[IFRequest] match {
           case JsSuccess(value, _)  if (value.eventName == "AcknowledgeReport") =>
             value.feedbackId match {
-              case FeedbackFourHttp201ResponseCode201.feedbackId => ServiceUnavailable(Json.toJson(serviceUnavailable))
-              case FeedbackFiveHttp201ResponseCode201.feedbackId => BadRequest(Json.toJson(invalidPayload))
+              case IfsServiceInternalServiceError500.feedbackId => InternalServerError
+              case IfsServiceRequestTimeout408.feedbackId => RequestTimeout
+              case IfsServiceNotAvailable503.feedbackId => ServiceUnavailable(Json.toJson(serviceUnavailable))
+              case IfsServiceBadRequest400.feedbackId => BadRequest(Json.toJson(invalidPayload))
               case _ => NoContent
             }
 
           case JsSuccess(value, _) => value.metadata.find(_.contains("calculationId")) match {
             case Some(value) => value.get("calculationId") match {
-              case Some(FeedbackFiveHttp201ResponseCode201.calculationId) => BadRequest(Json.toJson(invalidCorrelationId))
-              case Some(FeedbackFourHttp201ResponseCode201.calculationId) => ServiceUnavailable(Json.toJson(serviceUnavailable))
+              case Some(IfsServiceBadRequest400.calculationId) => BadRequest(Json.toJson(invalidCorrelationId))
+              case Some(IfsServiceNotAvailable503.calculationId) => ServiceUnavailable(Json.toJson(serviceUnavailable))
               case _ => NoContent
             }
             case _ => value.eventName match {
