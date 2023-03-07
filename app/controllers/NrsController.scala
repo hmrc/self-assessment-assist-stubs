@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.NrsHeaderValidatorAction
-import models.NRSSubmission
+import models.{NRSSubmission, NrsAccepted, NrsBadGateway, NrsBadRequest, NrsGatewayTimeout, NrsInternalServerError, NrsServiceUnavailable}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request}
@@ -50,13 +50,13 @@ class NrsController @Inject()(headerValidator: NrsHeaderValidatorAction,
             if (validChecksum(value)) {
               logger.debug(s"[StubNonRepudiationServiceController] Payload received: ${request.body}")
               getReportId(value) match {
-                case "a365c0b4-06e3-4fef-a555-16fd08770400" => BadRequest
-                case "a365c0b4-06e3-4fef-a555-16fd08770500" => InternalServerError(JsString("Internal NRS Submission API error"))
-                case "a365c0b4-06e3-4fef-a555-16fd08770502" => BadGateway
-                case "a365c0b4-06e3-4fef-a555-16fd08770503" => ServiceUnavailable
-                case "a365c0b4-06e3-4fef-a555-16fd08770504" => GatewayTimeout
-                case "a365c0b4-06e3-4fef-a555-16fd08770202" => Accepted(requestSuccessfulFake)
-                case _ => Accepted(requestSuccessfulFake)
+                case NrsBadRequest.feedbackId          => BadRequest
+                case NrsInternalServerError.feedbackId => InternalServerError(JsString("Internal NRS Submission API error"))
+                case NrsBadGateway.feedbackId         => BadGateway
+                case NrsServiceUnavailable.feedbackId => ServiceUnavailable
+                case NrsGatewayTimeout.feedbackId     => GatewayTimeout
+                case NrsAccepted.feedbackId           => Accepted(requestSuccessfulFake)
+                case _                                => Accepted(requestSuccessfulFake)
               }
             } else {
               ChecksumFailed
@@ -71,6 +71,7 @@ class NrsController @Inject()(headerValidator: NrsHeaderValidatorAction,
     val payload = Json.stringify(hashUtil.decode(submission.payload))
     val hash = hashUtil.getSha256Hex(payload)
 
+logger.info(s"for ${submission.metadata.searchKeys.searchKey} checksum should be $hash")
     submission.metadata.payloadSha256Checksum == hash
   }
 
