@@ -71,6 +71,7 @@ class NrsController @Inject()(headerValidator: NrsHeaderValidatorAction,
     val payload = Json.stringify(hashUtil.decode(submission.payload))
     val hash = hashUtil.getSha256Hex(payload)
 
+logger.info(s"for ${submission.metadata.searchKeys.searchKey} checksum should be $hash")
     submission.metadata.payloadSha256Checksum == hash
   }
 
