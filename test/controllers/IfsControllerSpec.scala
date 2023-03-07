@@ -62,7 +62,7 @@ class IfsControllerSpec extends SpecBase{
         ))))
       )))
 
-    val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/interaction-data/store-interactions").withBody(Json.toJson(req)).withHeaders(("Authorization", "dummy-api-key"),("Content-Type", "application/json") )
+    val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/interaction-data/store-interactions").withBody(Json.toJson(req)).withHeaders(("Authorization", "ABCD1234"),("Content-Type", "application/json") )
     controller.submit().apply(fakeRequest)
   }
 
@@ -94,7 +94,7 @@ class IfsControllerSpec extends SpecBase{
         ))))
       )))
 
-    val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/interaction-data/store-interactions").withBody(Json.toJson(req)).withHeaders(("Authorization", "dummy-api-key"),("Content-Type", "application/json") )
+    val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/interaction-data/store-interactions").withBody(Json.toJson(req)).withHeaders(("Authorization", "ABCD1234"),("Content-Type", "application/json") )
     controller.submit().apply(fakeRequest)
   }
 
