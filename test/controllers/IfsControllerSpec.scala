@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{FeedbackFiveHttp201ResponseCode201, FeedbackFourHttp201ResponseCode201, IFRequest, IFRequestPayload, IFRequestPayloadAction, Messages}
+import models.{IFRequest, IFRequestPayload, IFRequestPayloadAction, IfsServiceBadRequest400, IfsServiceInternalServiceError500, IfsServiceNotAvailable503, IfsServiceRequestTimeout408, Messages}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -109,14 +109,14 @@ class IfsControllerSpec extends SpecBase{
 
     "generate report: provided with a calculation id in metadata to trigger invalid correlationId" must {
       "return 400" in {
-        val result = submitStoreInteraction(FeedbackFiveHttp201ResponseCode201.calculationId)
+        val result = submitStoreInteraction(IfsServiceBadRequest400.calculationId)
         status(result) must be(BAD_REQUEST)
       }
     }
 
     "generate report: provided with a calculation id in metadata to service unavailable" must {
       "return 503" in {
-        val result = submitStoreInteraction(FeedbackFourHttp201ResponseCode201.calculationId)
+        val result = submitStoreInteraction(IfsServiceNotAvailable503.calculationId)
         status(result) must be(SERVICE_UNAVAILABLE)
       }
     }
@@ -130,16 +130,31 @@ class IfsControllerSpec extends SpecBase{
 
     "acknowledge report: provided with a feedback id trigger invalid bad request" must {
       "return 400" in {
-        val result = submitStoreAcknowledgement(FeedbackFiveHttp201ResponseCode201.feedbackId)
+        val result = submitStoreAcknowledgement(IfsServiceBadRequest400.feedbackId)
         status(result) must be(BAD_REQUEST)
+      }
+    }
+
+    "acknowledge report: provided with a feedback id trigger request timeout" must {
+      "return 408" in {
+        val result = submitStoreAcknowledgement(IfsServiceRequestTimeout408.feedbackId)
+        status(result) must be(REQUEST_TIMEOUT)
+      }
+    }
+
+    "acknowledge report: provided with a feedback id trigger internal server error" must {
+      "return 500" in {
+        val result = submitStoreAcknowledgement(IfsServiceInternalServiceError500.feedbackId)
+        status(result) must be(INTERNAL_SERVER_ERROR)
       }
     }
 
     "acknowledge report: provided with a feedback id trigger invalid service unavailable" must {
       "return 503" in {
-        val result = submitStoreAcknowledgement(FeedbackFourHttp201ResponseCode201.feedbackId)
+        val result = submitStoreAcknowledgement(IfsServiceNotAvailable503.feedbackId)
         status(result) must be(SERVICE_UNAVAILABLE)
       }
     }
+
   }
 }
