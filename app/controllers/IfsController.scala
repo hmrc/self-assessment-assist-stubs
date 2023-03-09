@@ -42,6 +42,7 @@ class IfsController @Inject()(headerValidator: HeaderValidatorAction,
       Future {
         request.body.validate[IFRequest] match {
           case JsSuccess(value, _)  if (value.eventName == "AcknowledgeReport") =>
+            logger.info(s"Processing AcknowledgeReport report")
             value.feedbackId match {
               case IfsServiceInternalServiceError500.feedbackId => InternalServerError
               case IfsServiceRequestTimeout408.feedbackId => RequestTimeout
@@ -50,7 +51,9 @@ class IfsController @Inject()(headerValidator: HeaderValidatorAction,
               case _ => NoContent
             }
 
-          case JsSuccess(value, _) => value.metadata.find(_.contains("calculationId")) match {
+          case JsSuccess(value, _) =>
+            logger.info(s"Processing generate report")
+            value.metaData.find(_.contains("calculationId")) match {
             case Some(value) => value.get("calculationId") match {
               case Some(IfsServiceInternalServiceError500.calculationId) => InternalServerError
               case Some(IfsServiceRequestTimeout408.calculationId) => RequestTimeout
@@ -58,12 +61,11 @@ class IfsController @Inject()(headerValidator: HeaderValidatorAction,
               case Some(IfsServiceNotAvailable503.calculationId) => ServiceUnavailable(Json.toJson(serviceUnavailable))
               case _ => NoContent
             }
-            case _ => value.eventName match {
-              case "GenerateReport" => BadRequest(Json.toJson(invalidPayload))
-              case _ => BadRequest(Json.toJson(invalidPayload))
-            }
+            case _ => logger.error(s"[IfsController]: calculationId not found bad request")
+                BadRequest(Json.toJson(invalidPayload))
           }
-          case _ => BadRequest(Json.toJson(invalidPayload))
+          case _ => logger.error(s"[IfsController]: Failed to validate IFS request")
+            BadRequest(Json.toJson(invalidPayload))
         }
       }
     }
