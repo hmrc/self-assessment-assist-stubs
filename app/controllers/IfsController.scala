@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.HeaderValidatorAction
-import models.{Error, IFRequest, IfsServiceBadRequest400, IfsServiceInternalServiceError500, IfsServiceNotAvailable503, IfsServiceRequestTimeout408}
+import models.{Error, IFRequest, IfsInternalServerError500, IfsServiceBadRequest400, IfsServiceNotAvailable503, IfsServiceRequestTimeout408}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request}
@@ -44,7 +44,7 @@ class IfsController @Inject()(headerValidator: HeaderValidatorAction,
           case JsSuccess(value, _)  if (value.eventName == "AcknowledgeReport") =>
             logger.info(s"Processing AcknowledgeReport report")
             value.feedbackId match {
-              case IfsServiceInternalServiceError500.feedbackId => InternalServerError
+              case IfsInternalServerError500.feedbackId => InternalServerError
               case IfsServiceRequestTimeout408.feedbackId => RequestTimeout
               case IfsServiceNotAvailable503.feedbackId => ServiceUnavailable(Json.toJson(serviceUnavailable))
               case IfsServiceBadRequest400.feedbackId => BadRequest(Json.toJson(invalidPayload))
@@ -55,7 +55,7 @@ class IfsController @Inject()(headerValidator: HeaderValidatorAction,
             logger.info(s"Processing generate report")
             value.metaData.find(_.contains("calculationId")) match {
             case Some(value) => value.get("calculationId") match {
-              case Some(IfsServiceInternalServiceError500.calculationId) => InternalServerError
+              case Some(IfsInternalServerError500.calculationId) => InternalServerError
               case Some(IfsServiceRequestTimeout408.calculationId) => RequestTimeout
               case Some(IfsServiceBadRequest400.calculationId) => BadRequest(Json.toJson(invalidCorrelationId))
               case Some(IfsServiceNotAvailable503.calculationId) => ServiceUnavailable(Json.toJson(serviceUnavailable))

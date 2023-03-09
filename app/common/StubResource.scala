@@ -16,7 +16,7 @@
 
 package common
 
-import models.{FeedbackForBadRequest, FeedbackMissingCalculationId}
+import models.{FeedbackForBadRequest, FeedbackMissingCalculationId, NrsAccepted, NrsBadGateway, NrsBadRequest, NrsGatewayTimeout, NrsInternalServerError, NrsServiceUnavailable}
 import play.api.Logging
 import play.api.http.ContentTypes
 import play.api.libs.json.Json
@@ -35,6 +35,15 @@ trait StubResource extends Results with ContentTypes with Logging {
           findResource(s"conf/response/submit/$calcId-response.json")map(
           _.replace("replaceFeedbackId", replaceFeedbackId)
             .replace("replaceCorrelationId", replaceCorrelationId))
+
+        case calcId@(NrsBadRequest.calculationId | NrsInternalServerError.calculationId |NrsBadGateway.calculationId |
+                     NrsServiceUnavailable.calculationId | NrsGatewayTimeout.calculationId
+                     |NrsAccepted.calculationId )=>
+          logger.info(s"nrs error scenario $calcId")
+          findResource(s"conf/response/submit/nrserrortemplate-response.json")map(
+            _.replace("replaceFeedbackId", replaceFeedbackId)
+              .replace("replaceCalculationId", calcId)
+              .replace("replaceCorrelationId", replaceCorrelationId))
 
         case calcId@_ =>
           logger.info(s"loading file $calcId")

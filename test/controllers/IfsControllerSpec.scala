@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{IFRequest, IFRequestPayload, IFRequestPayloadAction, IfsServiceBadRequest400, IfsServiceInternalServiceError500, IfsServiceNotAvailable503, IfsServiceRequestTimeout408, Messages}
+import models._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -130,7 +130,7 @@ class IfsControllerSpec extends SpecBase{
 
     "generate report: with a calculation id in metadata to trigger internal server error" must {
       "return 500" in {
-        val result = submitStoreInteraction(IfsServiceInternalServiceError500.calculationId)
+        val result = submitStoreInteraction(IfsInternalServerError500.calculationId)
         status(result) must be(INTERNAL_SERVER_ERROR)
       }
     }
@@ -158,7 +158,7 @@ class IfsControllerSpec extends SpecBase{
 
     "acknowledge report: provided with a feedback id trigger internal server error" must {
       "return 500" in {
-        val result = submitStoreAcknowledgement(IfsServiceInternalServiceError500.feedbackId)
+        val result = submitStoreAcknowledgement(IfsInternalServerError500.feedbackId)
         status(result) must be(INTERNAL_SERVER_ERROR)
       }
     }
