@@ -36,7 +36,7 @@ class IfsControllerSpec extends SpecBase{
       eventName = "GenerateReport",
       eventTimestamp = OffsetDateTime.now(),
       feedbackId = "feedbackId",
-      metadata = List(
+      metaData = List(
         Map("nino" -> "nino"),
         Map("taxYear" -> "2023"),
         Map("calculationId" -> calculationId),
@@ -72,7 +72,7 @@ class IfsControllerSpec extends SpecBase{
       eventName = "AcknowledgeReport",
       eventTimestamp = OffsetDateTime.now(),
       feedbackId,
-      metadata = List(
+      metaData = List(
         Map("nino" -> "nino"),
         Map("taxYear" -> "2023"),
       ),
