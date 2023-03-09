@@ -155,15 +155,14 @@ case object NrsAccepted extends CalculationIdDetails {
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
-
 case object IfsServiceBadRequest400 extends CalculationIdDetails {
-  override val calculationId = "500500b4-06e3-4fef-a555-6fd0877dc7ca"
+  override val calculationId = "400500b4-06e3-4fef-a555-6fd0877dc7ca"
   override val feedbackId = "f065r0b4-06e3-4fef-a555-16fd05000500"
   override val correlationId = "a5fht738957jfjf500jgjf777"
 }
 
 case object IfsServiceRequestTimeout408 extends CalculationIdDetails {
-  override val calculationId = "503503b4-06e3-4fef-a555-5fd0877dc7ca"
+  override val calculationId = "408503b4-06e3-4fef-a555-5fd0877dc7ca"
   override val feedbackId = "f065r0b4-06e3-4fef-a555-15fd05030500"
   override val correlationId = "a5fht738957jfjf503jgjf778"
 }
@@ -180,7 +179,7 @@ case object IfsServiceNotAvailable503 extends CalculationIdDetails {
   override val correlationId = "a8fht738957jfjf503jgjf777"
 }
 case object IfsServiceInternalServiceError500 extends CalculationIdDetails {
-  override val calculationId = "503503b4-06e17fef-a555-6fd0877dc7ca"
+  override val calculationId = "500503b4-06e17fef-a555-6fd0877dc7ca"
   override val feedbackId = "f065r0b4-06e3-4fef-a562-16fd05030500"
   override val correlationId = "a5fht738957jfjf503jgjf677"
 }

@@ -16,7 +16,7 @@
 
 package utils
 
-import models.{CalculationIdDetails, FeedbackAcknowledgeForbiddenHttp201ResponseCode401, FeedbackFiveHttp201ResponseCode201, FeedbackForBadRequest, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, NrsAccepted, NrsBadGateway, NrsBadRequest, NrsGatewayTimeout, NrsInternalServerError, NrsServiceUnavailable, RdsInternalServerError500, RdsNotAvailable404, RdsServiceNotAvailable503, RdsTimeout408}
+import models.{CalculationIdDetails, FeedbackAcknowledgeForbiddenHttp201ResponseCode401, FeedbackFiveHttp201ResponseCode201, FeedbackForBadRequest, FeedbackForDefaultResponse, FeedbackFourHttp201ResponseCode201, FeedbackFromRDSDevHttp201ResponseCode201, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackMissingCalculationId, FeedbackOneHttp201ResponseCode201, FeedbackSevenNRSFailureHttp201ResponseCode201, FeedbackThreeHttp201ResponseCode201, FeedbackTwoHttp201ResponseCode201, IfsInternalServerError500, IfsServiceBadRequest400, IfsServiceInternalServiceError500, IfsServiceNotAvailable503, IfsServiceRequestTimeout408, NrsAccepted, NrsBadGateway, NrsBadRequest, NrsGatewayTimeout, NrsInternalServerError, NrsServiceUnavailable, RdsInternalServerError500, RdsNotAvailable404, RdsServiceNotAvailable503, RdsTimeout408}
 
 object CommonData {
   val ninoMtdIdPairs = Map(
@@ -51,7 +51,12 @@ object CommonData {
      NrsBadGateway.calculationId -> NrsBadGateway,
      NrsServiceUnavailable.calculationId -> NrsServiceUnavailable,
      NrsGatewayTimeout.calculationId -> NrsGatewayTimeout,
-     NrsAccepted.calculationId -> NrsAccepted
+     NrsAccepted.calculationId -> NrsAccepted,
+     IfsServiceBadRequest400.calculationId -> IfsServiceBadRequest400,
+     IfsServiceRequestTimeout408.calculationId -> IfsServiceRequestTimeout408,
+     IfsInternalServerError500.calculationId -> IfsInternalServerError500,
+     IfsServiceNotAvailable503.calculationId -> IfsServiceNotAvailable503,
+     IfsServiceInternalServiceError500.calculationId -> IfsServiceInternalServiceError500
   ).withDefaultValue(FeedbackForDefaultResponse)
 
   //below store is used to find feedback and correlation if mapping while accepting acknowledge request
@@ -77,6 +82,11 @@ object CommonData {
      NrsBadGateway.feedbackId -> NrsBadGateway,
      NrsServiceUnavailable.feedbackId -> NrsServiceUnavailable,
      NrsGatewayTimeout.feedbackId -> NrsGatewayTimeout,
-     NrsAccepted.feedbackId -> NrsAccepted
+     NrsAccepted.feedbackId -> NrsAccepted,
+     IfsServiceBadRequest400.feedbackId -> IfsServiceBadRequest400,
+     IfsServiceRequestTimeout408.feedbackId -> IfsServiceRequestTimeout408,
+     IfsInternalServerError500.feedbackId -> IfsInternalServerError500,
+     IfsServiceNotAvailable503.feedbackId -> IfsServiceNotAvailable503,
+     IfsServiceInternalServiceError500.feedbackId -> IfsServiceInternalServiceError500
   ).withDefaultValue(FeedbackForDefaultResponse)
 }
