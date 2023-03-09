@@ -121,6 +121,20 @@ class IfsControllerSpec extends SpecBase{
       }
     }
 
+    "generate report: provided with a calculation id in metadata to trigger request timeout" must {
+      "return 408" in {
+        val result = submitStoreInteraction(IfsServiceRequestTimeout408.calculationId)
+        status(result) must be(REQUEST_TIMEOUT)
+      }
+    }
+
+    "generate report: with a calculation id in metadata to trigger internal server error" must {
+      "return 500" in {
+        val result = submitStoreInteraction(IfsServiceInternalServiceError500.calculationId)
+        status(result) must be(INTERNAL_SERVER_ERROR)
+      }
+    }
+
     "acknowledge report: provided with a calculation id in metadata for no content" must {
       "return 204" in {
         val result = submitStoreAcknowledgement("feedbackId")

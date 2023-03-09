@@ -52,6 +52,8 @@ class IfsController @Inject()(headerValidator: HeaderValidatorAction,
 
           case JsSuccess(value, _) => value.metadata.find(_.contains("calculationId")) match {
             case Some(value) => value.get("calculationId") match {
+              case Some(IfsServiceInternalServiceError500.calculationId) => InternalServerError
+              case Some(IfsServiceRequestTimeout408.calculationId) => RequestTimeout
               case Some(IfsServiceBadRequest400.calculationId) => BadRequest(Json.toJson(invalidCorrelationId))
               case Some(IfsServiceNotAvailable503.calculationId) => ServiceUnavailable(Json.toJson(serviceUnavailable))
               case _ => NoContent

@@ -1,0 +1,137 @@
+{
+  "links": [],
+  "version": 2,
+  "moduleId": "HMRC_ASSIST_ITSA_FINSUB_FEEDBACK",
+  "stepId": "execute",
+  "executionState": "completed",
+  "metadata": {
+    "module_id": "HMRC_ASSIST_ITSA_FINSUB_FEEDBACK",
+    "step_id": "execute"
+  },
+  "outputs": [
+    {
+      "name": "WelshActions",
+      "value": [
+        {
+          "metadata": [
+            {
+              "MESSAGE": "string"
+            },
+            {
+              "ACTION": "string"
+            },
+            {
+              "TITLE": "string"
+            },
+            {
+              "LINKTITLE": "string"
+            },
+            {
+              "LINKURL": "string"
+            },
+            {
+              "PATH": "string"
+            }
+          ]
+        },
+        {
+          "data": [
+            [
+              "Rydych wedi datgan benthyciad teulu fel ffynhonnell eich incwm. Bu newidiadau i'r rheolau ynghylch ffynonellau nad ydynt yn ymwneud â busnes y gallwch eu datgan, darllenwch y canllawiau priodol i weld sut mae hyn yn effeithio arnoch chi.",
+              "Gwirio Canllawiau",
+              "Ffynhonnell Incwm Di-Fusnes",
+              "[Canllawiau ITSA, Arweiniad i Ffynonellau Incwm]",
+              "[www.itsa/cym.gov.uk, www.itsa/incomesources.gov.uk]",
+              "general/non_business_income_sources/income_source"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "EnglishActions",
+      "value": [
+        {
+          "metadata": [
+            {
+              "MESSAGE": "string"
+            },
+            {
+              "ACTION": "string"
+            },
+            {
+              "TITLE": "string"
+            },
+            {
+              "LINKTITLE": "string"
+            },
+            {
+              "LINKURL": "string"
+            },
+            {
+              "PATH": "string"
+            }
+          ]
+        },
+        {
+          "data": [
+            [
+              "You appear to have claimed a previous year losses we have no record for (placeholder).",
+              "Check Lossess Carried Forward",
+              "Losses Carried Forward",
+              "[ITSA Guidance]",
+              "[www.itsa/incomecompliance.gov.uk]",
+              "general/losses_carried_forward"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "typeId",
+      "value": [
+        {
+          "metadata": [
+            {
+              "TYPEID": "string"
+            }
+          ]
+        },
+        {
+          "data": [
+            [
+              "001"
+            ],
+            [
+              "002"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "feedbackId",
+      "value": "replaceFeedbackId"
+    },
+    {
+      "name": "calculationId",
+      "value": "replaceCalculationId"
+    },
+    {
+      "name": "correlationId",
+      "value": "replaceCorrelationId"
+    },
+    {
+      "name": "responseCode",
+      "value": "201"
+    },
+    {
+      "name": "responseMessage",
+      "value": "Feedback Generated"
+    },
+    {
+      "name": "calculationTimestamp",
+      "value": "2019-02-15T09:35:15.094Z"
+    }
+  ]
+}
