@@ -64,7 +64,8 @@ class IfsController @Inject()(headerValidator: HeaderValidatorAction,
             case _ => logger.error(s"[IfsController]: calculationId not found bad request")
                 BadRequest(Json.toJson(invalidPayload))
           }
-          case _ => BadRequest(Json.toJson(invalidPayload))
+          case _ => logger.error(s"[IfsController]: Failed to validate IFS request")
+            BadRequest(Json.toJson(invalidPayload))
         }
       }
     }
