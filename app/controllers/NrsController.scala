@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.NrsHeaderValidatorAction
-import models.{NRSSubmission, NrsAccepted, NrsBadGateway, NrsBadRequest, NrsGatewayTimeout, NrsInternalServerError, NrsServiceUnavailable}
+import models.{NRSSubmission, NrsAccepted, NrsBadGateway, NrsBadRequest, NrsChecksumFailed, NrsGatewayTimeout, NrsInternalServerError, NrsNetworkTimeout, NrsNotFound, NrsServiceUnavailable, NrsUnauthorised}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request}
@@ -50,13 +50,17 @@ class NrsController @Inject()(headerValidator: NrsHeaderValidatorAction,
             if (validChecksum(value)) {
               logger.debug(s"[StubNonRepudiationServiceController] Payload received: ${request.body}")
               getReportId(value) match {
-                case NrsBadRequest.feedbackId          => BadRequest
-                case NrsInternalServerError.feedbackId => InternalServerError(JsString("Internal NRS Submission API error"))
-                case NrsBadGateway.feedbackId         => BadGateway
-                case NrsServiceUnavailable.feedbackId => ServiceUnavailable
-                case NrsGatewayTimeout.feedbackId     => GatewayTimeout
-                case NrsAccepted.feedbackId           => Accepted(requestSuccessfulFake)
-                case _                                => Accepted(requestSuccessfulFake)
+                case NrsBadRequest.feedbackId           => BadRequest
+                case NrsInternalServerError.feedbackId  => InternalServerError(JsString("Internal NRS Submission API error"))
+                case NrsBadGateway.feedbackId           => BadGateway
+                case NrsServiceUnavailable.feedbackId   => ServiceUnavailable
+                case NrsGatewayTimeout.feedbackId       => GatewayTimeout
+                case NrsAccepted.feedbackId             => Accepted(requestSuccessfulFake)
+                case NrsNetworkTimeout.feedbackId       => RequestTimeout
+                case NrsNotFound.feedbackId             => NotFound
+                case NrsChecksumFailed.feedbackId       => ChecksumFailed
+                case NrsUnauthorised.feedbackId         => Unauthorized
+                case _                                  => Accepted(requestSuccessfulFake)
               }
             } else {
               ChecksumFailed
