@@ -49,7 +49,8 @@ class NrsController @Inject()(headerValidator: NrsHeaderValidatorAction,
           case JsSuccess(value, _) =>
             if (validChecksum(value)) {
               logger.debug(s"[StubNonRepudiationServiceController] Payload received: ${request.body}")
-              getReportId(value) match {
+              val feedbackId = getReportId(value)
+              feedbackId match {
                 case NrsBadRequest.feedbackId           => BadRequest
                 case NrsInternalServerError.feedbackId  => InternalServerError(JsString("Internal NRS Submission API error"))
                 case NrsBadGateway.feedbackId           => BadGateway
@@ -63,9 +64,11 @@ class NrsController @Inject()(headerValidator: NrsHeaderValidatorAction,
                 case _                                  => Accepted(requestSuccessfulFake)
               }
             } else {
+              logger.error(s"Nrs checksum failed")
               ChecksumFailed
             }
-          case JsError(errors) => BadRequest(errors.toString())
+          case JsError(errors) => logger.error(s"Nrs validation failed")
+            BadRequest(errors.toString())
         }
       }
     }
