@@ -51,14 +51,6 @@
               "[Capital Allowance Guidance]",
               "[www.itsa/incomecompliance/allowances.gov.uk]",
               "general/business_income_sources/allowances"
-            ],
-            [
-              "You appear to have claimed a previous year losses we have no record for (placeholder).",
-              "Check Lossess Carried Forward",
-              "Losses Carried Forward",
-              "[ITSA Guidance]",
-              "[www.itsa/incomecompliance.gov.uk]",
-              "general/losses_carried_forward"
             ]
           ]
         }
@@ -117,7 +109,7 @@
         {
           "metadata": [
             {
-              "TYPEID": "string"
+              "typeID": "string"
             }
           ]
         },
