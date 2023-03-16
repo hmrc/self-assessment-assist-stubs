@@ -108,19 +108,19 @@ case object RdsNotAvailable404 extends CalculationIdDetails {
 
 case object RdsTimeout408 extends CalculationIdDetails {
   override val calculationId = "408408b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "f065r0b4-06e3-4fef-a555-16fd04080500"
+  override val feedbackId = "c204c0b4-06e3-4fef-a555-16fd0404dd7d"
   override val correlationId = "a5fht738957jfjf845jgjf777"
 }
 
 case object RdsInternalServerError500 extends CalculationIdDetails {
   override val calculationId = "500500b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "f065r0b4-06e3-4fef-a555-16fd05000500"
+  override val feedbackId = "c204c0b4-06e3-4fef-a500-16fd0404dd7d"
   override val correlationId = "a5fht738957jfjf500jgjf777"
 }
 
 case object RdsServiceNotAvailable503 extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "f065r0b4-06e3-4fef-a555-16fd05030500"
+  override val feedbackId = "c204c0b4-06e3-4fef-a503-16fd0404dd7d"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
