@@ -109,7 +109,7 @@
         {
           "metadata": [
             {
-              "typeID": "string"
+              "typeId": "string"
             }
           ]
         },
