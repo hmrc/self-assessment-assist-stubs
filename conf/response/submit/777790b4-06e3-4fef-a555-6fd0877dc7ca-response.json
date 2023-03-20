@@ -117,7 +117,7 @@
         {
           "metadata": [
             {
-              "TYPEID": "string"
+              "typeId": "string"
             }
           ]
         },
