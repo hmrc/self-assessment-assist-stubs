@@ -284,7 +284,7 @@ class RdsControllerSpec extends SpecBase with StubResource{
           .replace("testCorrelationIdValue",calculationIdUnderTest.correlationId)))
 
         val expectedResponse =
-          loadAckResponseTemplate(calculationIdUnderTest.feedbackId, "NJ070957A", "202",s"conf/response/acknowledge/feedback-ack.json")
+          loadAckResponseTemplate(calculationIdUnderTest.feedbackId, "NJ070957A", s"conf/response/acknowledge/feedback-ack-202.json")
 
         status(result) must be(CREATED)
         contentAsJson(result) must be(expectedResponse)

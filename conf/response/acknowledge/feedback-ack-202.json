@@ -27,7 +27,7 @@
     },
     {
       "name": "responseCode",
-      "value": "replaceResponseCode"
+      "value": 202
     },
     {
       "name": "responseMessage",
