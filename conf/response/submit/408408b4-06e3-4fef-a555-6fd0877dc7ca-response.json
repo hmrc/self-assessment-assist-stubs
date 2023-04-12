@@ -95,7 +95,7 @@
     },
     {
       "name": "responseCode",
-      "value": "408"
+      "value": 408
     },
     {
       "name": "responseMessage",

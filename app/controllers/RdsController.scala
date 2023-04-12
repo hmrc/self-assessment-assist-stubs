@@ -47,7 +47,7 @@ class RdsController @Inject()(cc: ControllerComponents)
     s"""
        |{
        |  "code": "FORBIDDEN",
-       |  "message": "Invalid feedback/correlationId"
+       |  "message": "Invalid request"
        |  }
        |""".stripMargin
 

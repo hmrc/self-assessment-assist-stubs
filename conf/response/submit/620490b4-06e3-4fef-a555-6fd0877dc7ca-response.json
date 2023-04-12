@@ -95,7 +95,7 @@
     },
     {
       "name": "responseCode",
-      "value": "204"
+      "value": 204
     },
     {
       "name": "responseMessage",

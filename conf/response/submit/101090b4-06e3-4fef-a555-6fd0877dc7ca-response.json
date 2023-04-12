@@ -135,7 +135,7 @@
     },
     {
       "name": "responseCode",
-      "value": "201"
+      "value": 201
     },
     {
       "name": "responseMessage",
