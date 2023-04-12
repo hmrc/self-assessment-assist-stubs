@@ -221,7 +221,7 @@ class RdsControllerSpec extends SpecBase with StubResource{
         val expectedResponse = Json.parse(s"""
                                              |{
                                              |  "code": "FORBIDDEN",
-                                             |  "message": "Invalid feedback/correlationId"
+                                             |  "message": "Invalid request"
                                              |  }
                                              |""".stripMargin)
         status(result) must be(BAD_REQUEST)
@@ -317,7 +317,7 @@ class RdsControllerSpec extends SpecBase with StubResource{
         val expectedResponse = Json.parse(s"""
                                              |{
                                              |  "code": "FORBIDDEN",
-                                             |  "message": "Invalid feedback/correlationId"
+                                             |  "message": "Invalid request"
                                              |  }
                                              |""".stripMargin)
         status(result) must be(BAD_REQUEST)
