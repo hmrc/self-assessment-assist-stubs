@@ -95,7 +95,7 @@
     },
     {
       "name": "responseCode",
-      "value": "404"
+      "value": 404
     },
     {
       "name": "responseMessage",

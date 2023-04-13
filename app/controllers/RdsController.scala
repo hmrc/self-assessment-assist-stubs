@@ -47,7 +47,7 @@ class RdsController @Inject()(cc: ControllerComponents)
     s"""
        |{
        |  "code": "FORBIDDEN",
-       |  "message": "Invalid feedback/correlationId"
+       |  "message": "Invalid request"
        |  }
        |""".stripMargin
 
@@ -140,12 +140,12 @@ class RdsController @Inject()(cc: ControllerComponents)
               case(RdsInternalServerError500.feedbackId,_)  => (INTERNAL_SERVER_ERROR, Json.parse(rdsInternalServerError))
               case(RdsServiceNotAvailable503.feedbackId,_)  => (SERVICE_UNAVAILABLE, Json.parse(rdsServiceUnvailableError))
               case (feedbackId,correlationId) if (rdsRequest.feedbackId.equals(feedbackId) && rdsRequest.correlationId.equals(correlationId))=>
-                val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "202",s"conf/response/acknowledge/feedback-ack.json")
+                val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, s"conf/response/acknowledge/feedback-ack-202.json")
                 (CREATED, response)
               case(_,_)                                 =>
                   logger.info(s"====== combination not found ======")
                   val fileName = s"conf/response/acknowledge/ack-resp-invalid-report-correlationid-combination.json"
-                  val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, "401",fileName)
+                  val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue,fileName)
                   (CREATED, response)
             }
           } catch {

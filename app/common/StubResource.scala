@@ -16,7 +16,7 @@
 
 package common
 
-import models.{FeedbackForBadRequest, FeedbackMissingCalculationId, NrsAccepted, NrsBadGateway, NrsBadRequest, NrsChecksumFailed, NrsGatewayTimeout, NrsInternalServerError, NrsNetworkTimeout, NrsNotFound, NrsServiceUnavailable, NrsUnauthorised}
+import models.{FeedbackForBadRequest, RdsInvalidRespWithMissingCalculationId, NrsAccepted, NrsBadGateway, NrsBadRequest, NrsChecksumFailed, NrsGatewayTimeout, NrsInternalServerError, NrsNetworkTimeout, NrsNotFound, NrsServiceUnavailable, NrsUnauthorised}
 import play.api.Logging
 import play.api.http.ContentTypes
 import play.api.libs.json.Json
@@ -30,7 +30,7 @@ trait StubResource extends Results with ContentTypes with Logging {
     val templateCotent =
       calculationId match {
         case calcId@(FeedbackForBadRequest.calculationId |
-                     FeedbackMissingCalculationId.calculationId)=>
+                     RdsInvalidRespWithMissingCalculationId.calculationId)=>
           logger.info(s"loading invalid file scenario $calcId")
           findResource(s"conf/response/submit/$calcId-response.json")map(
           _.replace("replaceFeedbackId", replaceFeedbackId)
@@ -62,12 +62,11 @@ trait StubResource extends Results with ContentTypes with Logging {
     parsedContent
   }
 
-  def loadAckResponseTemplate(replaceFeedbackId: String, replaceNino: String, replaceResponseCode:String,fileName:String) = {
+  def loadAckResponseTemplate(replaceFeedbackId: String, replaceNino: String, fileName:String) = {
     val templateCotent =
       findResource(fileName).map(
         _.replace("replaceFeedbackId", replaceFeedbackId)
-          .replace("replaceNino", replaceNino)
-            .replace("replaceResponseCode", replaceResponseCode))
+          .replace("replaceNino", replaceNino))
 
     val parsedContent = templateCotent
       .map(Json.parse)

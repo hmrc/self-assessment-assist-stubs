@@ -10,10 +10,6 @@
   },
   "outputs": [
     {
-      "name": "createdDttm",
-      "value": "2022-12-05T17:08:25.857"
-    },
-    {
       "name": "EnglishActions",
       "value": [
         {
@@ -36,11 +32,6 @@
             {
               "PATH": "string"
             }
-          ]
-        },
-        {
-          "data": [
-            []
           ]
         }
       ]
@@ -69,11 +60,6 @@
               "PATH": "string"
             }
           ]
-        },
-        {
-          "data": [
-            []
-          ]
         }
       ]
     },
@@ -82,12 +68,20 @@
       "value": "replaceCalculationId"
     },
     {
+      "name": "calculationTimestamp",
+      "value": "2019-02-15T09:35:15.094Z"
+    },
+    {
       "name": "correlationId",
-      "value": "replaceCorrelationId"
+      "value": null
+    },
+    {
+      "name": "createdDttm",
+      "value": null
     },
     {
       "name": "feedbackId",
-      "value": "b365c0b4-06e3-4fef-a555-16fd0877dc7c"
+      "value": null
     },
     {
       "name": "nino",
@@ -95,15 +89,19 @@
     },
     {
       "name": "responseCode",
-      "value": "204"
+      "value": 204
     },
     {
       "name": "responseMessage",
       "value": "No feedback applicable"
     },
     {
-      "name": "calculationTimestamp",
-      "value": "2019-02-15T09:35:15.094Z"
+      "name": "typeId",
+      "value": null
+    },
+    {
+      "name":"rt_Record_Contacts_Outer",
+      "value":"e63e5788-ba2c-1047-b4ee-6340432b763f"
     }
   ]
 }
