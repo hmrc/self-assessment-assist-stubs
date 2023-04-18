@@ -51,6 +51,14 @@ class RdsController @Inject()(cc: ControllerComponents)
        |  }
        |""".stripMargin
 
+  private def requestValidationFailure(msg:String): String =
+    s"""
+       |{
+       |  "code": "FORBIDDEN",
+       |  "message": "$msg"
+       |  }
+       |""".stripMargin
+
   private val rdsNotAvailableError: String =
     s"""
        |{
@@ -90,30 +98,34 @@ class RdsController @Inject()(cc: ControllerComponents)
       @annotation.nowarn
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
-          val fraudRiskReportReasons = rdsRequest.fraudRiskReportReasons
-          rdsRequest.calculationId.toString match {
-            case FeedbackForBadRequest.calculationId => (BAD_REQUEST,Json.parse(invalidBodyError))
-            case RdsNotAvailable404.calculationId => (NOT_FOUND,Json.parse(rdsNotAvailableError))
-            case RdsTimeout408.calculationId => (REQUEST_TIMEOUT,Json.parse(rdsRequestTimeoutError))
-            case RdsInternalServerError500.calculationId => (INTERNAL_SERVER_ERROR,Json.parse(rdsInternalServerError))
-            case RdsServiceNotAvailable503.calculationId => (SERVICE_UNAVAILABLE,Json.parse(rdsServiceUnvailableError))
-            case _ =>
-              val calculationIdDetails = calcIdMappings(rdsRequest.calculationId.toString)
-              try {
-                val response =
-                  loadSubmitResponseTemplate(
-                    calculationIdDetails.calculationId,
-                    calculationIdDetails.feedbackId,
-                    calculationIdDetails.correlationId
-                  )
-                logger.info(s"sending response")
-                (CREATED, response)
-              } catch {
-                case _: FileNotFoundException => (NOT_FOUND, Json.parse(error))
-                case _: BadRequestException => (BAD_REQUEST, Json.parse(invalidBodyError))
-                case NonFatal(_) => (INTERNAL_SERVER_ERROR, Json.parse(error))
-              }
-          }
+            rdsRequest.isValid match {
+              case (true,_) =>
+                rdsRequest.calculationId.toString match {
+                  case FeedbackForBadRequest.calculationId => (BAD_REQUEST, Json.parse(invalidBodyError))
+                  case RdsNotAvailable404.calculationId => (NOT_FOUND, Json.parse(rdsNotAvailableError))
+                  case RdsTimeout408.calculationId => (REQUEST_TIMEOUT, Json.parse(rdsRequestTimeoutError))
+                  case RdsInternalServerError500.calculationId => (INTERNAL_SERVER_ERROR, Json.parse(rdsInternalServerError))
+                  case RdsServiceNotAvailable503.calculationId => (SERVICE_UNAVAILABLE, Json.parse(rdsServiceUnvailableError))
+                  case _ =>
+                    val calculationIdDetails = calcIdMappings(rdsRequest.calculationId.toString)
+                    try {
+                      val response =
+                        loadSubmitResponseTemplate(
+                          calculationIdDetails.calculationId,
+                          calculationIdDetails.feedbackId,
+                          calculationIdDetails.correlationId
+                        )
+                      logger.info(s"sending response")
+                      (CREATED, response)
+                    } catch {
+                      case _: FileNotFoundException => (NOT_FOUND, Json.parse(error))
+                      case _: BadRequestException => (BAD_REQUEST, Json.parse(invalidBodyError))
+                      case NonFatal(_) => (INTERNAL_SERVER_ERROR, Json.parse(error))
+                    }
+                }
+              case (false,msg) => (BAD_REQUEST, Json.parse(requestValidationFailure(msg)))
+            }
+
 
         case JsError(_) => (BAD_REQUEST, Json.parse(invalidBodyError))
       }
