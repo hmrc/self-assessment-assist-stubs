@@ -29,7 +29,7 @@ import scala.concurrent.Future
 
 class RdsControllerSpec extends SpecBase with StubResource{
 
-  val generateReportRequestBody = s"""{
+  val validTaxYearFormat = s"""{
                         |  "inputs": [
                         |    {
                         |      "name": "calculationId",
@@ -41,7 +41,7 @@ class RdsControllerSpec extends SpecBase with StubResource{
                         |    },
                         |    {
                         |      "name": "taxYear",
-                        |      "value": "2021-22"
+                        |      "value": 2021
                         |    },
                         |    {
                         |      "name": "customerType",
@@ -114,6 +114,91 @@ class RdsControllerSpec extends SpecBase with StubResource{
                         |  ]
                         |}""".stripMargin
 
+  val inValidTaxYearFormat = s"""{
+                                                        |  "inputs": [
+                                                        |    {
+                                                        |      "name": "calculationId",
+                                                        |      "value": "testCalculationIdValue"
+                                                        |    },
+                                                        |    {
+                                                        |      "name": "nino",
+                                                        |      "value": "NJ070957A"
+                                                        |    },
+                                                        |    {
+                                                        |      "name": "taxYear",
+                                                        |      "value": "2021-22"
+                                                        |    },
+                                                        |    {
+                                                        |      "name": "customerType",
+                                                        |      "value": "T"
+                                                        |    },
+                                                        |    {
+                                                        |      "name": "agentRef",
+                                                        |      "value": ""
+                                                        |    },
+                                                        |    {
+                                                        |      "name": "preferredLanguage",
+                                                        |      "value": "EN"
+                                                        |    },
+                                                        |    {
+                                                        |      "name": "fraudRiskReportScore",
+                                                        |      "value": 0
+                                                        |    },
+                                                        |    {
+                                                        |      "name": "fraudRiskReportHeaders",
+                                                        |      "value": [
+                                                        |        {
+                                                        |          "metadata": [
+                                                        |            {
+                                                        |              "KEY": "string"
+                                                        |            },
+                                                        |            {
+                                                        |              "VALUE": "string"
+                                                        |            }
+                                                        |          ]
+                                                        |        },
+                                                        |        {
+                                                        |          "data": [
+                                                        |            [
+                                                        |              "Gov-Client-MAC-Addresses",
+                                                        |              ""
+                                                        |            ],
+                                                        |            [
+                                                        |              "Gov-Client-Timezone",
+                                                        |              ""
+                                                        |            ]
+                                                        |          ]
+                                                        |        }
+                                                        |      ]
+                                                        |    },
+                                                        |    {
+                                                        |      "name": "fraudRiskReportReasons",
+                                                        |      "value": [
+                                                        |        {
+                                                        |          "metadata": [
+                                                        |            {
+                                                        |              "Reason": "string"
+                                                        |            }
+                                                        |          ]
+                                                        |        },
+                                                        |        {
+                                                        |          "data": [
+                                                        |            [
+                                                        |              "UTR 0128925978251 is 3 hops from a something risky. The average UTR is 4.7 hops from something risky."
+                                                        |            ],
+                                                        |            [
+                                                        |              "DEVICE_ID e171dda8-bd00-415b-962b-b169b8b777a4 has been previously marked as Fraud. The average DEVICE_ID is 5.1 hops from something risky"
+                                                        |            ],
+                                                        |            [
+                                                        |              "NINO AB182561B is 2 hops from something risky. The average NINO is 3.1 hops from something risky."
+                                                        |            ]
+                                                        |          ]
+                                                        |        }
+                                                        |      ]
+                                                        |    }
+                                                        |  ]
+                                                        |}""".stripMargin
+
 
   val acknowledgeReportRequestBody = s"""{
                                         |  "inputs": [
@@ -153,7 +238,7 @@ class RdsControllerSpec extends SpecBase with StubResource{
     "provided with a valid request" must {
       "return a http status as created with the Report" in {
         val calculationIdUnderTest = calcIdMappings(FeedbackOneHttp201ResponseCode201.calculationId)
-        val result = callGenerateReport(Json.parse(generateReportRequestBody.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
+        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
 
         val expectedResponse =
           loadSubmitResponseTemplate(
@@ -167,10 +252,26 @@ class RdsControllerSpec extends SpecBase with StubResource{
       }
     }
 
+    "provided with a request with invalid taxyear format" must {
+      "return a http status as badrequest " in {
+        val calculationIdUnderTest = calcIdMappings(FeedbackOneHttp201ResponseCode201.calculationId)
+        val result = callGenerateReport(Json.parse(inValidTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
+        val expectedResponse =   Json.parse(s"""
+                                    |{
+                                    |  "code": "FORBIDDEN",
+                                    |  "message": "The field taxYear is not a valid value."
+                                    |  }
+                                    |""".stripMargin)
+
+        status(result) must be(BAD_REQUEST)
+        contentAsJson(result) must be(expectedResponse)
+      }
+    }
+
     "provided with a valid request with calculationId that has no feedback in RDS" must {
       "return a http status as created with the Report" in {
         val calculationIdUnderTest = calcIdMappings(FeedbackHttp201ResponseCode204.calculationId)
-        val result = callGenerateReport(Json.parse(generateReportRequestBody.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
+        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
 
         val expectedResponse =
           loadSubmitResponseTemplate(
@@ -187,7 +288,7 @@ class RdsControllerSpec extends SpecBase with StubResource{
     "provided with an valid request, but calcualationId is not available " must {
       "return a http status as created with body response code 404" in {
         val calculationIdUnderTest = calcIdMappings(FeedbackHttp201ResponseCode404.calculationId)
-        val result = callGenerateReport(Json.parse(generateReportRequestBody.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
+        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
         val expectedResponse =
           loadSubmitResponseTemplate(
             FeedbackHttp201ResponseCode404.calculationId,
@@ -202,7 +303,7 @@ class RdsControllerSpec extends SpecBase with StubResource{
     "provided with an valid request, but RDS is not available " must {
       "return a 404" in {
         val calculationIdUnderTest = calcIdMappings(RdsNotAvailable404.calculationId)
-        val result = callGenerateReport(Json.parse(generateReportRequestBody.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
+        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
         val expectedResponse = Json.parse(s"""
                                              |{
                                              |  "code": "NOT_FOUND",
@@ -217,7 +318,7 @@ class RdsControllerSpec extends SpecBase with StubResource{
     "provided with an invalid request" must {
       "return a BAD REQUEST" in {
         val calculationIdUnderTest = calcIdMappings(FeedbackForBadRequest.calculationId)
-        val result = callGenerateReport(Json.parse(generateReportRequestBody.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
+        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
         val expectedResponse = Json.parse(s"""
                                              |{
                                              |  "code": "FORBIDDEN",
@@ -232,7 +333,7 @@ class RdsControllerSpec extends SpecBase with StubResource{
     "provided with an valid request, but RDS timeout" must {
       "return a REQUEST_TIMEOUT" in {
         val calculationIdUnderTest = calcIdMappings(RdsTimeout408.calculationId)
-        val result = callGenerateReport(Json.parse(generateReportRequestBody.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
+        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
         val expectedResponse = Json.parse(s"""
                                              |{
                                              |  "code": "REQUEST_TIMEOUT",
@@ -247,7 +348,7 @@ class RdsControllerSpec extends SpecBase with StubResource{
     "provided with an valid request, but RDS has internal server error" must {
       "return a INTERNAL_SERVER_ERROR" in {
         val calculationIdUnderTest = calcIdMappings(RdsInternalServerError500.calculationId)
-        val result = callGenerateReport(Json.parse(generateReportRequestBody.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
+        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
         val expectedResponse = Json.parse(s"""
                                              |{
                                              |  "code": "INTERNAL_SERVER_ERROR",
@@ -262,7 +363,7 @@ class RdsControllerSpec extends SpecBase with StubResource{
     "provided with an valid request, but RDS service is not available" must {
       "return a SERVICE_UNAVAIALBLE" in {
         val calculationIdUnderTest = calcIdMappings(RdsServiceNotAvailable503.calculationId)
-        val result = callGenerateReport(Json.parse(generateReportRequestBody.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
+        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
         val expectedResponse = Json.parse(s"""
                                              |{
                                              |  "code": "SERVICE_UNAVAIALBLE",
