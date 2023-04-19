@@ -31,7 +31,7 @@ case class RdsRequest(inputs: Seq[Input]) {
 
   def ninoValue: String =
     inputs.find(_.name == "nino").map(_.value.toString)
-      .getOrElse(throw new BadRequestException("No 'nino' present."))//TODO fix me later, not the right exception
+      .getOrElse(throw new BadRequestException("No 'nino' present."))
 
   def feedbackId: String =
     inputs.find(_.name == "feedbackId").map(_.value.toString)
@@ -43,7 +43,21 @@ case class RdsRequest(inputs: Seq[Input]) {
 
   def fraudRiskReportReasons: Seq[Any] =
     inputs.find(_.name == "fraudRiskReportReasons").map(r => Seq(r.value))
-      .getOrElse(throw new BadRequestException("The value of the field \"fraudRiskReportReasons\" must not be empty or missing."))
+      .getOrElse(throw new BadRequestException("The field \"fraudRiskReportReasons\" must not be missing."))
+
+  def taxYear: String =
+    inputs.find(_.name == "taxYear").map(r => r.value.toString)
+      .getOrElse(throw new BadRequestException("The field \"taxYear\" must be a number and must not be missing."))
+
+  def isValid:(Boolean,String) =   {
+    println(s"$taxYear value")
+    if(fraudRiskReportReasons.isEmpty)
+      (false,"The field fraudRiskReportReasons must not be empty.")
+    else if(taxYear.toString.length !=4) {
+      (false,"The field taxYear is not a valid value.")
+    } else (true,"")
+  }
+
 
 }
 
