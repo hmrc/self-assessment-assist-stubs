@@ -1,7 +1,5 @@
 # microservice specific routes
 
-GET         /greet                                                                      controllers.GreetingController.greet()
-
 POST 	    /fraud                                                                      controllers.CipFraudController.submitFraudInfo()
 # RDS
 POST        /rds/assessments/self-assessment-assist                                     controllers.RdsController.generateReport()
