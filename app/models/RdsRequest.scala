@@ -26,38 +26,49 @@ import java.util.UUID
 case class RdsRequest(inputs: Seq[Input]) {
 
   def calculationId: UUID =
-    inputs.find(_.name == "calculationId").map(_.value.toString).map(UUID.fromString)
+    inputs
+      .find(_.name == "calculationId")
+      .map(_.value.toString)
+      .map(UUID.fromString)
       .getOrElse(throw new BadRequestException("No 'calculationId' present."))
 
   def ninoValue: String =
-    inputs.find(_.name == "nino").map(_.value.toString)
+    inputs
+      .find(_.name == "nino")
+      .map(_.value.toString)
       .getOrElse(throw new BadRequestException("No 'nino' present."))
 
   def feedbackId: String =
-    inputs.find(_.name == "feedbackId").map(_.value.toString)
+    inputs
+      .find(_.name == "feedbackId")
+      .map(_.value.toString)
       .getOrElse(throw new BadRequestException("No 'feedbackId' present."))
 
   def correlationId: String =
-    inputs.find(_.name == "correlationId").map(_.value.toString)
+    inputs
+      .find(_.name == "correlationId")
+      .map(_.value.toString)
       .getOrElse(throw new BadRequestException("No 'correlationId' present."))
 
   def fraudRiskReportReasons: Seq[Any] =
-    inputs.find(_.name == "fraudRiskReportReasons").map(r => Seq(r.value))
+    inputs
+      .find(_.name == "fraudRiskReportReasons")
+      .map(r => Seq(r.value))
       .getOrElse(throw new BadRequestException("The field \"fraudRiskReportReasons\" must not be missing."))
 
   def taxYear: String =
-    inputs.find(_.name == "taxYear").map(r => r.value.toString)
+    inputs
+      .find(_.name == "taxYear")
+      .map(r => r.value.toString)
       .getOrElse(throw new BadRequestException("The field \"taxYear\" must be a number and must not be missing."))
 
-  def isValid:(Boolean,String) =   {
-    println(s"$taxYear value")
-    if(fraudRiskReportReasons.isEmpty)
-      (false,"The field fraudRiskReportReasons must not be empty.")
-    else if(taxYear.toString.length !=4) {
-      (false,"The field taxYear is not a valid value.")
-    } else (true,"")
+  def isValid: (Boolean, String) = {
+    if (fraudRiskReportReasons.isEmpty)
+      (false, "The field fraudRiskReportReasons must not be empty.")
+    else if (taxYear.toString.length != 4) {
+      (false, "The field taxYear is not a valid value.")
+    } else (true, "")
   }
-
 
 }
 
@@ -84,23 +95,23 @@ object RdsRequest {
   case class DataWrapper(data: Seq[Seq[String]]) extends ObjectPart
 
   object Input {
+
     @annotation.nowarn
-    implicit val reads: Reads[Input] = {
-      case json@JsObject(values) =>
-        values.get("value") match {
-          case Some(JsString(_)) => InputWithString.reads.reads(json)
-          case Some(JsNull) => InputWithString.reads.reads(json)
-          case Some(JsNumber(_)) => InputWithInt.reads.reads(json)
-          case Some(JsArray(_)) => InputWithObject.reads.reads(json)
-          case Some(JsBoolean(_)) => InputWithBoolean.reads.reads(json)
-        }
+    implicit val reads: Reads[Input] = { case json @ JsObject(values) =>
+      values.get("value") match {
+        case Some(JsString(_))  => InputWithString.reads.reads(json)
+        case Some(JsNull)       => InputWithString.reads.reads(json)
+        case Some(JsNumber(_))  => InputWithInt.reads.reads(json)
+        case Some(JsArray(_))   => InputWithObject.reads.reads(json)
+        case Some(JsBoolean(_)) => InputWithBoolean.reads.reads(json)
+      }
     }
 
     @annotation.nowarn
     implicit val writes: Writes[Input] = {
-      case i@InputWithString(_, _) => InputWithString.writes.writes(i)
-      case i@InputWithInt(_, _) => InputWithInt.writes.writes(i)
-      case i@InputWithObject(_, _) => InputWithObject.writes.writes(i)
+      case i @ InputWithString(_, _) => InputWithString.writes.writes(i)
+      case i @ InputWithInt(_, _)    => InputWithInt.writes.writes(i)
+      case i @ InputWithObject(_, _) => InputWithObject.writes.writes(i)
     }
 
   }
@@ -108,11 +119,13 @@ object RdsRequest {
   object InputWithString {
 
     val reads: Reads[InputWithString] =
-      (JsPath \ "name").read[String]
+      (JsPath \ "name")
+        .read[String]
         .and((JsPath \ "value").readWithDefault[String](null))(InputWithString.apply _)
 
     val writes: Writes[InputWithString] =
-      (JsPath \ "name").write[String]
+      (JsPath \ "name")
+        .write[String]
         .and((JsPath \ "value").write[String])(unlift(InputWithString.unapply))
 
   }
@@ -120,11 +133,13 @@ object RdsRequest {
   object InputWithInt {
 
     val reads: Reads[InputWithInt] =
-      (JsPath \ "name").read[String]
+      (JsPath \ "name")
+        .read[String]
         .and((JsPath \ "value").read[Int])(InputWithInt.apply _)
 
     val writes: Writes[InputWithInt] =
-      (JsPath \ "name").write[String]
+      (JsPath \ "name")
+        .write[String]
         .and((JsPath \ "value").write[Int])(unlift(InputWithInt.unapply))
 
   }
@@ -132,11 +147,13 @@ object RdsRequest {
   object InputWithObject {
 
     val reads: Reads[InputWithObject] =
-      (JsPath \ "name").read[String]
+      (JsPath \ "name")
+        .read[String]
         .and((JsPath \ "value").read[Seq[ObjectPart]])(InputWithObject.apply _)
 
     val writes: Writes[InputWithObject] =
-      (JsPath \ "name").write[String]
+      (JsPath \ "name")
+        .write[String]
         .and((JsPath \ "value").write[Seq[ObjectPart]])(unlift(InputWithObject.unapply))
 
   }
@@ -144,11 +161,13 @@ object RdsRequest {
   object InputWithBoolean {
 
     val reads: Reads[InputWithBoolean] =
-      (JsPath \ "name").read[String]
+      (JsPath \ "name")
+        .read[String]
         .and((JsPath \ "value").readWithDefault[Boolean](false))(InputWithBoolean.apply _)
 
     val writes: Writes[InputWithBoolean] =
-      (JsPath \ "name").write[String]
+      (JsPath \ "name")
+        .write[String]
         .and((JsPath \ "value").write[Boolean])(unlift(InputWithBoolean.unapply))
 
   }
@@ -156,18 +175,17 @@ object RdsRequest {
   object ObjectPart {
 
     @annotation.nowarn
-    implicit val reads: Reads[ObjectPart] = {
-      case json@JsObject(values) =>
-        values.keys.toList match {
-          case List("metadata") => MetadataWrapper.reads.reads(json)
-          case List("data") => DataWrapper.reads.reads(json)
-        }
+    implicit val reads: Reads[ObjectPart] = { case json @ JsObject(values) =>
+      values.keys.toList match {
+        case List("metadata") => MetadataWrapper.reads.reads(json)
+        case List("data")     => DataWrapper.reads.reads(json)
+      }
     }
 
     @annotation.nowarn
     implicit val writes: Writes[ObjectPart] = {
-      case o@MetadataWrapper(_) => MetadataWrapper.writes.writes(o)
-      case o@DataWrapper(_) => DataWrapper.writes.writes(o)
+      case o @ MetadataWrapper(_) => MetadataWrapper.writes.writes(o)
+      case o @ DataWrapper(_)     => DataWrapper.writes.writes(o)
     }
 
   }
