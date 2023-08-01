@@ -26,43 +26,54 @@ import play.api.test.Helpers._
 import java.time.OffsetDateTime
 import scala.concurrent.Future
 
-class IfsControllerSpec extends SpecBase{
+class IfsControllerSpec extends SpecBase {
 
   private val controller: IfsController = app.injector.instanceOf[IfsController]
 
-  private def submitStoreInteraction(calculationId: String): Future[Result] = {
+  private val links = Some(
+    Seq(
+      IFRequestPayloadActionLinks("[Canllawiau ITSA, Arweiniad i Ffynonellau Incwm]", "[www.itsa/cym.gov.uk, www.itsa/incomesources.gov.uk]"),
+      IFRequestPayloadActionLinks("[Cyfrifo am Incwm]", "[www.itsa/incomecompliance.gov.uk]")
+    )
+  )
+
+  private def submitStoreInteraction(calculationId: String, links: Option[Seq[IFRequestPayloadActionLinks]] = None): Future[Result] = {
     val req = IFRequest(
       serviceRegime = "self-assessment-assist",
       eventName = "GenerateReport",
       eventTimestamp = OffsetDateTime.now(),
       feedbackId = "feedbackId",
       metaData = List(
-        Map("nino" -> "nino"),
-        Map("taxYear" -> "2023"),
-        Map("calculationId" -> calculationId),
-        Map("customerType" -> "Agent"),
+        Map("nino"                 -> "nino"),
+        Map("taxYear"              -> "2023"),
+        Map("calculationId"        -> calculationId),
+        Map("customerType"         -> "Agent"),
         Map("agentReferenceNumber" -> "12345"),
         Map("calculationTimestamp" -> "2019-02-15T09:35:15.094Z")
       ),
-      payload = Some(Messages(Some(Seq(IFRequestPayload(
-        messageId = "messageId",
-        englishAction = IFRequestPayloadAction(
-          title = "title",
-          message = "message",
-          action = "action",
-          path = "path",
-          links = None
-        ),
-        welshAction = IFRequestPayloadAction(
-          title = "TODO - title",
-          message = "TODO - message",
-          action = "TODO - action",
-          path = "TODO - path",
-          links = None
-        ))))
-      )))
+      payload = Some(
+        Messages(Some(Seq(IFRequestPayload(
+          messageId = "messageId",
+          englishAction = IFRequestPayloadAction(
+            title = "title",
+            message = "message",
+            action = "action",
+            path = "path",
+            links = links
+          ),
+          welshAction = IFRequestPayloadAction(
+            title = "TODO - title",
+            message = "TODO - message",
+            action = "TODO - action",
+            path = "TODO - path",
+            links = links
+          )
+        )))))
+    )
 
-    val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/interaction-data/store-interactions").withBody(Json.toJson(req)).withHeaders(("Authorization", "ABCD1234"),("Content-Type", "application/json") )
+    val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/interaction-data/store-interactions")
+      .withBody(Json.toJson(req))
+      .withHeaders(("Authorization", "ABCD1234"), ("Content-Type", "application/json"))
     controller.submit().apply(fakeRequest)
   }
 
@@ -73,28 +84,32 @@ class IfsControllerSpec extends SpecBase{
       eventTimestamp = OffsetDateTime.now(),
       feedbackId,
       metaData = List(
-        Map("nino" -> "nino"),
-        Map("taxYear" -> "2023"),
+        Map("nino"    -> "nino"),
+        Map("taxYear" -> "2023")
       ),
-      payload = Some(Messages(Some(List(IFRequestPayload(
-        messageId = "messageId",
-        englishAction = IFRequestPayloadAction(
-          title = "title",
-          message = "message",
-          action = "action",
-          path = "path",
-          links = None
-        ),
-        welshAction = IFRequestPayloadAction(
-          title = "TODO - title",
-          message = "TODO - message",
-          action = "TODO - action",
-          path = "TODO - path",
-          links = None
-        ))))
-      )))
+      payload = Some(
+        Messages(Some(List(IFRequestPayload(
+          messageId = "messageId",
+          englishAction = IFRequestPayloadAction(
+            title = "title",
+            message = "message",
+            action = "action",
+            path = "path",
+            links = None
+          ),
+          welshAction = IFRequestPayloadAction(
+            title = "TODO - title",
+            message = "TODO - message",
+            action = "TODO - action",
+            path = "TODO - path",
+            links = None
+          )
+        )))))
+    )
 
-    val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/interaction-data/store-interactions").withBody(Json.toJson(req)).withHeaders(("Authorization", "ABCD1234"),("Content-Type", "application/json") )
+    val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/interaction-data/store-interactions")
+      .withBody(Json.toJson(req))
+      .withHeaders(("Authorization", "ABCD1234"), ("Content-Type", "application/json"))
     controller.submit().apply(fakeRequest)
   }
 
@@ -110,6 +125,13 @@ class IfsControllerSpec extends SpecBase{
     "generate report: provided with a calculation id in metadata to trigger invalid correlationId" must {
       "return 400" in {
         val result = submitStoreInteraction(IfsServiceBadRequest400.calculationId)
+        status(result) must be(BAD_REQUEST)
+      }
+    }
+
+    "generate report: provided with a valid calculation id in metadata but invalid links" must {
+      "return 400" in {
+        val result = submitStoreInteraction(FeedbackOneHttp201ResponseCode201.calculationId, links)
         status(result) must be(BAD_REQUEST)
       }
     }
@@ -171,4 +193,5 @@ class IfsControllerSpec extends SpecBase{
     }
 
   }
+
 }
