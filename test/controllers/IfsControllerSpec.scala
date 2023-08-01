@@ -122,6 +122,13 @@ class IfsControllerSpec extends SpecBase {
       }
     }
 
+    "generate report: provided with a calculation id in metadata to trigger invalid correlationId" must {
+      "return 400" in {
+        val result = submitStoreInteraction(IfsServiceBadRequest400.calculationId, None)
+        status(result) must be(BAD_REQUEST)
+      }
+    }
+
     "generate report: provided with a valid calculation id in metadata but invalid links" must {
       "return 400" in {
         val result = submitStoreInteraction(FeedbackOneHttp201ResponseCode201.calculationId, links)
