@@ -37,7 +37,7 @@ class IfsControllerSpec extends SpecBase {
     )
   )
 
-  private def submitStoreInteraction(calculationId: String, links: Option[Seq[IFRequestPayloadActionLinks]]): Future[Result] = {
+  private def submitStoreInteraction(calculationId: String, links: Option[Seq[IFRequestPayloadActionLinks]] = None): Future[Result] = {
     val req = IFRequest(
       serviceRegime = "self-assessment-assist",
       eventName = "GenerateReport",
@@ -117,14 +117,14 @@ class IfsControllerSpec extends SpecBase {
 
     "generate report: provided with a calculation id in metadata" must {
       "return 204" in {
-        val result = submitStoreInteraction("good one", None)
+        val result = submitStoreInteraction("good one")
         status(result) must be(NO_CONTENT)
       }
     }
 
     "generate report: provided with a calculation id in metadata to trigger invalid correlationId" must {
       "return 400" in {
-        val result = submitStoreInteraction(IfsServiceBadRequest400.calculationId, None)
+        val result = submitStoreInteraction(IfsServiceBadRequest400.calculationId)
         status(result) must be(BAD_REQUEST)
       }
     }
@@ -138,21 +138,21 @@ class IfsControllerSpec extends SpecBase {
 
     "generate report: provided with a calculation id in metadata to service unavailable" must {
       "return 503" in {
-        val result = submitStoreInteraction(IfsServiceNotAvailable503.calculationId, None)
+        val result = submitStoreInteraction(IfsServiceNotAvailable503.calculationId)
         status(result) must be(SERVICE_UNAVAILABLE)
       }
     }
 
     "generate report: provided with a calculation id in metadata to trigger request timeout" must {
       "return 408" in {
-        val result = submitStoreInteraction(IfsServiceRequestTimeout408.calculationId, None)
+        val result = submitStoreInteraction(IfsServiceRequestTimeout408.calculationId)
         status(result) must be(REQUEST_TIMEOUT)
       }
     }
 
     "generate report: with a calculation id in metadata to trigger internal server error" must {
       "return 500" in {
-        val result = submitStoreInteraction(IfsInternalServerError500.calculationId, None)
+        val result = submitStoreInteraction(IfsInternalServerError500.calculationId)
         status(result) must be(INTERNAL_SERVER_ERROR)
       }
     }
