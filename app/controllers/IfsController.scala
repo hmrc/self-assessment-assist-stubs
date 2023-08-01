@@ -17,7 +17,15 @@
 package controllers
 
 import controllers.actions.HeaderValidatorAction
-import models.{Error, IFRequest, IfsInternalServerError500, IfsServiceBadRequest400, IfsServiceNotAvailable503, IfsServiceRequestTimeout408}
+import models.{
+  Error,
+  IFRequest,
+  IFRequestPayloadActionLinks,
+  IfsInternalServerError500,
+  IfsServiceBadRequest400,
+  IfsServiceNotAvailable503,
+  IfsServiceRequestTimeout408
+}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request}
@@ -27,48 +35,73 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
-class IfsController @Inject()(headerValidator: HeaderValidatorAction,
-                              cc: ControllerComponents
-                             )(implicit ec: ExecutionContext)
-  extends BackendController(cc) with Logging {
+class IfsController @Inject() (headerValidator: HeaderValidatorAction, cc: ControllerComponents)(implicit ec: ExecutionContext)
+    extends BackendController(cc)
+    with Logging {
 
-
-  val invalidPayload: Error = Error("INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload.")
+  val invalidPayload: Error       = Error("INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload.")
   val invalidCorrelationId: Error = Error("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid header CorrelationId.")
-  val serviceUnavailable: Error = Error("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
+  val serviceUnavailable: Error   = Error("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
 
   def submit(): Action[JsValue] = {
     headerValidator.async(parse.json) { implicit request: Request[JsValue] =>
       Future {
         request.body.validate[IFRequest] match {
-          case JsSuccess(value, _)  if (value.eventName == "AcknowledgeReport") =>
+          case JsSuccess(value, _) if (value.eventName == "AcknowledgeReport") =>
             logger.info(s"Processing AcknowledgeReport report")
             value.feedbackId match {
-              case IfsInternalServerError500.feedbackId => InternalServerError
+              case IfsInternalServerError500.feedbackId   => InternalServerError
               case IfsServiceRequestTimeout408.feedbackId => RequestTimeout
-              case IfsServiceNotAvailable503.feedbackId => ServiceUnavailable(Json.toJson(serviceUnavailable))
-              case IfsServiceBadRequest400.feedbackId => BadRequest(Json.toJson(invalidPayload))
-              case _ => NoContent
+              case IfsServiceNotAvailable503.feedbackId   => ServiceUnavailable(Json.toJson(serviceUnavailable))
+              case IfsServiceBadRequest400.feedbackId     => BadRequest(Json.toJson(invalidPayload))
+              case _                                      => NoContent
             }
-
           case JsSuccess(value, _) =>
-            logger.info(s"Processing generate report")
-            value.metaData.find(_.contains("calculationId")) match {
-            case Some(value) => value.get("calculationId") match {
-              case Some(IfsInternalServerError500.calculationId) => InternalServerError
-              case Some(IfsServiceRequestTimeout408.calculationId) => RequestTimeout
-              case Some(IfsServiceBadRequest400.calculationId) => BadRequest(Json.toJson(invalidCorrelationId))
-              case Some(IfsServiceNotAvailable503.calculationId) => ServiceUnavailable(Json.toJson(serviceUnavailable))
-              case _ => NoContent
+            if (!hasInvalidLinks(value)) {
+              logger.info(s"Processing generate report")
+              value.metaData.find(_.contains("calculationId")) match {
+                case Some(value) =>
+                  value.get("calculationId") match {
+                    case Some(IfsInternalServerError500.calculationId)   => InternalServerError
+                    case Some(IfsServiceRequestTimeout408.calculationId) => RequestTimeout
+                    case Some(IfsServiceBadRequest400.calculationId)     => BadRequest(Json.toJson(invalidCorrelationId))
+                    case Some(IfsServiceNotAvailable503.calculationId)   => ServiceUnavailable(Json.toJson(serviceUnavailable))
+                    case _                                               => NoContent
+                  }
+                case _ =>
+                  logger.error(s"[IfsController]: calculationId not found bad request")
+                  BadRequest(Json.toJson(invalidPayload))
+              }
+            } else {
+              logger.error(s"[IfsController]: Invalid links array ")
+              BadRequest(Json.toJson(invalidPayload))
             }
-            case _ => logger.error(s"[IfsController]: calculationId not found bad request")
-                BadRequest(Json.toJson(invalidPayload))
-          }
-          case _ => logger.error(s"[IfsController]: Failed to validate IFS request")
+          case _ =>
+            logger.error(s"[IfsController]: Failed to validate IFS request")
             BadRequest(Json.toJson(invalidPayload))
         }
       }
     }
   }
-}
 
+  private def hasInvalidLinks(value: IFRequest): Boolean = {
+    value.payload.exists { messages =>
+      messages.messages.exists { ifRequestPayloadSeq =>
+        ifRequestPayloadSeq.exists { ifRequestPayload =>
+          hasInvalidSquareBrackets(ifRequestPayload.englishAction.links) ||
+          hasInvalidSquareBrackets(ifRequestPayload.welshAction.links)
+        }
+      }
+    }
+  }
+
+  private def hasInvalidSquareBrackets(links: Option[Seq[IFRequestPayloadActionLinks]]): Boolean = {
+    links.exists {
+      _.exists { link =>
+        link.linkTitle.contains('[') || link.linkTitle.contains(']') ||
+        link.linkUrl.contains('[') || link.linkUrl.contains(']')
+      }
+    }
+  }
+
+}
