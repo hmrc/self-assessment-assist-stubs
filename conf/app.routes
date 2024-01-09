@@ -9,7 +9,5 @@ POST 	    /submission                                                           
 
 POST 	    /interaction-data/store-interactions                                        controllers.IfsController.submit()
 
-GET         /mtd-identifier-lookup/nino/:nino                                           controllers.IdentifierLookupController.lookup(nino: String)
-
 PUT         /*route                                                                     controllers.GenericController.unsupportedRequestHandler(route)
 DELETE      /*route                                                                     controllers.GenericController.unsupportedRequestHandler(route)
