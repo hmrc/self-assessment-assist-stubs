@@ -13,7 +13,7 @@ It is build using
 ## Development Setup
 Run the microservice from the console using: `sbt run` (starts on port 8343)
 
-Start the service manager profile: `sm --start SELF_ASSESSMENT_ASSIST_STUBS`
+Start the service manager profile: `sm2 --start SELF_ASSESSMENT_ASSIST_STUBS`
 
 ## Highlighted SBT Tasks
 | Task                    | Description                                                                                          | Command
