@@ -25,7 +25,7 @@ trait HeaderValidator {
 
   val CONTENT_TYPE_HEADER = "Content-Type"
   val API_KEY_HEADER = "X-API-Key"
-  val TOKEN_HEADER = "Authorization"
+  private val TOKEN_HEADER = "Authorization"
   private val VALID_CONTENT_TYPE = "application/json"
   private val VALID_API_KEY = "dummy-api-key"
   private val VALID_TOKEN_VALUE = "ABCD1234"

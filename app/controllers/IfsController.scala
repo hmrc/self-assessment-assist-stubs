@@ -39,15 +39,15 @@ class IfsController @Inject() (headerValidator: HeaderValidatorAction, cc: Contr
     extends BackendController(cc)
     with Logging {
 
-  val invalidPayload: Error       = Error("INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload.")
-  val invalidCorrelationId: Error = Error("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid header CorrelationId.")
-  val serviceUnavailable: Error   = Error("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
+  private val invalidPayload: Error       = Error("INVALID_PAYLOAD", "Submission has not passed validation. Invalid payload.")
+  private val invalidCorrelationId: Error = Error("INVALID_CORRELATIONID", "Submission has not passed validation. Invalid header CorrelationId.")
+  private val serviceUnavailable: Error   = Error("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
 
   def submit(): Action[JsValue] = {
     headerValidator.async(parse.json) { implicit request: Request[JsValue] =>
       Future {
         request.body.validate[IFRequest] match {
-          case JsSuccess(value, _) if (value.eventName == "AcknowledgeReport") =>
+          case JsSuccess(value, _) if value.eventName == "AcknowledgeReport" =>
             logger.info(s"Processing AcknowledgeReport report")
             value.feedbackId match {
               case IfsInternalServerError500.feedbackId   => InternalServerError

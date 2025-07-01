@@ -28,7 +28,7 @@ class GenericController @Inject()(cc: ControllerComponents)(implicit ec: Executi
   extends BackendController(cc) {
 
   def unsupportedRequestHandler(id: String): Action[JsValue] = Action.async(parse.json) {
-    request => {
+    _ => {
 
       def requestSuccesfulFake = {
         val retSubmissionSuccesful =

@@ -95,7 +95,6 @@ class RdsController @Inject()(cc: ControllerComponents)
     request: Request[JsValue] => {
       logger.info(s"======Invoked RDS stub for report generation======")
       val rdsRequestValidationResult = request.body.validate[RdsRequest]
-      @annotation.nowarn
       val statusJson = rdsRequestValidationResult match {
         case JsSuccess(rdsRequest, _) =>
             rdsRequest.isValid match {
@@ -151,7 +150,7 @@ class RdsController @Inject()(cc: ControllerComponents)
               case(RdsTimeout408.feedbackId,_)              => (REQUEST_TIMEOUT, Json.parse(rdsRequestTimeoutError))
               case(RdsInternalServerError500.feedbackId,_)  => (INTERNAL_SERVER_ERROR, Json.parse(rdsInternalServerError))
               case(RdsServiceNotAvailable503.feedbackId,_)  => (SERVICE_UNAVAILABLE, Json.parse(rdsServiceUnvailableError))
-              case (feedbackId,correlationId) if (rdsRequest.feedbackId.equals(feedbackId) && rdsRequest.correlationId.equals(correlationId))=>
+              case (feedbackId,correlationId) if rdsRequest.feedbackId.equals(feedbackId) && rdsRequest.correlationId.equals(correlationId) =>
                 val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, s"conf/response/acknowledge/feedback-ack-202.json")
                 (CREATED, response)
               case(_,_)                                 =>
