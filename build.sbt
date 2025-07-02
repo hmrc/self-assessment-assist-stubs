@@ -1,31 +1,28 @@
-import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings}
+import uk.gov.hmrc.DefaultBuildSettings
+
+ThisBuild / scalaVersion := "2.13.16"
+ThisBuild / majorVersion := 0
 
 val appName = "self-assessment-assist-stubs"
 
-lazy val ItTest = config("it") extend Test
-
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
-  .disablePlugins(JUnitXmlReportPlugin)
+  .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
-    majorVersion                     := 0,
-    scalaVersion                     := "2.13.16",
-    libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
-    scalacOptions ++= List(
-      "-language:higherKinds",
-      "-Xlint:-byname-implicit",
-      "-Xfatal-warnings",
-      "-Wconf:src=routes/.*:silent",
-      "-feature"
-    )
+    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    retrieveManaged                 := true,
+    update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(warnScalaVersionEviction = false),
   )
-.settings(defaultSettings() *)
-  .configs(ItTest)
   .settings(
-    ItTest / fork                       := true,
-    ItTest / unmanagedSourceDirectories := Seq((ItTest / baseDirectory).value / "it"),
-    ItTest / unmanagedClasspath += baseDirectory.value / "resources",
-    Runtime / unmanagedClasspath += baseDirectory.value / "resources",
-    addTestReportOption(ItTest, "int-test-reports")
+    Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
+    Compile / unmanagedClasspath += baseDirectory.value / "resources"
   )
   .settings(PlayKeys.playDefaultPort := 8343)
+
+lazy val it = project
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test")
+  .settings(DefaultBuildSettings.itSettings())
+  .settings(
+    scalacOptions ++= Seq("-Xfatal-warnings")
+  )
