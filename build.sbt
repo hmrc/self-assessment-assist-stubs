@@ -2,6 +2,7 @@ import uk.gov.hmrc.DefaultBuildSettings
 
 ThisBuild / scalaVersion := "2.13.16"
 ThisBuild / majorVersion := 0
+ThisBuild / scalacOptions += "-Xfatal-warnings"
 
 val appName = "self-assessment-assist-stubs"
 
@@ -10,6 +11,10 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    scalacOptions ++= List(
+      "-Wconf:src=routes/.*:silent",
+      "-feature"
+    ),
     retrieveManaged                 := true,
     update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(warnScalaVersionEviction = false),
   )
@@ -23,6 +28,3 @@ lazy val it = project
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test")
   .settings(DefaultBuildSettings.itSettings())
-  .settings(
-    scalacOptions ++= Seq("-Xfatal-warnings")
-  )

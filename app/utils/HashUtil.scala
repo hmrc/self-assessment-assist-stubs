@@ -20,7 +20,6 @@ import play.api.libs.json.{JsValue, Json}
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import java.util.HexFormat._
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
@@ -35,7 +34,7 @@ class HashUtil @Inject()() {
   def getSha256Hex(value: String): String = {
     val digest = MessageDigest.getInstance("SHA-256")
     val bytes = digest.digest(value.getBytes(StandardCharsets.UTF_8))
-    of().formatHex(bytes)
+    bytes.map("%02x".format(_)).mkString
   }
 }
 
