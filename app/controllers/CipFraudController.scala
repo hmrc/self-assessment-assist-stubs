@@ -30,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class CipFraudController @Inject()(cc: ControllerComponents)(implicit ec: ExecutionContext)
   extends BackendController(cc) with Logging {
 
-  val retSubmissionSuccesful =
+  val retSubmissionSuccesful: String =
     s"""{
        |  "riskScore": 0,
        |  "riskCorrelationId": "123e4567-e89b-12d3-a456-426614174000",
@@ -41,7 +41,7 @@ class CipFraudController @Inject()(cc: ControllerComponents)(implicit ec: Execut
        |  ]
        |}""".stripMargin
 
-  val failureResponse =
+  private val failureResponse =
     s"""{"nino":["Invalid nino, expected a string with 9 digits test failure scenario"]}""".stripMargin
 
   def submitFraudInfo(): Action[JsValue] = Action.async(parse.json) {

@@ -1,28 +1,30 @@
-import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+import uk.gov.hmrc.DefaultBuildSettings
+
+ThisBuild / scalaVersion := "2.13.16"
+ThisBuild / majorVersion := 0
+ThisBuild / scalacOptions += "-Xfatal-warnings"
 
 val appName = "self-assessment-assist-stubs"
 
-val silencerVersion = "1.7.16"
-
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
-  .disablePlugins(JUnitXmlReportPlugin)
+  .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
-    majorVersion                     := 0,
-    scalaVersion                     := "2.13.12",
-    libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
-    // ***************
-    // Use the silencer plugin to suppress warnings
-    scalacOptions += "-P:silencer:pathFilters=routes",
-    libraryDependencies ++= Seq(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
-    )
-    // ***************
+    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
+    scalacOptions ++= List(
+      "-Wconf:src=routes/.*:silent",
+      "-feature"
+    ),
+    retrieveManaged                 := true,
+    update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(warnScalaVersionEviction = false),
   )
-  .configs(IntegrationTest)
-  .settings(integrationTestSettings(): _*)
-  .settings(resolvers += Resolver.jcenterRepo)
+  .settings(
+    Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
+    Compile / unmanagedClasspath += baseDirectory.value / "resources"
+  )
   .settings(PlayKeys.playDefaultPort := 8343)
-  .settings(CodeCoverageSettings.settings: _*)
+
+lazy val it = project
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test")
+  .settings(DefaultBuildSettings.itSettings())

@@ -16,17 +16,17 @@
 
 package common
 
-import models.{FeedbackForBadRequest, RdsInvalidRespWithMissingCalculationId, NrsAccepted, NrsBadGateway, NrsBadRequest, NrsChecksumFailed, NrsGatewayTimeout, NrsInternalServerError, NrsNetworkTimeout, NrsNotFound, NrsServiceUnavailable, NrsUnauthorised}
+import models.{FeedbackForBadRequest, NrsAccepted, NrsBadGateway, NrsBadRequest, NrsChecksumFailed, NrsGatewayTimeout, NrsInternalServerError, NrsNetworkTimeout, NrsNotFound, NrsServiceUnavailable, NrsUnauthorised, RdsInvalidRespWithMissingCalculationId}
 import play.api.Logging
 import play.api.http.ContentTypes
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results
 
 import java.io.{File, FileInputStream}
 
 trait StubResource extends Results with ContentTypes with Logging {
 
-  def loadSubmitResponseTemplate(calculationId:String, replaceFeedbackId: String, replaceCorrelationId: String) = {
+  def loadSubmitResponseTemplate(calculationId:String, replaceFeedbackId: String, replaceCorrelationId: String): JsValue = {
     val templateCotent =
       calculationId match {
         case calcId@(FeedbackForBadRequest.calculationId |
@@ -62,7 +62,7 @@ trait StubResource extends Results with ContentTypes with Logging {
     parsedContent
   }
 
-  def loadAckResponseTemplate(replaceFeedbackId: String, replaceNino: String, fileName:String) = {
+  def loadAckResponseTemplate(replaceFeedbackId: String, replaceNino: String, fileName:String): JsValue = {
     val templateCotent =
       findResource(fileName).map(
         _.replace("replaceFeedbackId", replaceFeedbackId)
@@ -74,7 +74,7 @@ trait StubResource extends Results with ContentTypes with Logging {
     parsedContent
   }
 
-  def findResource(path: String): Option[String] = {
+  private def findResource(path: String): Option[String] = {
     val file = new File(path)
     val absolutePath = file.getAbsolutePath
     val stream = new FileInputStream(absolutePath)
