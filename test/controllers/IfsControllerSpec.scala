@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,181 +17,234 @@
 package controllers
 
 import base.SpecBase
+import config.AppConfig
+import controllers.actions.HeaderValidatorAction
 import models._
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.Result
+import org.apache.pekko.stream.testkit.NoMaterializer
+import play.api.Configuration
+import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.mvc.{BodyParsers, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
 import java.time.OffsetDateTime
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class IfsControllerSpec extends SpecBase {
 
-  private val controller: IfsController = app.injector.instanceOf[IfsController]
+  private def makeAppConfig(disableErrorResponses: Boolean): AppConfig =
+    new AppConfig(Configuration.from(Map("feature-switch.disable-error-responses" -> disableErrorResponses)))
 
-  private val links = Some(
-    Seq(
-      IFRequestPayloadActionLinks("[Canllawiau ITSA, Arweiniad i Ffynonellau Incwm]", "[www.itsa/cym.gov.uk, www.itsa/incomesources.gov.uk]"),
-      IFRequestPayloadActionLinks("[Cyfrifo am Incwm]", "[www.itsa/incomecompliance.gov.uk]")
+  private class Test(disableErrorResponses: Boolean = false) {
+    private val headerValidatorAction: HeaderValidatorAction = new HeaderValidatorAction(new BodyParsers.Default()(NoMaterializer))
+    private val appConfig: AppConfig = makeAppConfig(disableErrorResponses)
+
+    val controller: IfsController = new IfsController(headerValidatorAction, stubControllerComponents(), appConfig)
+  }
+
+  private val invalidLinks: Seq[IFRequestPayloadActionLinks] = Seq(
+    IFRequestPayloadActionLinks("[title", "url"),
+    IFRequestPayloadActionLinks("title]", "url"),
+    IFRequestPayloadActionLinks("title", "[url"),
+    IFRequestPayloadActionLinks("title", "url]")
+  )
+
+  private def generateRequest(calculationId: String,
+                              links: Option[Seq[IFRequestPayloadActionLinks]]): IFRequest = IFRequest(
+    serviceRegime = "self-assessment-assist",
+    eventName = "GenerateReport",
+    eventTimestamp = OffsetDateTime.now(),
+    feedbackId = "feedbackId",
+    metaData = List(
+      Map("nino"                 -> "nino"),
+      Map("taxYear"              -> "2023"),
+      Map("calculationId"        -> calculationId),
+      Map("customerType"         -> "Agent"),
+      Map("agentReferenceNumber" -> "12345"),
+      Map("calculationTimestamp" -> "2019-02-15T09:35:15.094Z")
+    ),
+    payload = Some(
+      Messages(
+        Some(
+          List(
+            IFRequestPayload(
+              messageId = "messageId",
+              englishAction = IFRequestPayloadAction(
+                title = "title",
+                message = "message",
+                action = "action",
+                path = "path",
+                links = links
+              ),
+              welshAction = IFRequestPayloadAction(
+                title = "TODO - title",
+                message = "TODO - message",
+                action = "TODO - action",
+                path = "TODO - path",
+                links = links
+              )
+            )
+          )
+        )
+      )
     )
   )
 
-  private def submitStoreInteraction(calculationId: String, links: Option[Seq[IFRequestPayloadActionLinks]] = None): Future[Result] = {
-    val req = IFRequest(
-      serviceRegime = "self-assessment-assist",
-      eventName = "GenerateReport",
-      eventTimestamp = OffsetDateTime.now(),
-      feedbackId = "feedbackId",
-      metaData = List(
-        Map("nino"                 -> "nino"),
-        Map("taxYear"              -> "2023"),
-        Map("calculationId"        -> calculationId),
-        Map("customerType"         -> "Agent"),
-        Map("agentReferenceNumber" -> "12345"),
-        Map("calculationTimestamp" -> "2019-02-15T09:35:15.094Z")
-      ),
-      payload = Some(
-        Messages(Some(Seq(IFRequestPayload(
-          messageId = "messageId",
-          englishAction = IFRequestPayloadAction(
-            title = "title",
-            message = "message",
-            action = "action",
-            path = "path",
-            links = links
-          ),
-          welshAction = IFRequestPayloadAction(
-            title = "TODO - title",
-            message = "TODO - message",
-            action = "TODO - action",
-            path = "TODO - path",
-            links = links
+  private def acknowledgeRequest(feedbackId: String): IFRequest = IFRequest(
+    serviceRegime = "self-assessment-assist",
+    eventName = "AcknowledgeReport",
+    eventTimestamp = OffsetDateTime.now(),
+    feedbackId = feedbackId,
+    metaData = List(
+      Map("nino"    -> "nino"),
+      Map("taxYear" -> "2023")
+    ),
+    payload = Some(
+      Messages(
+        Some(
+          List(
+            IFRequestPayload(
+              messageId = "messageId",
+              englishAction = IFRequestPayloadAction(
+                title = "title",
+                message = "message",
+                action = "action",
+                path = "path",
+                links = None
+              ),
+              welshAction = IFRequestPayloadAction(
+                title = "TODO - title",
+                message = "TODO - message",
+                action = "TODO - action",
+                path = "TODO - path",
+                links = None
+              )
+            )
           )
-        )))))
+        )
+      )
     )
+  )
 
-    val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/interaction-data/store-interactions")
-      .withBody(Json.toJson(req))
+  private def callSubmit(controller: IfsController, requestBody: JsValue): Future[Result] = {
+    val request: FakeRequest[JsValue] = FakeRequest("POST", "/interaction-data/store-interactions")
+      .withBody(requestBody)
       .withHeaders(("Authorization", "ABCD1234"), ("Content-Type", "application/json"))
-    controller.submit().apply(fakeRequest)
+
+    controller.submit().apply(request)
   }
 
-  private def submitStoreAcknowledgement(feedbackId: String): Future[Result] = {
-    val req = IFRequest(
-      serviceRegime = "self-assessment-assist",
-      eventName = "AcknowledgeReport",
-      eventTimestamp = OffsetDateTime.now(),
-      feedbackId,
-      metaData = List(
-        Map("nino"    -> "nino"),
-        Map("taxYear" -> "2023")
-      ),
-      payload = Some(
-        Messages(Some(List(IFRequestPayload(
-          messageId = "messageId",
-          englishAction = IFRequestPayloadAction(
-            title = "title",
-            message = "message",
-            action = "action",
-            path = "path",
-            links = None
-          ),
-          welshAction = IFRequestPayloadAction(
-            title = "TODO - title",
-            message = "TODO - message",
-            action = "TODO - action",
-            path = "TODO - path",
-            links = None
+  private def testSubmitStoreInteraction(controller: IfsController,
+                                         calculationId: String,
+                                         expectedStatus: Int,
+                                         expectedBody: Option[JsValue],
+                                         links: Option[Seq[IFRequestPayloadActionLinks]] = None): Unit = {
+    val requestBody: JsValue = Json.toJson(generateRequest(calculationId, links))
+
+    val result: Future[Result] = callSubmit(controller, requestBody)
+
+    status(result) mustBe expectedStatus
+    expectedBody match {
+      case Some(expectedJson) => contentAsJson(result) mustBe expectedJson
+      case None               => contentAsString(result) mustBe empty
+    }
+  }
+
+  private def testSubmitStoreAcknowledgement(controller: IfsController,
+                                             feedbackId: String,
+                                             expectedStatus: Int,
+                                             expectedBody: Option[JsValue]): Unit = {
+    val requestBody: JsValue = Json.toJson(acknowledgeRequest(feedbackId))
+
+    val result: Future[Result] = callSubmit(controller, requestBody)
+
+    status(result) mustBe expectedStatus
+    expectedBody match {
+      case Some(expectedJson) => contentAsJson(result) mustBe expectedJson
+      case None               => contentAsString(result) mustBe empty
+    }
+  }
+
+  private val featureSwitchTestCases: Seq[(Boolean, String)] = Seq((true, "enabled"), (false, "disabled"))
+
+  "IfsController" when {
+    "submit" when {
+      featureSwitchTestCases.foreach { case (disableErrorResponses, scenario) =>
+        s"processing a generate report event and feature switch is $scenario" must {
+          "return 204 NO_CONTENT when a valid calculationId is supplied" in new Test(disableErrorResponses) {
+            testSubmitStoreInteraction(controller, "good-one", NO_CONTENT, None)
+          }
+
+          "return 400 BAD_REQUEST" when {
+            "a request with invalid links is supplied" in new Test(disableErrorResponses) {
+              val expectedResponse: JsValue = controller.invalidPayloadError
+
+              invalidLinks.foreach { link =>
+                testSubmitStoreInteraction(controller, "good-one", BAD_REQUEST, Some(expectedResponse), Some(Seq(link)))
+              }
+            }
+
+            "an invalid request without calculationId is supplied" in new Test(disableErrorResponses) {
+              val expectedResponse: JsValue = controller.invalidPayloadError
+
+              val requestBody: JsValue = Json.toJson(generateRequest("good-one", None).copy(metaData = Nil))
+
+              val result: Future[Result] = callSubmit(controller, requestBody)
+
+              status(result) mustBe BAD_REQUEST
+              contentAsJson(result) mustBe expectedResponse
+            }
+          }
+
+          "handle all IFS errors" in new Test(disableErrorResponses) {
+            val errorCases: Seq[(Int, String, Option[JsValue])] = Seq(
+              (BAD_REQUEST, IfsServiceBadRequest400.calculationId, Some(controller.invalidCorrelationIdError)),
+              (REQUEST_TIMEOUT, IfsServiceRequestTimeout408.calculationId, None),
+              (INTERNAL_SERVER_ERROR, IfsInternalServerError500.calculationId, Some(controller.internalServerError)),
+              (SERVICE_UNAVAILABLE, IfsServiceNotAvailable503.calculationId, Some(controller.serviceUnavailableError))
+            )
+
+            errorCases.foreach { case (statusCode, calculationId, expectedBody) =>
+              val (code, body): (Int, Option[JsValue]) = if (disableErrorResponses) {
+                (NO_CONTENT, None)
+              } else {
+                (statusCode, expectedBody)
+              }
+
+              testSubmitStoreInteraction(controller, calculationId, code, body)
+            }
+          }
+        }
+      }
+
+      "processing an acknowledge report event" must {
+        "return 204 NO_CONTENT when a valid feedbackId is supplied" in new Test() {
+          testSubmitStoreAcknowledgement(controller, "good-one", NO_CONTENT, None)
+        }
+
+        "handle all IFS errors" in new Test() {
+          val errorCases: Seq[(Int, String, Option[JsValue])] = Seq(
+            (BAD_REQUEST, IfsServiceBadRequest400.feedbackId, Some(controller.invalidPayloadError)),
+            (REQUEST_TIMEOUT, IfsServiceRequestTimeout408.feedbackId, None),
+            (INTERNAL_SERVER_ERROR, IfsInternalServerError500.feedbackId, Some(controller.internalServerError)),
+            (SERVICE_UNAVAILABLE, IfsServiceNotAvailable503.feedbackId, Some(controller.serviceUnavailableError))
           )
-        )))))
-    )
 
-    val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", "/interaction-data/store-interactions")
-      .withBody(Json.toJson(req))
-      .withHeaders(("Authorization", "ABCD1234"), ("Content-Type", "application/json"))
-    controller.submit().apply(fakeRequest)
+          errorCases.foreach { case (statusCode, feedbackId, expectedBody) =>
+            testSubmitStoreAcknowledgement(controller, feedbackId, statusCode, expectedBody)
+          }
+        }
+      }
+
+      "an invalid request is supplied must return 400 BAD_REQUEST" in new Test() {
+        val expectedResponse: JsValue = controller.invalidPayloadError
+
+        val result: Future[Result] = callSubmit(controller, JsObject.empty)
+
+        status(result) mustBe BAD_REQUEST
+        contentAsJson(result) mustBe expectedResponse
+      }
+    }
   }
-
-  "IfsController.submit()" when {
-
-    "generate report: provided with a calculation id in metadata" must {
-      "return 204" in {
-        val result = submitStoreInteraction("good one")
-        status(result) must be(NO_CONTENT)
-      }
-    }
-
-    "generate report: provided with a calculation id in metadata to trigger invalid correlationId" must {
-      "return 400" in {
-        val result = submitStoreInteraction(IfsServiceBadRequest400.calculationId)
-        status(result) must be(BAD_REQUEST)
-      }
-    }
-
-    "generate report: provided with a valid calculation id in metadata but invalid links" must {
-      "return 400" in {
-        val result = submitStoreInteraction(FeedbackOneHttp201ResponseCode201.calculationId, links)
-        status(result) must be(BAD_REQUEST)
-      }
-    }
-
-    "generate report: provided with a calculation id in metadata to service unavailable" must {
-      "return 503" in {
-        val result = submitStoreInteraction(IfsServiceNotAvailable503.calculationId)
-        status(result) must be(SERVICE_UNAVAILABLE)
-      }
-    }
-
-    "generate report: provided with a calculation id in metadata to trigger request timeout" must {
-      "return 408" in {
-        val result = submitStoreInteraction(IfsServiceRequestTimeout408.calculationId)
-        status(result) must be(REQUEST_TIMEOUT)
-      }
-    }
-
-    "generate report: with a calculation id in metadata to trigger internal server error" must {
-      "return 500" in {
-        val result = submitStoreInteraction(IfsInternalServerError500.calculationId)
-        status(result) must be(INTERNAL_SERVER_ERROR)
-      }
-    }
-
-    "acknowledge report: provided with a calculation id in metadata for no content" must {
-      "return 204" in {
-        val result = submitStoreAcknowledgement("feedbackId")
-        status(result) must be(NO_CONTENT)
-      }
-    }
-
-    "acknowledge report: provided with a feedback id trigger invalid bad request" must {
-      "return 400" in {
-        val result = submitStoreAcknowledgement(IfsServiceBadRequest400.feedbackId)
-        status(result) must be(BAD_REQUEST)
-      }
-    }
-
-    "acknowledge report: provided with a feedback id trigger request timeout" must {
-      "return 408" in {
-        val result = submitStoreAcknowledgement(IfsServiceRequestTimeout408.feedbackId)
-        status(result) must be(REQUEST_TIMEOUT)
-      }
-    }
-
-    "acknowledge report: provided with a feedback id trigger internal server error" must {
-      "return 500" in {
-        val result = submitStoreAcknowledgement(IfsInternalServerError500.feedbackId)
-        status(result) must be(INTERNAL_SERVER_ERROR)
-      }
-    }
-
-    "acknowledge report: provided with a feedback id trigger invalid service unavailable" must {
-      "return 503" in {
-        val result = submitStoreAcknowledgement(IfsServiceNotAvailable503.feedbackId)
-        status(result) must be(SERVICE_UNAVAILABLE)
-      }
-    }
-
-  }
-
 }

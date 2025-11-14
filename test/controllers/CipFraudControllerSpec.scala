@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,65 +17,110 @@
 package controllers
 
 import base.SpecBase
+import config.AppConfig
 import models.FraudRiskRequest
-import play.api.libs.json.{JsValue, Json}
+import play.api.Configuration
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import utils.CommonData.ninoMtdIdPairs
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CipFraudControllerSpec extends SpecBase{
+class CipFraudControllerSpec extends SpecBase {
 
-  private val controller: CipFraudController = app.injector.instanceOf[CipFraudController]
+  private def makeAppConfig(disableErrorResponses: Boolean): AppConfig =
+    new AppConfig(Configuration.from(Map("feature-switch.disable-error-responses" -> disableErrorResponses)))
 
+  private class Test(disableErrorResponses: Boolean = false) {
+    private val appConfig: AppConfig = makeAppConfig(disableErrorResponses)
 
-  private def submitFraudInfo(nino: String,taxYear:String,fraudRiskHeaders:Map[String,String] = Map.empty): Future[Result] = {
-    val fraudRiskRequest =new FraudRiskRequest(
-      nino= Some(nino),
-      taxYear = Some(taxYear),
-      fraudRiskHeaders=fraudRiskHeaders
-    )
-    val fakeRequest: FakeRequest[JsValue] = FakeRequest("POST", s"/fraud").withBody(Json.toJson(fraudRiskRequest))
-    controller.submitFraudInfo().apply(fakeRequest)
+    val controller: CipFraudController = new CipFraudController(stubControllerComponents(), appConfig)
   }
 
-  "CipFraudController submitFraudInfo()" when {
+  private def fraudRiskRequest(nino: String) = FraudRiskRequest(
+    nino = Some(nino),
+    fraudRiskHeaders = Map.empty
+  )
 
-    "provided with a valid fraud risk request" must {
-      "return 200 with the FraudRiskReport" in {
-        val nino = "NJ070957A"
-        val result = submitFraudInfo(nino,ninoMtdIdPairs(nino))
-        val expectedResponse = Json.parse(
-          s"""{
-             |  "riskScore": 0,
-             |  "riskCorrelationId": "123e4567-e89b-12d3-a456-426614174000",
-             |  "reasons": [
-             |    "UTR 0128925978251 is 3 hops from a something risky. The average UTR is 4.7 hops from something risky.",
-             |    "DEVICE_ID e171dda8-bd00-415b-962b-b169b8b777a4 has been previously marked as Fraud. The average DEVICE_ID is 5.1 hops from something risky",
-             |    "NINO AB182561B is 2 hops from something risky. The average NINO is 3.1 hops from something risky."
-             |  ]
-             |}""".stripMargin
-        )
-        status(result) must be(OK)
-        contentAsJson(result) must be(expectedResponse)
-      }
+  private def callSubmitFraudInfo(controller: CipFraudController, requestBody: JsValue): Future[Result] = {
+    val request: FakeRequest[JsValue] = FakeRequest("POST", "/fraud").withBody(requestBody)
+
+    controller.submitFraudInfo().apply(request)
+  }
+
+  private def testSubmitFraudInfo(controller: CipFraudController,
+                                  nino: String,
+                                  expectedStatus: Int,
+                                  expectedBody: Option[JsValue]): Unit = {
+    val requestBody: JsValue = Json.toJson(fraudRiskRequest(nino))
+
+    val result: Future[Result] = callSubmitFraudInfo(controller, requestBody)
+
+    status(result) mustBe expectedStatus
+    expectedBody match {
+      case Some(expectedJson) => contentAsJson(result) mustBe expectedJson
+      case None               => contentAsString(result) mustBe empty
     }
+  }
 
-    "provided with an invalid request" must {
-      "return a 400" in {
-        val nino = "JL530692C"
-        val result = submitFraudInfo(nino,ninoMtdIdPairs(nino))
-        status(result) must be(BAD_REQUEST)
-      }
+  private def expectedOutcome(controller: CipFraudController,
+                              disableErrorResponses: Boolean,
+                              errorStatus: Int,
+                              errorBody: Option[JsValue]): (Int, Option[JsValue]) = {
+    if (disableErrorResponses) {
+      (OK, Some(controller.successResponse))
+    } else {
+      (errorStatus, errorBody)
     }
+  }
 
-    "provided with an valid request, but an ALB failure " must {
-      "return a 500" in {
-        val nino = "AA088213C"
-        val result = submitFraudInfo(nino,ninoMtdIdPairs(nino))
-        status(result) must be(INTERNAL_SERVER_ERROR)
+  private val featureSwitchTestCases: Seq[(Boolean, String)] = Seq((true, "enabled"), (false, "disabled"))
+
+  "CipFraudController" when {
+    "submitFraudInfo" when {
+      featureSwitchTestCases.foreach { case (disableErrorResponses, scenario) =>
+        s"feature switch is $scenario" must {
+          Seq("NJ070957A", "ZZ123456A").foreach { nino =>
+            s"return 200 OK for valid NINO $nino" in new Test(disableErrorResponses) {
+              val expectedResponse: JsValue = controller.successResponse
+
+              testSubmitFraudInfo(controller, nino, OK, Some(expectedResponse))
+            }
+          }
+
+          "return the expected response for NINO AA088213C" in new Test(disableErrorResponses) {
+            val (expectedStatus, expectedResponse): (Int, Option[JsValue]) = expectedOutcome(
+              controller, disableErrorResponses, INTERNAL_SERVER_ERROR, None
+            )
+
+            testSubmitFraudInfo(controller, "AA088213C", expectedStatus, expectedResponse)
+          }
+
+          "return the expected response for NINO ME636062B" in new Test(disableErrorResponses) {
+            val (expectedStatus, expectedResponse): (Int, Option[JsValue]) = expectedOutcome(
+              controller, disableErrorResponses, REQUEST_TIMEOUT, None
+            )
+
+            testSubmitFraudInfo(controller, "ME636062B", expectedStatus, expectedResponse)
+          }
+
+          "return the expected response for NINO JL530692C" in new Test(disableErrorResponses) {
+            val (expectedStatus, expectedResponse): (Int, Option[JsValue]) = expectedOutcome(
+              controller, disableErrorResponses, BAD_REQUEST, Some(controller.failureResponse)
+            )
+
+            testSubmitFraudInfo(controller, "JL530692C", expectedStatus, expectedResponse)
+          }
+        }
+      }
+
+      "an invalid request is supplied must return 400 BAD_REQUEST" in new Test() {
+        val result: Future[Result] = callSubmitFraudInfo(controller, JsObject.empty)
+
+        status(result) mustBe BAD_REQUEST
+        contentAsString(result) must include("JsonValidationError")
       }
     }
   }

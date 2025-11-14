@@ -12,12 +12,11 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test,
     scalacOptions ++= List(
-      "-Wconf:src=routes/.*:silent",
+      "-Wconf:src=routes/.*:s",
       "-feature"
-    ),
-    retrieveManaged                 := true,
-    update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(warnScalaVersionEviction = false),
+    )
   )
+  .settings(CodeCoverageSettings.settings)
   .settings(
     Compile / unmanagedResourceDirectories += baseDirectory.value / "resources",
     Compile / unmanagedClasspath += baseDirectory.value / "resources"

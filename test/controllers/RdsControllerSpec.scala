@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package controllers
 
 import base.SpecBase
 import common.StubResource
-import models.{FeedbackForBadRequest, FeedbackHttp201ResponseCode204, FeedbackHttp201ResponseCode404, FeedbackOneHttp201ResponseCode201, RdsInternalServerError500, RdsNotAvailable404, RdsServiceNotAvailable503, RdsTimeout408}
-import play.api.libs.json.{JsValue, Json}
+import config.AppConfig
+import models._
+import play.api.Configuration
+import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -27,419 +29,304 @@ import utils.CommonData.{calcIdMappings, feedbackIdAndCorrelationIdMapping}
 
 import scala.concurrent.Future
 
-class RdsControllerSpec extends SpecBase with StubResource{
+class RdsControllerSpec extends SpecBase {
 
-  val validTaxYearFormat = s"""{
-                        |  "inputs": [
-                        |    {
-                        |      "name": "calculationId",
-                        |      "value": "testCalculationIdValue"
-                        |    },
-                        |    {
-                        |      "name": "nino",
-                        |      "value": "NJ070957A"
-                        |    },
-                        |    {
-                        |      "name": "taxYear",
-                        |      "value": 2021
-                        |    },
-                        |    {
-                        |      "name": "customerType",
-                        |      "value": "T"
-                        |    },
-                        |    {
-                        |      "name": "agentRef",
-                        |      "value": ""
-                        |    },
-                        |    {
-                        |      "name": "preferredLanguage",
-                        |      "value": "EN"
-                        |    },
-                        |    {
-                        |      "name": "fraudRiskReportScore",
-                        |      "value": 0
-                        |    },
-                        |    {
-                        |      "name": "fraudRiskReportHeaders",
-                        |      "value": [
-                        |        {
-                        |          "metadata": [
-                        |            {
-                        |              "KEY": "string"
-                        |            },
-                        |            {
-                        |              "VALUE": "string"
-                        |            }
-                        |          ]
-                        |        },
-                        |        {
-                        |          "data": [
-                        |            [
-                        |              "Gov-Client-MAC-Addresses",
-                        |              ""
-                        |            ],
-                        |            [
-                        |              "Gov-Client-Timezone",
-                        |              ""
-                        |            ]
-                        |          ]
-                        |        }
-                        |      ]
-                        |    },
-                        |    {
-                        |      "name": "fraudRiskReportReasons",
-                        |      "value": [
-                        |        {
-                        |          "metadata": [
-                        |            {
-                        |              "Reason": "string"
-                        |            }
-                        |          ]
-                        |        },
-                        |        {
-                        |          "data": [
-                        |            [
-                        |              "UTR 0128925978251 is 3 hops from a something risky. The average UTR is 4.7 hops from something risky."
-                        |            ],
-                        |            [
-                        |              "DEVICE_ID e171dda8-bd00-415b-962b-b169b8b777a4 has been previously marked as Fraud. The average DEVICE_ID is 5.1 hops from something risky"
-                        |            ],
-                        |            [
-                        |              "NINO AB182561B is 2 hops from something risky. The average NINO is 3.1 hops from something risky."
-                        |            ]
-                        |          ]
-                        |        }
-                        |      ]
-                        |    }
-                        |  ]
-                        |}""".stripMargin
+  private def makeAppConfig(disableErrorResponses: Boolean): AppConfig =
+    new AppConfig(Configuration.from(Map("feature-switch.disable-error-responses" -> disableErrorResponses)))
 
-  val inValidTaxYearFormat = s"""{
-                                                        |  "inputs": [
-                                                        |    {
-                                                        |      "name": "calculationId",
-                                                        |      "value": "testCalculationIdValue"
-                                                        |    },
-                                                        |    {
-                                                        |      "name": "nino",
-                                                        |      "value": "NJ070957A"
-                                                        |    },
-                                                        |    {
-                                                        |      "name": "taxYear",
-                                                        |      "value": "2021-22"
-                                                        |    },
-                                                        |    {
-                                                        |      "name": "customerType",
-                                                        |      "value": "T"
-                                                        |    },
-                                                        |    {
-                                                        |      "name": "agentRef",
-                                                        |      "value": ""
-                                                        |    },
-                                                        |    {
-                                                        |      "name": "preferredLanguage",
-                                                        |      "value": "EN"
-                                                        |    },
-                                                        |    {
-                                                        |      "name": "fraudRiskReportScore",
-                                                        |      "value": 0
-                                                        |    },
-                                                        |    {
-                                                        |      "name": "fraudRiskReportHeaders",
-                                                        |      "value": [
-                                                        |        {
-                                                        |          "metadata": [
-                                                        |            {
-                                                        |              "KEY": "string"
-                                                        |            },
-                                                        |            {
-                                                        |              "VALUE": "string"
-                                                        |            }
-                                                        |          ]
-                                                        |        },
-                                                        |        {
-                                                        |          "data": [
-                                                        |            [
-                                                        |              "Gov-Client-MAC-Addresses",
-                                                        |              ""
-                                                        |            ],
-                                                        |            [
-                                                        |              "Gov-Client-Timezone",
-                                                        |              ""
-                                                        |            ]
-                                                        |          ]
-                                                        |        }
-                                                        |      ]
-                                                        |    },
-                                                        |    {
-                                                        |      "name": "fraudRiskReportReasons",
-                                                        |      "value": [
-                                                        |        {
-                                                        |          "metadata": [
-                                                        |            {
-                                                        |              "Reason": "string"
-                                                        |            }
-                                                        |          ]
-                                                        |        },
-                                                        |        {
-                                                        |          "data": [
-                                                        |            [
-                                                        |              "UTR 0128925978251 is 3 hops from a something risky. The average UTR is 4.7 hops from something risky."
-                                                        |            ],
-                                                        |            [
-                                                        |              "DEVICE_ID e171dda8-bd00-415b-962b-b169b8b777a4 has been previously marked as Fraud. The average DEVICE_ID is 5.1 hops from something risky"
-                                                        |            ],
-                                                        |            [
-                                                        |              "NINO AB182561B is 2 hops from something risky. The average NINO is 3.1 hops from something risky."
-                                                        |            ]
-                                                        |          ]
-                                                        |        }
-                                                        |      ]
-                                                        |    }
-                                                        |  ]
-                                                        |}""".stripMargin
+  private class Test(disableErrorResponses: Boolean = false, forceMissingResource: Boolean = false) {
+    private val appConfig: AppConfig = makeAppConfig(disableErrorResponses)
 
+    val stubResource: StubResource = new StubResource(appConfig) {
+      override def findResource(path: String): Option[String] = if (forceMissingResource) None else super.findResource(path)
+    }
 
-  val acknowledgeReportRequestBody = s"""{
-                                        |  "inputs": [
-                                        |    {
-                                        |      "name": "feedbackId",
-                                        |      "value": "testFeedbackIdValue"
-                                        |    },
-                                        |    {
-                                        |      "name": "nino",
-                                        |      "value": "NJ070957A"
-                                        |    },
-                                        |    {
-                                        |      "name": "correlationId",
-                                        |      "value": "testCorrelationIdValue"
-                                        |    }
-                                        |  ]
-                                        |}""".stripMargin
+    val controller: RdsController = new RdsController(stubControllerComponents(), stubResource) {
+      override def sandboxFeedbackId: String = FeedbackForDefaultResponse.feedbackId
+      override def sandboxCorrelationId: String = FeedbackForDefaultResponse.correlationId
+    }
+  }
 
-  private val controller: RdsController = app.injector.instanceOf[RdsController]
+  private def generateRequestBody(calculationId: String, taxYear: Int): JsValue = Json.parse(
+    s"""
+      |{
+      |  "inputs": [
+      |    {
+      |      "name": "calculationId",
+      |      "value": "$calculationId"
+      |    },
+      |    {
+      |      "name": "nino",
+      |      "value": "NJ070957A"
+      |    },
+      |    {
+      |      "name": "taxYear",
+      |      "value": $taxYear
+      |    },
+      |    {
+      |      "name": "customerType",
+      |      "value": "T"
+      |    },
+      |    {
+      |      "name": "agentRef",
+      |      "value": ""
+      |    },
+      |    {
+      |      "name": "preferredLanguage",
+      |      "value": "EN"
+      |    },
+      |    {
+      |      "name": "fraudRiskReportScore",
+      |      "value": 0
+      |    },
+      |    {
+      |      "name": "fraudRiskReportHeaders",
+      |      "value": [
+      |        {
+      |          "metadata": [
+      |            {
+      |              "KEY": "string"
+      |            },
+      |            {
+      |              "VALUE": "string"
+      |            }
+      |          ]
+      |        },
+      |        {
+      |          "data": [
+      |            [
+      |              "Gov-Client-MAC-Addresses",
+      |              ""
+      |            ],
+      |            [
+      |              "Gov-Client-Timezone",
+      |              ""
+      |            ]
+      |          ]
+      |        }
+      |      ]
+      |    },
+      |    {
+      |      "name": "fraudRiskReportReasons",
+      |      "value": [
+      |        {
+      |          "metadata": [
+      |            {
+      |              "Reason": "string"
+      |            }
+      |          ]
+      |        },
+      |        {
+      |          "data": [
+      |            [
+      |              "UTR 0128925978251 is 3 hops from a something risky. The average UTR is 4.7 hops from something risky."
+      |            ],
+      |            [
+      |              "DEVICE_ID e171dda8-bd00-415b-962b-b169b8b777a4 has been previously marked as Fraud. The average DEVICE_ID is 5.1 hops from something risky"
+      |            ],
+      |            [
+      |              "NINO AB182561B is 2 hops from something risky. The average NINO is 3.1 hops from something risky."
+      |            ]
+      |          ]
+      |        }
+      |      ]
+      |    }
+      |  ]
+      |}
+    """.stripMargin
+  )
 
-  private def callGenerateReport(value: JsValue): Future[Result] = {
-    val request: FakeRequest[JsValue] =
-      FakeRequest("POST", "/rds/assessments/self-assessment-assist").withBody(value)
+  private def acknowledgeRequestBody(feedbackId: String, correlationId: String): JsValue = Json.parse(
+    s"""
+      |{
+      |  "inputs": [
+      |    {
+      |      "name": "feedbackId",
+      |      "value": "$feedbackId"
+      |    },
+      |    {
+      |      "name": "nino",
+      |      "value": "NJ070957A"
+      |    },
+      |    {
+      |      "name": "correlationId",
+      |      "value": "$correlationId"
+      |    }
+      |  ]
+      |}
+    """.stripMargin
+  )
+
+  private def callGenerateReport(controller: RdsController, requestBody: JsValue): Future[Result] = {
+    val request: FakeRequest[JsValue] = FakeRequest("POST", "/rds/assessments/self-assessment-assist").withBody(requestBody)
 
     controller.generateReport().apply(request)
   }
 
-  private def callAcknowledgeReport(value: JsValue): Future[Result] = {
-    val request: FakeRequest[JsValue] =
-      FakeRequest("POST", "/rds/assessments/self-assessment-assist/acknowledge").withBody(value)
+  private def callAcknowledgeReport(controller: RdsController, requestBody: JsValue): Future[Result] = {
+    val request: FakeRequest[JsValue] = FakeRequest("POST", "/rds/assessments/self-assessment-assist/acknowledge").withBody(requestBody)
 
     controller.acknowledgeReport().apply(request)
   }
 
-  "RdsController generateReport" when {
+  private def testGenerateReport(controller: RdsController,
+                                 calculationId: String,
+                                 expectedStatus: Int,
+                                 expectedBody: JsValue,
+                                 taxYear: Int = 2021): Unit = {
+    val requestBody: JsValue = generateRequestBody(calculationId, taxYear)
 
-    "provided with a valid request" must {
-      "return a http status as created with the Report" in {
-        val calculationIdUnderTest = calcIdMappings(FeedbackOneHttp201ResponseCode201.calculationId)
-        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
+    val result: Future[Result] = callGenerateReport(controller, requestBody)
 
-        val expectedResponse =
-          loadSubmitResponseTemplate(
-            calculationIdUnderTest.calculationId,
-            calculationIdUnderTest.feedbackId,
-            calculationIdUnderTest.correlationId
-          )
-
-        status(result) must be(CREATED)
-        contentAsJson(result) must be(expectedResponse)
-      }
-    }
-
-    "provided with a request with invalid taxyear format" must {
-      "return a http status as badrequest " in {
-        val calculationIdUnderTest = calcIdMappings(FeedbackOneHttp201ResponseCode201.calculationId)
-        val result = callGenerateReport(Json.parse(inValidTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
-        val expectedResponse =   Json.parse(s"""
-                                    |{
-                                    |  "code": "FORBIDDEN",
-                                    |  "message": "The field taxYear is not a valid value."
-                                    |  }
-                                    |""".stripMargin)
-
-        status(result) must be(BAD_REQUEST)
-        contentAsJson(result) must be(expectedResponse)
-      }
-    }
-
-    "provided with a valid request with calculationId that has no feedback in RDS" must {
-      "return a http status as created with the Report" in {
-        val calculationIdUnderTest = calcIdMappings(FeedbackHttp201ResponseCode204.calculationId)
-        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
-
-        val expectedResponse =
-          loadSubmitResponseTemplate(
-            FeedbackHttp201ResponseCode204.calculationId,
-            FeedbackHttp201ResponseCode204.feedbackId,
-            FeedbackHttp201ResponseCode204.correlationId
-          )
-
-        status(result) must be(CREATED)
-        contentAsJson(result) must be(expectedResponse)
-      }
-    }
-
-    "provided with an valid request, but calcualationId is not available " must {
-      "return a http status as created with body response code 404" in {
-        val calculationIdUnderTest = calcIdMappings(FeedbackHttp201ResponseCode404.calculationId)
-        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
-        val expectedResponse =
-          loadSubmitResponseTemplate(
-            FeedbackHttp201ResponseCode404.calculationId,
-            FeedbackHttp201ResponseCode404.feedbackId,
-            FeedbackHttp201ResponseCode404.correlationId
-          )
-        status(result) must be(CREATED)
-        contentAsJson(result) must be(expectedResponse)
-      }
-    }
-
-    "provided with an valid request, but RDS is not available " must {
-      "return a 404" in {
-        val calculationIdUnderTest = calcIdMappings(RdsNotAvailable404.calculationId)
-        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
-        val expectedResponse = Json.parse(s"""
-                                             |{
-                                             |  "code": "NOT_FOUND",
-                                             |  "message": "Scenario to mimic non availabilty of RDS"
-                                             |  }
-                                             |""".stripMargin)
-        status(result) must be(NOT_FOUND)
-        contentAsJson(result) must be(expectedResponse)
-      }
-    }
-
-    "provided with an invalid request" must {
-      "return a BAD REQUEST" in {
-        val calculationIdUnderTest = calcIdMappings(FeedbackForBadRequest.calculationId)
-        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
-        val expectedResponse = Json.parse(s"""
-                                             |{
-                                             |  "code": "FORBIDDEN",
-                                             |  "message": "Invalid request"
-                                             |  }
-                                             |""".stripMargin)
-        status(result) must be(BAD_REQUEST)
-        contentAsJson(result) must be(expectedResponse)
-      }
-    }
-
-    "provided with an valid request, but RDS timeout" must {
-      "return a REQUEST_TIMEOUT" in {
-        val calculationIdUnderTest = calcIdMappings(RdsTimeout408.calculationId)
-        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
-        val expectedResponse = Json.parse(s"""
-                                             |{
-                                             |  "code": "REQUEST_TIMEOUT",
-                                             |  "message": "RDS request timeout"
-                                             |  }
-                                             |""".stripMargin)
-        status(result) must be(REQUEST_TIMEOUT)
-        contentAsJson(result) must be(expectedResponse)
-      }
-    }
-
-    "provided with an valid request, but RDS has internal server error" must {
-      "return a INTERNAL_SERVER_ERROR" in {
-        val calculationIdUnderTest = calcIdMappings(RdsInternalServerError500.calculationId)
-        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
-        val expectedResponse = Json.parse(s"""
-                                             |{
-                                             |  "code": "INTERNAL_SERVER_ERROR",
-                                             |  "message": "RDS internal server error"
-                                             |  }
-                                             |""".stripMargin)
-        status(result) must be(INTERNAL_SERVER_ERROR)
-        contentAsJson(result) must be(expectedResponse)
-      }
-    }
-
-    "provided with an valid request, but RDS service is not available" must {
-      "return a SERVICE_UNAVAIALBLE" in {
-        val calculationIdUnderTest = calcIdMappings(RdsServiceNotAvailable503.calculationId)
-        val result = callGenerateReport(Json.parse(validTaxYearFormat.replace("testCalculationIdValue",calculationIdUnderTest.calculationId)))
-        val expectedResponse = Json.parse(s"""
-                                             |{
-                                             |  "code": "SERVICE_UNAVAIALBLE",
-                                             |  "message": "RDS service not available error"
-                                             |  }
-                                             |""".stripMargin)
-        status(result) must be(SERVICE_UNAVAILABLE)
-        contentAsJson(result) must be(expectedResponse)
-      }
-    }
+    status(result) mustBe expectedStatus
+    contentAsJson(result) mustBe expectedBody
   }
 
-  "RdsController acknowledgeReport" when {
-    "provided with a valid request" must {
-      "return a http status as created with the Report" in {
-        val calculationIdUnderTest = feedbackIdAndCorrelationIdMapping(FeedbackOneHttp201ResponseCode201.feedbackId)
-        val result = callAcknowledgeReport(Json.parse(acknowledgeReportRequestBody
-          .replace("testFeedbackIdValue", calculationIdUnderTest.feedbackId)
-          .replace("testCorrelationIdValue",calculationIdUnderTest.correlationId)))
+  private def testAcknowledgeReport(controller: RdsController,
+                                    feedbackId: String,
+                                    correlationId: String,
+                                    expectedStatus: Int,
+                                    expectedBody: JsValue): Unit = {
+    val requestBody: JsValue = acknowledgeRequestBody(feedbackId, correlationId)
 
-        val expectedResponse =
-          loadAckResponseTemplate(calculationIdUnderTest.feedbackId, "NJ070957A", s"conf/response/acknowledge/feedback-ack-202.json")
+    val result: Future[Result] = callAcknowledgeReport(controller, requestBody)
 
-        status(result) must be(CREATED)
-        contentAsJson(result) must be(expectedResponse)
+    status(result) mustBe expectedStatus
+    contentAsJson(result) mustBe expectedBody
+  }
+
+  private val featureSwitchTestCases: Seq[(Boolean, String)] = Seq((true, "enabled"), (false, "disabled"))
+
+  "RdsController" when {
+    featureSwitchTestCases.foreach { case (disableErrorResponses, scenario) =>
+      s"generateReport and feature switch is $scenario" must {
+        "return 201 CREATED with the report when a valid request is supplied" in new Test(disableErrorResponses) {
+          val details: CalculationIdDetails = calcIdMappings(FeedbackForDefaultResponse.calculationId)
+
+          val expectedResponse: JsValue = stubResource.loadSubmitResponseTemplate(
+            details.calculationId, details.feedbackId, details.correlationId
+          )
+
+          testGenerateReport(controller, details.calculationId, CREATED, expectedResponse)
+        }
+
+        "return 400 BAD_REQUEST" when {
+          "a request with an invalid tax year is supplied" in new Test(disableErrorResponses) {
+            val calcId: String = FeedbackForDefaultResponse.calculationId
+
+            val expectedResponse: JsValue = controller.requestValidationFailure("The field taxYear is not a valid value.")
+
+            testGenerateReport(controller, calcId, BAD_REQUEST, expectedResponse, 20111)
+          }
+
+          "an invalid request is supplied" in new Test(disableErrorResponses) {
+            val expectedResponse: JsValue = controller.invalidBodyError
+
+            val result: Future[Result] = callGenerateReport(controller, JsObject.empty)
+
+            status(result) mustBe BAD_REQUEST
+            contentAsJson(result) mustBe expectedResponse
+          }
+        }
+
+        "return 500 INTERNAL_SERVER_ERROR when template is not found" in new Test(disableErrorResponses, true) {
+          val calcId: String = "00000000-0000-0000-0000-000000000000"
+
+          val expectedResponse: JsValue = controller.calcIdNotFoundError
+
+          testGenerateReport(controller, calcId, INTERNAL_SERVER_ERROR, expectedResponse)
+        }
+
+        "handle all RDS errors" in new Test(disableErrorResponses) {
+          val errorCases: Seq[(Int, String, JsValue)] = Seq(
+            (BAD_REQUEST, FeedbackForBadRequest.calculationId, controller.invalidBodyError),
+            (NOT_FOUND, RdsNotAvailable404.calculationId, controller.rdsNotAvailableError),
+            (REQUEST_TIMEOUT, RdsTimeout408.calculationId, controller.rdsRequestTimeoutError),
+            (INTERNAL_SERVER_ERROR, RdsInternalServerError500.calculationId, controller.rdsInternalServerError),
+            (SERVICE_UNAVAILABLE, RdsServiceNotAvailable503.calculationId, controller.rdsServiceUnavailableError)
+          )
+
+          errorCases.foreach { case (statusCode, calculationId, expectedBody) =>
+            val (code, body): (Int, JsValue) = if (disableErrorResponses) {
+              val details: CalculationIdDetails = calcIdMappings(FeedbackForDefaultResponse.calculationId)
+
+              val expectedResponse: JsValue = stubResource.loadSubmitResponseTemplate(
+                calculationId, details.feedbackId, details.correlationId
+              )
+
+              (CREATED, expectedResponse)
+            } else {
+              (statusCode, expectedBody)
+            }
+
+            testGenerateReport(controller, calculationId, code, body)
+          }
+        }
+      }
+
+      s"acknowledgeReport and feature switch is $scenario" must {
+        "return 201 CREATED when a valid request is supplied" in new Test(disableErrorResponses) {
+          val details: CalculationIdDetails = feedbackIdAndCorrelationIdMapping(FeedbackForDefaultResponse.feedbackId)
+
+          val expectedResponse: JsValue = stubResource.loadAckResponseTemplate(details.feedbackId, "NJ070957A", "conf/response/acknowledge/feedback-ack-202.json")
+
+          testAcknowledgeReport(controller, details.feedbackId, details.correlationId, CREATED, expectedResponse)
+        }
+
+        "return 400 BAD_REQUEST when an invalid request is supplied" in new Test(disableErrorResponses) {
+          val expectedResponse: JsValue = controller.invalidBodyError
+
+          val result: Future[Result] = callAcknowledgeReport(controller, JsObject.empty)
+
+          status(result) mustBe BAD_REQUEST
+          contentAsJson(result) mustBe expectedResponse
+        }
+
+        "return 500 INTERNAL_SERVER_ERROR when template is not found" in new Test(disableErrorResponses, true) {
+          val (feedbackId, correlationId): (String, String) = ("00000000-0000-0000-0000-000000000000", "7X57CKG72JVNSSS9SALT")
+
+          val expectedResponse: JsValue = controller.calcIdNotFoundError
+
+          testAcknowledgeReport(controller, feedbackId, correlationId, INTERNAL_SERVER_ERROR, expectedResponse)
+        }
+
+        "handle all RDS errors" in new Test(disableErrorResponses) {
+          val errorCases: Seq[(Int, String, String, JsValue)] = Seq(
+            (BAD_REQUEST, FeedbackForBadRequest.feedbackId, FeedbackForBadRequest.correlationId, controller.invalidBodyError),
+            (NOT_FOUND, RdsNotAvailable404.feedbackId, RdsNotAvailable404.correlationId, controller.rdsNotAvailableError),
+            (REQUEST_TIMEOUT, RdsTimeout408.feedbackId, RdsTimeout408.correlationId, controller.rdsRequestTimeoutError),
+            (INTERNAL_SERVER_ERROR, RdsInternalServerError500.feedbackId, RdsInternalServerError500.correlationId, controller.rdsInternalServerError),
+            (SERVICE_UNAVAILABLE, RdsServiceNotAvailable503.feedbackId, RdsServiceNotAvailable503.correlationId, controller.rdsServiceUnavailableError)
+          )
+
+          errorCases.foreach { case (statusCode, feedbackId, correlationId, expectedBody) =>
+            val (code, body): (Int, JsValue) = if (disableErrorResponses) {
+              val expectedResponse: JsValue = stubResource.loadAckResponseTemplate(feedbackId, "NJ070957A", "conf/response/acknowledge/feedback-ack-202.json")
+
+              (CREATED, expectedResponse)
+            } else {
+              (statusCode, expectedBody)
+            }
+
+            testAcknowledgeReport(controller, feedbackId, correlationId, code, body)
+          }
+        }
       }
     }
 
-    "provided with an valid request, but RDS is not available " must {
-      "return a 404" in {
-        val calculationIdUnderTest = feedbackIdAndCorrelationIdMapping(RdsNotAvailable404.feedbackId)
-        val result = callAcknowledgeReport(Json.parse(acknowledgeReportRequestBody
-          .replace("testFeedbackIdValue", calculationIdUnderTest.feedbackId)
-          .replace("testCorrelationIdValue",calculationIdUnderTest.correlationId)))
-        val expectedResponse = Json.parse(s"""
-                                             |{
-                                             |  "code": "NOT_FOUND",
-                                             |  "message": "Scenario to mimic non availabilty of RDS"
-                                             |  }
-                                             |""".stripMargin)
-        status(result) must be(NOT_FOUND)
-        contentAsJson(result) must be(expectedResponse)
+    "sandboxFeedbackId" must {
+      "generate a valid UUID" in new Test() {
+        override val controller: RdsController = new RdsController(stubControllerComponents(), stubResource)
+
+        controller.sandboxFeedbackId must fullyMatch regex "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$".r
       }
     }
 
-    "provided with an invalid request" must {
-      "return a BAD REQUEST" in {
-        val calculationIdUnderTest = feedbackIdAndCorrelationIdMapping(FeedbackForBadRequest.feedbackId)
-        val result = callAcknowledgeReport(Json.parse(acknowledgeReportRequestBody
-          .replace("testFeedbackIdValue", calculationIdUnderTest.feedbackId)
-          .replace("testCorrelationIdValue",calculationIdUnderTest.correlationId)))
-        val expectedResponse = Json.parse(s"""
-                                             |{
-                                             |  "code": "FORBIDDEN",
-                                             |  "message": "Invalid request"
-                                             |  }
-                                             |""".stripMargin)
-        status(result) must be(BAD_REQUEST)
-        contentAsJson(result) must be(expectedResponse)
-      }
-    }
+    "sandboxCorrelationId" must {
+      "generate a valid 64-character uppercase alphanumeric ID" in new Test() {
+        override val controller: RdsController = new RdsController(stubControllerComponents(), stubResource)
 
-    "provided with an valid request, but RDS timeout" must {
-      "return a REQUEST_TIMEOUT" in {
-        val calculationIdUnderTest = feedbackIdAndCorrelationIdMapping(RdsTimeout408.feedbackId)
-        val result = callAcknowledgeReport(Json.parse(acknowledgeReportRequestBody
-          .replace("testFeedbackIdValue", calculationIdUnderTest.feedbackId)
-          .replace("testCorrelationIdValue",calculationIdUnderTest.correlationId)))
-        val expectedResponse = Json.parse(s"""
-                                             |{
-                                             |  "code": "REQUEST_TIMEOUT",
-                                             |  "message": "RDS request timeout"
-                                             |  }
-                                             |""".stripMargin)
-        status(result) must be(REQUEST_TIMEOUT)
-        contentAsJson(result) must be(expectedResponse)
+        controller.sandboxCorrelationId must fullyMatch regex "^[A-Z0-9]{64}$".r
       }
     }
   }
