@@ -21,9 +21,8 @@ import models._
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 
-import java.io.File
 import javax.inject.{Inject, Singleton}
-import scala.io.Source.fromFile
+import scala.io.Source
 import scala.util.Using
 
 @Singleton
@@ -42,10 +41,10 @@ class StubResource @Inject()(appConfig: AppConfig) extends Logging {
 
     val fileName: String = if (!shouldConvertErrorToSuccess && explicitResponseCalcIds.contains(calculationId)) {
       logger.info(s"[StubResource][loadSubmitResponseTemplate] Loading explicit response file for $calculationId")
-      s"conf/response/submit/$calculationId-response.json"
+      s"response/submit/$calculationId-response.json"
     } else {
       logger.info(s"[StubResource][loadSubmitResponseTemplate] Loading default success file for $calculationId")
-      "conf/response/submit/default-success-response.json"
+      "response/submit/default-success-response.json"
     }
 
     val templateContent: String = findResource(fileName).getOrElse(
@@ -73,13 +72,12 @@ class StubResource @Inject()(appConfig: AppConfig) extends Logging {
   }
 
   def findResource(path: String): Option[String] = {
-    val file: File = new File(path)
-
-    if (file.exists()) {
-      Using(fromFile(file))(_.mkString).toOption
-    } else {
-      logger.error(s"[StubResource][findResource] File not found: $path")
-      None
-    }
+    Option(getClass.getClassLoader.getResourceAsStream(path))
+      .fold[Option[String]] {
+        logger.error(s"[StubResource][findResource] File not found: $path")
+        None
+      } { stream =>
+        Using(stream)(Source.fromInputStream(_).mkString).toOption
+      }
   }
 }

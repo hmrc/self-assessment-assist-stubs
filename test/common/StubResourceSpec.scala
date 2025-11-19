@@ -64,7 +64,7 @@ class StubResourceSpec extends SpecBase {
 
             val expectedJson: JsValue = expectedJsonFromFile(
               stubResource,
-              "conf/response/submit/default-success-response.json",
+              "response/submit/default-success-response.json",
               "replaceFeedbackId" -> s"fb-$calcId",
               "replaceCalculationId" -> calcId,
               "replaceCorrelationId" -> s"corr-$calcId"
@@ -89,7 +89,7 @@ class StubResourceSpec extends SpecBase {
 
             val expectedJson: JsValue = expectedJsonFromFile(
               stubResource,
-              s"conf/response/submit/$calcId-response.json",
+              s"response/submit/$calcId-response.json",
               "replaceFeedbackId" -> s"fb-$calcId",
               "replaceCalculationId" -> calcId,
               "replaceCorrelationId" -> s"corr-$calcId"
@@ -109,9 +109,9 @@ class StubResourceSpec extends SpecBase {
           )
 
           val expectedFileName: String = if (disableErrorResponses) {
-            "conf/response/submit/default-success-response.json"
+            "response/submit/default-success-response.json"
           } else {
-            s"conf/response/submit/$calcId-response.json"
+            s"response/submit/$calcId-response.json"
           }
 
           val expectedJson: JsValue = expectedJsonFromFile(
@@ -139,7 +139,7 @@ class StubResourceSpec extends SpecBase {
 
     "loadAckResponseTemplate" must {
       "return the default acknowledge JSON" in new Test() {
-        val fileName: String = "conf/response/acknowledge/feedback-ack-202.json"
+        val fileName: String = "response/acknowledge/feedback-ack-202.json"
 
         val result: JsValue = stubResource.loadAckResponseTemplate(
           feedbackId = "fbAck001",

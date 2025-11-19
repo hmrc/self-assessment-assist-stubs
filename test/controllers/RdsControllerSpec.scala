@@ -268,7 +268,7 @@ class RdsControllerSpec extends SpecBase {
         "return 201 CREATED when a valid request is supplied" in new Test(disableErrorResponses) {
           val details: CalculationIdDetails = feedbackIdAndCorrelationIdMapping(FeedbackForDefaultResponse.feedbackId)
 
-          val expectedResponse: JsValue = stubResource.loadAckResponseTemplate(details.feedbackId, "NJ070957A", "conf/response/acknowledge/feedback-ack-202.json")
+          val expectedResponse: JsValue = stubResource.loadAckResponseTemplate(details.feedbackId, "NJ070957A", "response/acknowledge/feedback-ack-202.json")
 
           testAcknowledgeReport(controller, details.feedbackId, details.correlationId, CREATED, expectedResponse)
         }
@@ -301,7 +301,7 @@ class RdsControllerSpec extends SpecBase {
 
           errorCases.foreach { case (statusCode, feedbackId, correlationId, expectedBody) =>
             val (code, body): (Int, JsValue) = if (disableErrorResponses) {
-              val expectedResponse: JsValue = stubResource.loadAckResponseTemplate(feedbackId, "NJ070957A", "conf/response/acknowledge/feedback-ack-202.json")
+              val expectedResponse: JsValue = stubResource.loadAckResponseTemplate(feedbackId, "NJ070957A", "response/acknowledge/feedback-ack-202.json")
 
               (CREATED, expectedResponse)
             } else {
