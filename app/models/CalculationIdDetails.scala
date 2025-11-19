@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,36 +22,6 @@ trait CalculationIdDetails {
   val correlationId: String
 }
 
-case object FeedbackOneHttp201ResponseCode201 extends CalculationIdDetails {
-  override val calculationId = "111190b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd0877dc7c"
-  override val correlationId = "a5fht738957jfjf845jgjf855"
-}
-
-case object FeedbackTwoHttp201ResponseCode201 extends CalculationIdDetails {
-  override val calculationId = "222290b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "579800fe-e047-cd40-b3e4-0e14b1f183a8"
-  override val correlationId = "b5fht738957jfjf845jgjf855"
-}
-
-case object FeedbackThreeHttp201ResponseCode201 extends CalculationIdDetails {
-  override val calculationId = "333390b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "c365c0b4-06e3-4fef-a555-16fd0877dc7c"
-  override val correlationId = "c5fht738957jfjf845jgjf855"
-}
-
-case object FeedbackFourHttp201ResponseCode201 extends CalculationIdDetails {
-  override val calculationId = "444490b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "d365c0b4-06e3-4fef-a555-16fd0877dc7c"
-  override val correlationId = "d5fht738957jfjf845jgjf855"
-}
-
-case object FeedbackFiveHttp201ResponseCode201 extends CalculationIdDetails {
-  override val calculationId = "555590b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "e365c0b4-06e3-4fef-a555-16fd0877dc7c"
-  override val correlationId = "efht738957jfjf845jgjf855"
-}
-
 case object FeedbackForDefaultResponse extends CalculationIdDetails {
   override val calculationId = "000090b4-06e3-4fef-a555-6fd0877dc7de"
   override val feedbackId = "a465c0b4-06e3-4fef-a555-16fd0877dc7c"
@@ -70,12 +40,6 @@ case object RdsInvalidRespWithMissingCalculationId extends CalculationIdDetails 
   override val correlationId = "mfht938957jfjf845jgjf999"
 }
 
-case object FeedbackFromRDSDevHttp201ResponseCode201 extends CalculationIdDetails {
-  override val calculationId = "666690b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "b365c0b4-06e3-4fef-a555-16fd0877dc7c"
-  override val correlationId = "mfht938957jfjf845jgjf999"
-}
-
 case object FeedbackHttp201ResponseCode204 extends CalculationIdDetails {
   override val calculationId = "620490b4-06e3-4fef-a555-6fd0877dc7ca"
   override val feedbackId = "c204c0b4-06e3-4fef-a555-16fd0877dc7c"
@@ -86,12 +50,6 @@ case object FeedbackHttp201ResponseCode404 extends CalculationIdDetails {
   override val calculationId = "640490b4-06e3-4fef-a555-6fd0877dc7ca"
   override val feedbackId = "c404c0b4-06e3-4fef-a555-16fd0877dc7c"
   override val correlationId = "mfht938957jfjf845jgjf999"
-}
-
-case object FeedbackSevenNRSFailureHttp201ResponseCode201 extends CalculationIdDetails {
-  override val calculationId = "777790b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770500"
-  override val correlationId = "a5fht738957jfjf845jgjf777"
 }
 
 case object RdsNotAvailable404 extends CalculationIdDetails {
@@ -123,36 +81,43 @@ case object NrsBadRequest extends CalculationIdDetails {
   override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770400"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
+
 case object NrsInternalServerError extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a211-6fd0877dc7ba"
   override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08775500"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
+
 case object NrsBadGateway extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a311-6fd0877dc7ba"
   override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770502"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
+
 case object NrsServiceUnavailable extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a411-6fd0877dc7ba"
   override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770503"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
+
 case object NrsGatewayTimeout extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a511-6fd0877dc7ba"
   override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770504"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
+
 case object NrsAccepted extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a555-6fd0877dc7ba"
   override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770202"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
+
 case object NrsUnauthorised extends CalculationIdDetails {
   override val calculationId = "401401b4-06e3-4fef-a555-6fd0877dc7ba"
   override val feedbackId = "a366c0b4-06e3-4fef-a401-16fd08770202"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
+
 case object NrsChecksumFailed extends CalculationIdDetails {
   override val calculationId = "419419b4-06e3-4fef-a555-6fd0877dc7ba"
   override val feedbackId = "a365c0b4-06e3-4fef-a419-16fd08770202"

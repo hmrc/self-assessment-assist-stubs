@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,165 +17,188 @@
 package controllers
 
 import common.StubResource
-import models.{FeedbackForBadRequest, RdsInternalServerError500, RdsNotAvailable404, RdsRequest, RdsServiceNotAvailable503, RdsTimeout408}
+import models._
+import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc.{Action, ControllerComponents, Request}
-import uk.gov.hmrc.http.BadRequestException
+import play.api.mvc.{Action, ControllerComponents, Request, Result}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import utils.CommonData.{calcIdMappings, feedbackIdAndCorrelationIdMapping}
 
-import java.io.FileNotFoundException
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import scala.util.control.NonFatal
+import scala.util.Random.alphanumeric
+import scala.util.{Failure, Success, Try}
 
-@Singleton()
-class RdsController @Inject()(cc: ControllerComponents)
-  extends BackendController(cc) with StubResource {
+@Singleton
+class RdsController @Inject()(cc: ControllerComponents, stubResource: StubResource) extends BackendController(cc) with Logging {
 
+  val calcIdNotFoundError: JsValue = Json.parse(
+    """
+      |{
+      |  "code": "MATCHING_RESOURCE_NOT_FOUND",
+      |  "message": "The Calculation Id was not found at this time. You can try again later"
+      |}
+    """.stripMargin
+  )
 
+  val invalidBodyError: JsValue = Json.parse(
+    """
+      |{
+      |  "code": "FORBIDDEN",
+      |  "message": "Invalid request"
+      |}
+    """.stripMargin
+  )
 
-  private val error: String =
+  def requestValidationFailure(msg: String): JsValue = Json.parse(
     s"""
-       |{
-       |  "code": "MATCHING_RESOURCE_NOT_FOUND",
-       |  "message": "The Calculation Id was not found at this time. You can try again later"
-       |  }
-       |""".stripMargin
+      |{
+      |  "code": "FORBIDDEN",
+      |  "message": "$msg"
+      |}
+    """.stripMargin
+  )
 
-  private val invalidBodyError: String =
-    s"""
-       |{
-       |  "code": "FORBIDDEN",
-       |  "message": "Invalid request"
-       |  }
-       |""".stripMargin
+  val rdsNotAvailableError: JsValue = Json.parse(
+    """
+      |{
+      |  "code": "NOT_FOUND",
+      |  "message": "Scenario to mimic non availability of RDS"
+      |}
+    """.stripMargin
+  )
 
-  private def requestValidationFailure(msg:String): String =
-    s"""
-       |{
-       |  "code": "FORBIDDEN",
-       |  "message": "$msg"
-       |  }
-       |""".stripMargin
+  val rdsRequestTimeoutError: JsValue = Json.parse(
+    """
+      |{
+      |  "code": "REQUEST_TIMEOUT",
+      |  "message": "RDS request timeout"
+      |}
+    """.stripMargin
+  )
 
-  private val rdsNotAvailableError: String =
-    s"""
-       |{
-       |  "code": "NOT_FOUND",
-       |  "message": "Scenario to mimic non availabilty of RDS"
-       |  }
-       |""".stripMargin
+  val rdsInternalServerError: JsValue = Json.parse(
+    """
+      |{
+      |  "code": "INTERNAL_SERVER_ERROR",
+      |  "message": "RDS internal server error"
+      |}
+    """.stripMargin
+  )
 
-  private val rdsRequestTimeoutError: String =
-    s"""
-       |{
-       |  "code": "REQUEST_TIMEOUT",
-       |  "message": "RDS request timeout"
-       |  }
-       |""".stripMargin
+  val rdsServiceUnavailableError: JsValue = Json.parse(
+    """
+      |{
+      |  "code": "SERVICE_UNAVAILABLE",
+      |  "message": "RDS service not available error"
+      |}
+    """.stripMargin
+  )
 
-  private val rdsInternalServerError: String =
-    s"""
-       |{
-       |  "code": "INTERNAL_SERVER_ERROR",
-       |  "message": "RDS internal server error"
-       |  }
-       |""".stripMargin
-
-  private val rdsServiceUnvailableError: String =
-    s"""
-       |{
-       |  "code": "SERVICE_UNAVAIALBLE",
-       |  "message": "RDS service not available error"
-       |  }
-       |""".stripMargin
-
-  def generateReport(): Action[JsValue] = Action.async(parse.json) {
-    request: Request[JsValue] => {
-      logger.info(s"======Invoked RDS stub for report generation======")
-      val rdsRequestValidationResult = request.body.validate[RdsRequest]
-      val statusJson = rdsRequestValidationResult match {
-        case JsSuccess(rdsRequest, _) =>
-            rdsRequest.isValid match {
-              case (true,_) =>
-                rdsRequest.calculationId.toString match {
-                  case FeedbackForBadRequest.calculationId => (BAD_REQUEST, Json.parse(invalidBodyError))
-                  case RdsNotAvailable404.calculationId => (NOT_FOUND, Json.parse(rdsNotAvailableError))
-                  case RdsTimeout408.calculationId => (REQUEST_TIMEOUT, Json.parse(rdsRequestTimeoutError))
-                  case RdsInternalServerError500.calculationId => (INTERNAL_SERVER_ERROR, Json.parse(rdsInternalServerError))
-                  case RdsServiceNotAvailable503.calculationId => (SERVICE_UNAVAILABLE, Json.parse(rdsServiceUnvailableError))
-                  case _ =>
-                    val calculationIdDetails = calcIdMappings(rdsRequest.calculationId.toString)
-                    try {
-                      val response =
-                        loadSubmitResponseTemplate(
-                          calculationIdDetails.calculationId,
-                          calculationIdDetails.feedbackId,
-                          calculationIdDetails.correlationId
-                        )
-                      logger.info(s"sending response")
-                      (CREATED, response)
-                    } catch {
-                      case _: FileNotFoundException => (NOT_FOUND, Json.parse(error))
-                      case _: BadRequestException => (BAD_REQUEST, Json.parse(invalidBodyError))
-                      case NonFatal(_) => (INTERNAL_SERVER_ERROR, Json.parse(error))
-                    }
-                }
-              case (false,msg) => (BAD_REQUEST, Json.parse(requestValidationFailure(msg)))
-            }
-
-
-        case JsError(_) => (BAD_REQUEST, Json.parse(invalidBodyError))
-      }
-
-      Future.successful(new Status(statusJson._1)(statusJson._2))
+  private def loadTemplate(loadFn: => JsValue, method: String, isSandboxMode: Boolean): Result = {
+    Try(loadFn) match {
+      case Success(response: JsValue) =>
+        val logMessage: String = if (isSandboxMode) {
+          s"[RdsController][$method] Sandbox mode enabled - returning success response"
+        } else {
+          s"[RdsController][$method] Returning success response"
+        }
+        logger.info(logMessage)
+        Created(response)
+      case Failure(_) => InternalServerError(calcIdNotFoundError)
     }
   }
 
-  def acknowledgeReport(): Action[JsValue] = Action.async(parse.json) {
-    request => {
-      logger.info(s"======Invoked RDS for report acknowledge======")
-      val rdsAcknowledgeRequestValidationResult = request.body.validate[RdsRequest]
-      logger.info(s"======validation success======")
-      val statusJson = rdsAcknowledgeRequestValidationResult match {
-        case JsSuccess(rdsRequest, _) =>
-          try {
-            logger.info(s"====== success path======")
-            def feedbackDetails = feedbackIdAndCorrelationIdMapping(rdsRequest.feedbackId)
+  private val existingFeedbackIds: Set[String] = feedbackIdAndCorrelationIdMapping.keySet
 
-            (feedbackDetails.feedbackId,feedbackDetails.correlationId) match {
-              case(FeedbackForBadRequest.feedbackId,_)      => (BAD_REQUEST, Json.parse(invalidBodyError))
-              case(RdsNotAvailable404.feedbackId,_)         => (NOT_FOUND, Json.parse(rdsNotAvailableError))
-              case(RdsTimeout408.feedbackId,_)              => (REQUEST_TIMEOUT, Json.parse(rdsRequestTimeoutError))
-              case(RdsInternalServerError500.feedbackId,_)  => (INTERNAL_SERVER_ERROR, Json.parse(rdsInternalServerError))
-              case(RdsServiceNotAvailable503.feedbackId,_)  => (SERVICE_UNAVAILABLE, Json.parse(rdsServiceUnvailableError))
-              case (feedbackId,correlationId) if rdsRequest.feedbackId.equals(feedbackId) && rdsRequest.correlationId.equals(correlationId) =>
-                val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue, s"conf/response/acknowledge/feedback-ack-202.json")
-                (CREATED, response)
-              case(_,_)                                 =>
-                  logger.info(s"====== combination not found ======")
-                  val fileName = s"conf/response/acknowledge/ack-resp-invalid-report-correlationid-combination.json"
-                  val response = loadAckResponseTemplate(rdsRequest.feedbackId, rdsRequest.ninoValue,fileName)
-                  (CREATED, response)
-            }
-          } catch {
-            case e: FileNotFoundException =>
-              logger.error(s"======FileNotFoundException $e======")
-              (NOT_FOUND, Json.parse(error))
-            case b: BadRequestException =>
-              logger.error(s"======BadRequestException $b======")
-              (BAD_REQUEST, Json.parse(error))
+  def sandboxFeedbackId: String = Iterator.continually(UUID.randomUUID().toString).dropWhile(existingFeedbackIds.contains).next()
+
+  def sandboxCorrelationId: String = alphanumeric.take(64).mkString.toUpperCase
+
+  def generateReport(): Action[JsValue] = Action.async(parse.json) { request: Request[JsValue] =>
+    logger.info("[RdsController][generateReport] Invoked RDS for report generation")
+
+    val result: Result = request.body.validate[RdsRequest] match {
+      case JsError(_) => BadRequest(invalidBodyError)
+      case JsSuccess(rdsRequest, _) if !rdsRequest.isValid._1 => BadRequest(requestValidationFailure(rdsRequest.isValid._2))
+      case JsSuccess(rdsRequest, _) =>
+        val calculationId: String = rdsRequest.calculationId.toString
+
+        if (stubResource.isSandboxMode) {
+          loadTemplate(
+            loadFn = stubResource.loadSubmitResponseTemplate(calculationId, sandboxFeedbackId, sandboxCorrelationId),
+            method = "generateReport",
+            isSandboxMode = true
+          )
+        } else {
+          val details: CalculationIdDetails = calcIdMappings(calculationId)
+
+          val (detailsFeedbackId, detailsCorrelationId): (String, String) = (details.feedbackId, details.correlationId)
+
+          calculationId match {
+            case FeedbackForBadRequest.calculationId => BadRequest(invalidBodyError)
+            case RdsNotAvailable404.calculationId => NotFound(rdsNotAvailableError)
+            case RdsTimeout408.calculationId => RequestTimeout(rdsRequestTimeoutError)
+            case RdsInternalServerError500.calculationId => InternalServerError(rdsInternalServerError)
+            case RdsServiceNotAvailable503.calculationId => ServiceUnavailable(rdsServiceUnavailableError)
+            case _ => loadTemplate(
+              loadFn = stubResource.loadSubmitResponseTemplate(calculationId, detailsFeedbackId, detailsCorrelationId),
+              method = "generateReport",
+              isSandboxMode = false
+            )
           }
-
-        case JsError(_) => (BAD_REQUEST, Json.parse(invalidBodyError))
-      }
-
-      Future.successful(new Status(statusJson._1)(statusJson._2))
+        }
     }
+
+    Future.successful(result)
+  }
+
+  def acknowledgeReport(): Action[JsValue] = Action.async(parse.json) { request: Request[JsValue] =>
+    logger.info("[RdsController][acknowledgeReport] Invoked RDS for report acknowledgement")
+
+    val result: Result = request.body.validate[RdsRequest] match {
+      case JsError(_) => BadRequest(invalidBodyError)
+      case JsSuccess(rdsRequest, _) =>
+        val (requestFeedbackId, requestCorrelationId, requestNino): (String, String, String) =
+          (rdsRequest.feedbackId, rdsRequest.correlationId, rdsRequest.ninoValue)
+
+        val details: CalculationIdDetails = feedbackIdAndCorrelationIdMapping(requestFeedbackId)
+
+        val (detailsFeedbackId, detailsCorrelationId): (String, String) = (details.feedbackId, details.correlationId)
+
+        val successAckResponseFile: String = "conf/response/acknowledge/feedback-ack-202.json"
+        val invalidAckResponseFile: String = "conf/response/acknowledge/ack-resp-invalid-report-correlationid-combination.json"
+
+        if (stubResource.isSandboxMode) {
+          loadTemplate(
+            loadFn = stubResource.loadAckResponseTemplate(requestFeedbackId, requestNino, successAckResponseFile),
+            method = "acknowledgeReport",
+            isSandboxMode = true
+          )
+        } else {
+          (requestFeedbackId, requestCorrelationId) match {
+            case (FeedbackForBadRequest.feedbackId, _) => BadRequest(invalidBodyError)
+            case (RdsNotAvailable404.feedbackId, _) => NotFound(rdsNotAvailableError)
+            case (RdsTimeout408.feedbackId, _) => RequestTimeout(rdsRequestTimeoutError)
+            case (RdsInternalServerError500.feedbackId, _) => InternalServerError(rdsInternalServerError)
+            case (RdsServiceNotAvailable503.feedbackId, _) => ServiceUnavailable(rdsServiceUnavailableError)
+            case (`detailsFeedbackId`, `detailsCorrelationId`) => loadTemplate(
+              loadFn = stubResource.loadAckResponseTemplate(requestFeedbackId, requestNino, successAckResponseFile),
+              method = "acknowledgeReport",
+              isSandboxMode = false
+            )
+            case _ =>
+              logger.info("[RdsController][acknowledgeReport] Combination not found")
+              loadTemplate(
+                loadFn = stubResource.loadAckResponseTemplate(requestFeedbackId, requestNino, invalidAckResponseFile),
+                method = "acknowledgeReport",
+                isSandboxMode = false
+              )
+          }
+        }
+    }
+
+    Future.successful(result)
   }
 }
-
-
-
-

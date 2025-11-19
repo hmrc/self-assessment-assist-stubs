@@ -1,0 +1,141 @@
+{
+  "links": [],
+  "version": 2,
+  "moduleId": "HMRC_ASSIST_ITSA_FINSUB_FEEDBACK",
+  "stepId": "execute",
+  "executionState": "completed",
+  "metadata": {
+    "module_id": "HMRC_ASSIST_ITSA_FINSUB_FEEDBACK",
+    "step_id": "execute"
+  },
+  "outputs": [
+    {
+      "name": "WelshActions",
+      "value": [
+        {
+          "metadata": [
+            {
+              "MESSAGE": "string"
+            },
+            {
+              "ACTION": "string"
+            },
+            {
+              "TITLE": "string"
+            },
+            {
+              "LINKTITLE": "string"
+            },
+            {
+              "LINKURL": "string"
+            },
+            {
+              "PATH": "string"
+            }
+          ]
+        },
+        {
+          "data": [
+            [
+              "Mae’r adran gorff fel arfer rhwng un a thair brawddeg. Mae’r adran hon yn rhoi gwybod i’r defnyddiwr pam eu bod yn cael y neges neu pa reol dreth sy’n berthnasol. Er enghraifft, os ydych yn defnyddio rhywbeth at ddibenion busnes a phersonol, dim ond y costau busnes y gallwch eu hawlio fel treuliau caniataol. (corff dalfan)",
+              "Mae'r adran weithredu fel arfer yn cynnwys tair i bedair brawddeg. Mae’n egluro beth all y defnyddiwr ei wneud i ddatrys y gwall posibl. Mewn rhai negeseuon, gall yr adran hon hefyd rybuddio defnyddwyr am ganlyniadau os ydynt yn cyflwyno gwybodaeth anghywir. Er enghraifft, gellir cynghori’r defnyddiwr i wneud newidiadau os oes angen, er mwyn osgoi llog a chosbau posibl. (dalfa gweithredu)",
+              "Adborth CThEF: mae’r teitl yn dweud wrth y defnyddiwr i adolygu neu wirio rhywbeth yn y ffurflen dreth (dalfa teitl)",
+              "[Ewch i GOV.UK i ddysgu mwy am dreth incwm. (enghraifft ddolen dalfan 1), Gallwch hefyd fynd i GOV.UK i gael gwybod am dreuliau pan fyddwch yn hunangyflogedig. (enghraifft ddolen dalfan 2), Fel rheol dylai fod dim mwy na thair dolen ym mhob neges a dylid defnyddio'r frawddeg gyfan fel testun y ddolen. (canllawiau dolenni dalfan)]",
+              "[https://www.gov.uk/treth-incwm, https://www.gov.uk/treuliau-os-ydych-yn-hunangyflogedig, https://www.gov.uk/help-treth]",
+              "/individuals/business/self-employment/[nino]/[businessId]/cumulative/[taxYear] (llwybr dalfan)"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "EnglishActions",
+      "value": [
+        {
+          "metadata": [
+            {
+              "MESSAGE": "string"
+            },
+            {
+              "ACTION": "string"
+            },
+            {
+              "TITLE": "string"
+            },
+            {
+              "LINKTITLE": "string"
+            },
+            {
+              "LINKURL": "string"
+            },
+            {
+              "PATH": "string"
+            }
+          ]
+        },
+        {
+          "data": [
+            [
+              "The body section is usually one to three sentences. This section lets the user know why they are getting the message or which tax rule is relevant. For example, if you use something for both business and personal reasons you can only claim allowable expenses for the business costs. (placeholder body)",
+              "The action section is usually three to four sentences. It explains what the user can do to resolve the potential error. In some messages this section may also warn users about consequences if they submit incorrect information. For example, the user may be advised to make changes if needed to avoid interest and potential penalties. (placeholder action)",
+              "HMRC feedback: the title tells the user to review or check something in the return (placeholder title)",
+              "[Go to GOV.UK to learn more about income tax. (placeholder link example 1), You can also go to GOVUK to find out about expenses when you’re self-employed. (placeholder link example 2), Usually no more than three links per message and the whole sentence should be used as the link text. (placeholder link guidance)]",
+              "[https://www.gov.uk/income-tax, https://www.gov.uk/expenses-if-youre-self-employed, https://www.gov.uk/tax-help]",
+              "/individuals/business/self-employment/[nino]/[businessId]/cumulative/[taxYear] (placeholder path)"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "typeId",
+      "value": [
+        {
+          "metadata": [
+            {
+              "typeId": "string"
+            }
+          ]
+        },
+        {
+          "data": [
+            [
+              "001"
+            ],
+            [
+              "002"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "feedbackId",
+      "value": "replaceFeedbackId"
+    },
+    {
+      "name": "calculationId",
+      "value": "replaceCalculationId"
+    },
+    {
+      "name": "correlationId",
+      "value": "replaceCorrelationId"
+    },
+    {
+      "name": "responseCode",
+      "value": 201
+    },
+    {
+      "name": "responseMessage",
+      "value": "Feedback Generated"
+    },
+    {
+      "name": "createdDttm",
+      "value": "2022-12-05T17:08:25.857"
+    },
+    {
+      "name": "calculationTimestamp",
+      "value": "2019-02-15T09:35:15.094Z"
+    }
+  ]
+}

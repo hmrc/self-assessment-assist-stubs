@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,73 +16,70 @@
 
 package common
 
-import models.{FeedbackForBadRequest, NrsAccepted, NrsBadGateway, NrsBadRequest, NrsChecksumFailed, NrsGatewayTimeout, NrsInternalServerError, NrsNetworkTimeout, NrsNotFound, NrsServiceUnavailable, NrsUnauthorised, RdsInvalidRespWithMissingCalculationId}
+import config.AppConfig
+import models._
 import play.api.Logging
-import play.api.http.ContentTypes
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.Results
 
-import java.io.{File, FileInputStream}
+import java.io.File
+import javax.inject.{Inject, Singleton}
+import scala.io.Source.fromFile
+import scala.util.Using
 
-trait StubResource extends Results with ContentTypes with Logging {
+@Singleton
+class StubResource @Inject()(appConfig: AppConfig) extends Logging {
 
-  def loadSubmitResponseTemplate(calculationId:String, replaceFeedbackId: String, replaceCorrelationId: String): JsValue = {
-    val templateCotent =
-      calculationId match {
-        case calcId@(FeedbackForBadRequest.calculationId |
-                     RdsInvalidRespWithMissingCalculationId.calculationId)=>
-          logger.info(s"loading invalid file scenario $calcId")
-          findResource(s"conf/response/submit/$calcId-response.json")map(
-          _.replace("replaceFeedbackId", replaceFeedbackId)
-            .replace("replaceCorrelationId", replaceCorrelationId))
+  val isSandboxMode: Boolean = appConfig.disableErrorResponses
 
-        case calcId@(NrsBadRequest.calculationId | NrsInternalServerError.calculationId |NrsBadGateway.calculationId |
-                     NrsServiceUnavailable.calculationId | NrsGatewayTimeout.calculationId
-                     |NrsAccepted.calculationId | NrsUnauthorised.calculationId | NrsChecksumFailed.calculationId
-                      |NrsNotFound.calculationId | NrsNetworkTimeout.calculationId)=>
-          logger.info(s"nrs error scenario $calcId")
-          findResource(s"conf/response/submit/nrserrortemplate-response.json")map(
-            _.replace("replaceFeedbackId", replaceFeedbackId)
-              .replace("replaceCalculationId", calcId)
-              .replace("replaceCorrelationId", replaceCorrelationId))
+  private val explicitResponseCalcIds: Set[String] = Set(
+    FeedbackHttp201ResponseCode204.calculationId,
+    FeedbackHttp201ResponseCode404.calculationId,
+    RdsInvalidRespWithMissingCalculationId.calculationId
+  )
 
-        case calcId@_ =>
-          logger.info(s"loading file $calcId")
-          findResource(s"conf/response/submit/$calcId-response.json")map(
-            _.replace("replaceFeedbackId", replaceFeedbackId)
-              .replace("replaceCalculationId", calcId)
-              .replace("replaceCorrelationId", replaceCorrelationId))
-      }
+  def loadSubmitResponseTemplate(calculationId: String, feedbackId: String, correlationId: String): JsValue = {
+    val shouldConvertErrorToSuccess: Boolean = calculationId == RdsInvalidRespWithMissingCalculationId.calculationId && isSandboxMode
 
-
-
-
-    val parsedContent = templateCotent
-      .map(Json.parse).getOrElse(throw new IllegalStateException("Response template parsing failed"))
-    parsedContent
-  }
-
-  def loadAckResponseTemplate(replaceFeedbackId: String, replaceNino: String, fileName:String): JsValue = {
-    val templateCotent =
-      findResource(fileName).map(
-        _.replace("replaceFeedbackId", replaceFeedbackId)
-          .replace("replaceNino", replaceNino))
-
-    val parsedContent = templateCotent
-      .map(Json.parse)
-      .getOrElse(throw new IllegalStateException("Acknowledge template parsing failed"))
-    parsedContent
-  }
-
-  private def findResource(path: String): Option[String] = {
-    val file = new File(path)
-    val absolutePath = file.getAbsolutePath
-    val stream = new FileInputStream(absolutePath)
-    val json = try {
-      Json.parse(stream)
-    } finally {
-      stream.close()
+    val fileName: String = if (!shouldConvertErrorToSuccess && explicitResponseCalcIds.contains(calculationId)) {
+      logger.info(s"[StubResource][loadSubmitResponseTemplate] Loading explicit response file for $calculationId")
+      s"conf/response/submit/$calculationId-response.json"
+    } else {
+      logger.info(s"[StubResource][loadSubmitResponseTemplate] Loading default success file for $calculationId")
+      "conf/response/submit/default-success-response.json"
     }
-    Some(json.toString)
+
+    val templateContent: String = findResource(fileName).getOrElse(
+      throw new IllegalStateException(s"[StubResource][loadSubmitResponseTemplate] Submit template parsing failed: $fileName")
+    )
+
+    Json.parse(
+      templateContent
+        .replace("replaceFeedbackId", feedbackId)
+        .replace("replaceCalculationId", calculationId)
+        .replace("replaceCorrelationId", correlationId)
+    )
+  }
+
+  def loadAckResponseTemplate(feedbackId: String, nino: String, fileName: String): JsValue = {
+    val templateContent: String = findResource(fileName).getOrElse(
+      throw new IllegalStateException(s"[StubResource][loadAckResponseTemplate] Acknowledge template parsing failed: $fileName")
+    )
+
+    Json.parse(
+      templateContent
+        .replace("replaceFeedbackId", feedbackId)
+        .replace("replaceNino", nino)
+    )
+  }
+
+  def findResource(path: String): Option[String] = {
+    val file: File = new File(path)
+
+    if (file.exists()) {
+      Using(fromFile(file))(_.mkString).toOption
+    } else {
+      logger.error(s"[StubResource][findResource] File not found: $path")
+      None
+    }
   }
 }
