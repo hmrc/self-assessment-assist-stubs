@@ -167,8 +167,8 @@ class RdsController @Inject()(cc: ControllerComponents, stubResource: StubResour
 
         val (detailsFeedbackId, detailsCorrelationId): (String, String) = (details.feedbackId, details.correlationId)
 
-        val successAckResponseFile: String = "conf/response/acknowledge/feedback-ack-202.json"
-        val invalidAckResponseFile: String = "conf/response/acknowledge/ack-resp-invalid-report-correlationid-combination.json"
+        val successAckResponseFile: String = "response/acknowledge/feedback-ack-202.json"
+        val invalidAckResponseFile: String = "response/acknowledge/ack-resp-invalid-report-correlationid-combination.json"
 
         if (stubResource.isSandboxMode) {
           loadTemplate(
