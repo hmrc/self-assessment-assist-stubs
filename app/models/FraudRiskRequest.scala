@@ -43,6 +43,7 @@ object FraudRiskRequest {
 case class UTR private(value:String)
 
 object UTR{
+  def apply(value: String): UTR = new UTR(value)
   implicit val format: OFormat[UTR] = Json.format[UTR]
 }
 
@@ -54,11 +55,13 @@ object UserId{
 
 case class BankAccountSortCode private(value:String)
 object BankAccountSortCode{
+  def apply(value: String): BankAccountSortCode = new BankAccountSortCode(value)
   implicit val format: OFormat[BankAccountSortCode] = Json.format[BankAccountSortCode]
 }
 
 
 case class BankAccountNumber private(value:String)
 object BankAccountNumber{
+  def apply(value: String): BankAccountNumber = new BankAccountNumber(value)
   implicit val format: OFormat[BankAccountNumber] = Json.format[BankAccountNumber]
 }

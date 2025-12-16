@@ -30,17 +30,17 @@ trait HeaderValidator {
   private val VALID_API_KEY = "dummy-api-key"
   private val VALID_TOKEN_VALUE = "ABCD1234"
 
-  def isApiKeyValid(request: Request[_]): Boolean = {
+  def isApiKeyValid(request: Request[?]): Boolean = {
     val tokenValue = request.headers.get(API_KEY_HEADER).getOrElse("Invalid")
     tokenValue.contains(VALID_API_KEY)
   }
 
-  def isAuthTokenValid(request: Request[_]): Boolean = {
+  def isAuthTokenValid(request: Request[?]): Boolean = {
     val tokenValue = request.headers.get(TOKEN_HEADER).getOrElse("Invalid")
     tokenValue.contains(VALID_TOKEN_VALUE)
   }
 
-  def isContentTypeValid(request: Request[_]): Boolean = {
+  def isContentTypeValid(request: Request[?]): Boolean = {
     val tokenValue = request.headers.get(CONTENT_TYPE_HEADER).getOrElse("Invalid")
     tokenValue.contains(VALID_CONTENT_TYPE)
   }

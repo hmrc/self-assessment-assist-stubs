@@ -116,7 +116,7 @@ class RdsController @Inject()(cc: ControllerComponents, stubResource: StubResour
 
   def sandboxCorrelationId: String = alphanumeric.take(64).mkString.toUpperCase
 
-  def generateReport(): Action[JsValue] = Action.async(parse.json) { request: Request[JsValue] =>
+  def generateReport(): Action[JsValue] = Action.async(parse.json) { (request: Request[JsValue]) =>
     logger.info("[RdsController][generateReport] Invoked RDS for report generation")
 
     val result: Result = request.body.validate[RdsRequest] match {
@@ -154,7 +154,7 @@ class RdsController @Inject()(cc: ControllerComponents, stubResource: StubResour
     Future.successful(result)
   }
 
-  def acknowledgeReport(): Action[JsValue] = Action.async(parse.json) { request: Request[JsValue] =>
+  def acknowledgeReport(): Action[JsValue] = Action.async(parse.json) { (request: Request[JsValue])=>
     logger.info("[RdsController][acknowledgeReport] Invoked RDS for report acknowledgement")
 
     val result: Result = request.body.validate[RdsRequest] match {

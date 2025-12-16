@@ -19,7 +19,6 @@ package controllers
 import base.SpecBase
 import controllers.actions.HeaderValidator
 import models.{NrsBadGateway, NrsBadRequest, NrsGatewayTimeout, NrsInternalServerError, NrsServiceUnavailable}
-import play.api.http.Status.{ACCEPTED, BAD_REQUEST}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
