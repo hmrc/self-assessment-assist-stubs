@@ -16,10 +16,10 @@
 
 package models
 
-import play.api.libs.functional.syntax.{toFunctionalBuilderOps, unlift}
 import play.api.libs.json._
 import models.RdsRequest.Input
 import uk.gov.hmrc.http.BadRequestException
+import play.api.libs.functional.syntax._
 
 import java.util.UUID
 
@@ -107,7 +107,6 @@ object RdsRequest {
       }
     }
 
-    @annotation.nowarn
     implicit val writes: Writes[Input] = {
       case i @ InputWithString(_, _) => InputWithString.writes.writes(i)
       case i @ InputWithInt(_, _)    => InputWithInt.writes.writes(i)
@@ -121,12 +120,14 @@ object RdsRequest {
     val reads: Reads[InputWithString] =
       (JsPath \ "name")
         .read[String]
-        .and((JsPath \ "value").readWithDefault[String](null))(InputWithString.apply _)
+        .and((JsPath \ "value").readWithDefault[String](null))(InputWithString.apply)
 
     val writes: Writes[InputWithString] =
       (JsPath \ "name")
         .write[String]
-        .and((JsPath \ "value").write[String])(unlift(InputWithString.unapply))
+        .and((JsPath \ "value").write[String]) { i =>
+          (i.name, i.value)
+        }
 
   }
 
@@ -135,12 +136,14 @@ object RdsRequest {
     val reads: Reads[InputWithInt] =
       (JsPath \ "name")
         .read[String]
-        .and((JsPath \ "value").read[Int])(InputWithInt.apply _)
+        .and((JsPath \ "value").read[Int])(InputWithInt.apply)
 
     val writes: Writes[InputWithInt] =
       (JsPath \ "name")
         .write[String]
-        .and((JsPath \ "value").write[Int])(unlift(InputWithInt.unapply))
+        .and((JsPath \ "value").write[Int]) { i =>
+          (i.name, i.value)
+        }
 
   }
 
@@ -149,28 +152,32 @@ object RdsRequest {
     val reads: Reads[InputWithObject] =
       (JsPath \ "name")
         .read[String]
-        .and((JsPath \ "value").read[Seq[ObjectPart]])(InputWithObject.apply _)
+        .and((JsPath \ "value").read[Seq[ObjectPart]])(InputWithObject.apply)
 
     val writes: Writes[InputWithObject] =
       (JsPath \ "name")
         .write[String]
-        .and((JsPath \ "value").write[Seq[ObjectPart]])(unlift(InputWithObject.unapply))
+        .and((JsPath \ "value").write[Seq[ObjectPart]]) { i =>
+          (i.name, i.value)
+        }
 
   }
 
   object InputWithBoolean {
 
-    val reads: Reads[InputWithBoolean] =
+    implicit val reads: Reads[InputWithBoolean] =
       (JsPath \ "name")
         .read[String]
-        .and((JsPath \ "value").readWithDefault[Boolean](false))(InputWithBoolean.apply _)
+        .and((JsPath \ "value").readWithDefault[Boolean](false))(InputWithBoolean.apply)
 
-    val writes: Writes[InputWithBoolean] =
+    implicit val writes: Writes[InputWithBoolean] =
       (JsPath \ "name")
         .write[String]
-        .and((JsPath \ "value").write[Boolean])(unlift(InputWithBoolean.unapply))
-
+        .and((JsPath \ "value").write[Boolean]) { i =>
+          (i.name, i.value)
+        }
   }
+
 
   object ObjectPart {
 
@@ -182,7 +189,6 @@ object RdsRequest {
       }
     }
 
-    @annotation.nowarn
     implicit val writes: Writes[ObjectPart] = {
       case o @ MetadataWrapper(_) => MetadataWrapper.writes.writes(o)
       case o @ DataWrapper(_)     => DataWrapper.writes.writes(o)

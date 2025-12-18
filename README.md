@@ -6,9 +6,9 @@ The self-assessment-assist-stubs is designed to support the following:
 - self-assessment-assist
 
 It is build using
-- Scala 2.13.8
+- Scala 3.5.x
 - Java 11
-- sbt 1.7.2
+- sbt 1.10.x
 
 ## Development Setup
 Run the microservice from the console using: `sbt run` (starts on port 8343)
@@ -19,7 +19,7 @@ Start the service manager profile: `sm2 --start SELF_ASSESSMENT_ASSIST_STUBS`
 | Task                    | Description                                                                                          | Command
 :------------------------|:-----------------------------------------------------------------------------------------------------|:-----
  test                    | Runs the standard unit tests                                                                         | ```$ sbt test```
- it:test                 | Runs the integration tests                                                                           | ```$ sbt it:test ```
+ it/test                 | Runs the integration tests                                                                           | ```$ sbt it/test ```
  dependencyCheck         | Runs dependency-check against the current project. It aggregates dependencies and generates a report | ```$ sbt dependencyCheck```
  dependencyUpdates       | Shows a list of project dependencies that can be updated                                             | ```$ sbt dependencyUpdates```
  dependencyUpdatesReport | Writes a list of project dependencies to a file                                                      | ```$ sbt dependencyUpdatesReport```|
