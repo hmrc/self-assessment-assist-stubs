@@ -25,7 +25,7 @@ object JsonUtils {
 
   def jsonFromFile(path: String): JsValue = {
     val resource = Source.fromURL(getClass.getResource(path))
-    val json = Json.parse(resource.mkString)
+    val json     = Json.parse(resource.mkString)
     resource.close()
     json
   }
@@ -34,4 +34,5 @@ object JsonUtils {
     val submissionPayload = jsonFromFile(path)
     Base64.encodeBase64String(Json.toBytes(submissionPayload))
   }
+
 }

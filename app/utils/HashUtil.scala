@@ -24,17 +24,18 @@ import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class HashUtil @Inject()() {
+class HashUtil @Inject() () {
 
   def encode(value: String): String =
     Base64.getEncoder.encodeToString(value.getBytes(StandardCharsets.UTF_8))
+
   def decode(payload: String): JsValue =
-  Json.parse(new String(Base64.getDecoder.decode(payload), StandardCharsets.UTF_8))
+    Json.parse(new String(Base64.getDecoder.decode(payload), StandardCharsets.UTF_8))
 
   def getSha256Hex(value: String): String = {
     val digest = MessageDigest.getInstance("SHA-256")
-    val bytes = digest.digest(value.getBytes(StandardCharsets.UTF_8))
+    val bytes  = digest.digest(value.getBytes(StandardCharsets.UTF_8))
     bytes.map("%02x".format(_)).mkString
   }
-}
 
+}

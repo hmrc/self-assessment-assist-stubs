@@ -23,12 +23,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait HeaderValidator {
 
-  val CONTENT_TYPE_HEADER = "Content-Type"
-  val API_KEY_HEADER = "X-API-Key"
-  private val TOKEN_HEADER = "Authorization"
+  val CONTENT_TYPE_HEADER        = "Content-Type"
+  val API_KEY_HEADER             = "X-API-Key"
+  private val TOKEN_HEADER       = "Authorization"
   private val VALID_CONTENT_TYPE = "application/json"
-  private val VALID_API_KEY = "dummy-api-key"
-  private val VALID_TOKEN_VALUE = "ABCD1234"
+  private val VALID_API_KEY      = "dummy-api-key"
+  private val VALID_TOKEN_VALUE  = "ABCD1234"
 
   def isApiKeyValid(request: Request[?]): Boolean = {
     val tokenValue = request.headers.get(API_KEY_HEADER).getOrElse("Invalid")
@@ -44,10 +44,12 @@ trait HeaderValidator {
     val tokenValue = request.headers.get(CONTENT_TYPE_HEADER).getOrElse("Invalid")
     tokenValue.contains(VALID_CONTENT_TYPE)
   }
+
 }
 
-class HeaderValidatorAction @Inject()(parser: BodyParsers.Default)
-                                     (implicit val ec: ExecutionContext) extends ActionBuilderImpl(parser) with HeaderValidator {
+class HeaderValidatorAction @Inject() (parser: BodyParsers.Default)(implicit val ec: ExecutionContext)
+    extends ActionBuilderImpl(parser)
+    with HeaderValidator {
 
   override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
 
@@ -60,10 +62,12 @@ class HeaderValidatorAction @Inject()(parser: BodyParsers.Default)
       Future.successful(Results.Unauthorized)
     }
   }
+
 }
 
-class NrsHeaderValidatorAction @Inject()(parser: BodyParsers.Default)
-                                     (implicit val ec: ExecutionContext) extends ActionBuilderImpl(parser) with HeaderValidator {
+class NrsHeaderValidatorAction @Inject() (parser: BodyParsers.Default)(implicit val ec: ExecutionContext)
+    extends ActionBuilderImpl(parser)
+    with HeaderValidator {
 
   override def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
 
@@ -75,4 +79,5 @@ class NrsHeaderValidatorAction @Inject()(parser: BodyParsers.Default)
       Future.successful(Results.Unauthorized)
     }
   }
+
 }

@@ -101,9 +101,9 @@ class FraudRiskRequestSpec extends UnitSpec {
   "UTR, UserId, BankAccountSortCode, BankAccountNumber JSON formats" should {
 
     "serialize and deserialize correctly" in {
-      val utr = UTR("1234567890")
-      val userId = UserId("user-1")
-      val sortCode = BankAccountSortCode("12-34-56")
+      val utr           = UTR("1234567890")
+      val userId        = UserId("user-1")
+      val sortCode      = BankAccountSortCode("12-34-56")
       val accountNumber = BankAccountNumber("12345678")
 
       Json.toJson(utr).validate[UTR].get shouldBe utr
@@ -112,5 +112,5 @@ class FraudRiskRequestSpec extends UnitSpec {
       Json.toJson(accountNumber).validate[BankAccountNumber].get shouldBe accountNumber
     }
   }
-}
 
+}

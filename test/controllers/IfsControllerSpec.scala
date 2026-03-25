@@ -38,7 +38,7 @@ class IfsControllerSpec extends SpecBase {
 
   private class Test(disableErrorResponses: Boolean = false) {
     private val headerValidatorAction: HeaderValidatorAction = new HeaderValidatorAction(new BodyParsers.Default()(NoMaterializer))
-    private val appConfig: AppConfig = makeAppConfig(disableErrorResponses)
+    private val appConfig: AppConfig                         = makeAppConfig(disableErrorResponses)
 
     val controller: IfsController = new IfsController(headerValidatorAction, stubControllerComponents(), appConfig)
   }
@@ -50,8 +50,7 @@ class IfsControllerSpec extends SpecBase {
     IFRequestPayloadActionLinks("title", "url]")
   )
 
-  private def generateRequest(calculationId: String,
-                              links: Option[Seq[IFRequestPayloadActionLinks]]): IFRequest = IFRequest(
+  private def generateRequest(calculationId: String, links: Option[Seq[IFRequestPayloadActionLinks]]): IFRequest = IFRequest(
     serviceRegime = "self-assessment-assist",
     eventName = "GenerateReport",
     eventTimestamp = OffsetDateTime.now(),
@@ -247,4 +246,5 @@ class IfsControllerSpec extends SpecBase {
       }
     }
   }
+
 }

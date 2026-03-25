@@ -42,9 +42,10 @@ class RdsControllerSpec extends SpecBase {
     }
 
     val controller: RdsController = new RdsController(stubControllerComponents(), stubResource) {
-      override def sandboxFeedbackId: String = FeedbackForDefaultResponse.feedbackId
+      override def sandboxFeedbackId: String    = FeedbackForDefaultResponse.feedbackId
       override def sandboxCorrelationId: String = FeedbackForDefaultResponse.correlationId
     }
+
   }
 
   private def generateRequestBody(calculationId: String, taxYear: Int): JsValue = Json.parse(
@@ -204,7 +205,9 @@ class RdsControllerSpec extends SpecBase {
           val details: CalculationIdDetails = calcIdMappings(FeedbackForDefaultResponse.calculationId)
 
           val expectedResponse: JsValue = stubResource.loadSubmitResponseTemplate(
-            details.calculationId, details.feedbackId, details.correlationId
+            details.calculationId,
+            details.feedbackId,
+            details.correlationId
           )
 
           testGenerateReport(controller, details.calculationId, CREATED, expectedResponse)
@@ -251,7 +254,9 @@ class RdsControllerSpec extends SpecBase {
               val details: CalculationIdDetails = calcIdMappings(FeedbackForDefaultResponse.calculationId)
 
               val expectedResponse: JsValue = stubResource.loadSubmitResponseTemplate(
-                calculationId, details.feedbackId, details.correlationId
+                calculationId,
+                details.feedbackId,
+                details.correlationId
               )
 
               (CREATED, expectedResponse)
@@ -268,7 +273,8 @@ class RdsControllerSpec extends SpecBase {
         "return 201 CREATED when a valid request is supplied" in new Test(disableErrorResponses) {
           val details: CalculationIdDetails = feedbackIdAndCorrelationIdMapping(FeedbackForDefaultResponse.feedbackId)
 
-          val expectedResponse: JsValue = stubResource.loadAckResponseTemplate(details.feedbackId, "NJ070957A", "response/acknowledge/feedback-ack-202.json")
+          val expectedResponse: JsValue =
+            stubResource.loadAckResponseTemplate(details.feedbackId, "NJ070957A", "response/acknowledge/feedback-ack-202.json")
 
           testAcknowledgeReport(controller, details.feedbackId, details.correlationId, CREATED, expectedResponse)
         }
@@ -296,12 +302,17 @@ class RdsControllerSpec extends SpecBase {
             (NOT_FOUND, RdsNotAvailable404.feedbackId, RdsNotAvailable404.correlationId, controller.rdsNotAvailableError),
             (REQUEST_TIMEOUT, RdsTimeout408.feedbackId, RdsTimeout408.correlationId, controller.rdsRequestTimeoutError),
             (INTERNAL_SERVER_ERROR, RdsInternalServerError500.feedbackId, RdsInternalServerError500.correlationId, controller.rdsInternalServerError),
-            (SERVICE_UNAVAILABLE, RdsServiceNotAvailable503.feedbackId, RdsServiceNotAvailable503.correlationId, controller.rdsServiceUnavailableError)
+            (
+              SERVICE_UNAVAILABLE,
+              RdsServiceNotAvailable503.feedbackId,
+              RdsServiceNotAvailable503.correlationId,
+              controller.rdsServiceUnavailableError)
           )
 
           errorCases.foreach { case (statusCode, feedbackId, correlationId, expectedBody) =>
             val (code, body): (Int, JsValue) = if (disableErrorResponses) {
-              val expectedResponse: JsValue = stubResource.loadAckResponseTemplate(feedbackId, "NJ070957A", "response/acknowledge/feedback-ack-202.json")
+              val expectedResponse: JsValue =
+                stubResource.loadAckResponseTemplate(feedbackId, "NJ070957A", "response/acknowledge/feedback-ack-202.json")
 
               (CREATED, expectedResponse)
             } else {
@@ -330,4 +341,5 @@ class RdsControllerSpec extends SpecBase {
       }
     }
   }
+
 }

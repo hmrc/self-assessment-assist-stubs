@@ -31,7 +31,7 @@ import scala.util.Random.alphanumeric
 import scala.util.{Failure, Success, Try}
 
 @Singleton
-class RdsController @Inject()(cc: ControllerComponents, stubResource: StubResource) extends BackendController(cc) with Logging {
+class RdsController @Inject() (cc: ControllerComponents, stubResource: StubResource) extends BackendController(cc) with Logging {
 
   val calcIdNotFoundError: JsValue = Json.parse(
     """
@@ -120,7 +120,7 @@ class RdsController @Inject()(cc: ControllerComponents, stubResource: StubResour
     logger.info("[RdsController][generateReport] Invoked RDS for report generation")
 
     val result: Result = request.body.validate[RdsRequest] match {
-      case JsError(_) => BadRequest(invalidBodyError)
+      case JsError(_)                                         => BadRequest(invalidBodyError)
       case JsSuccess(rdsRequest, _) if !rdsRequest.isValid._1 => BadRequest(requestValidationFailure(rdsRequest.isValid._2))
       case JsSuccess(rdsRequest, _) =>
         val calculationId: String = rdsRequest.calculationId.toString
@@ -137,16 +137,17 @@ class RdsController @Inject()(cc: ControllerComponents, stubResource: StubResour
           val (detailsFeedbackId, detailsCorrelationId): (String, String) = (details.feedbackId, details.correlationId)
 
           calculationId match {
-            case FeedbackForBadRequest.calculationId => BadRequest(invalidBodyError)
-            case RdsNotAvailable404.calculationId => NotFound(rdsNotAvailableError)
-            case RdsTimeout408.calculationId => RequestTimeout(rdsRequestTimeoutError)
+            case FeedbackForBadRequest.calculationId     => BadRequest(invalidBodyError)
+            case RdsNotAvailable404.calculationId        => NotFound(rdsNotAvailableError)
+            case RdsTimeout408.calculationId             => RequestTimeout(rdsRequestTimeoutError)
             case RdsInternalServerError500.calculationId => InternalServerError(rdsInternalServerError)
             case RdsServiceNotAvailable503.calculationId => ServiceUnavailable(rdsServiceUnavailableError)
-            case _ => loadTemplate(
-              loadFn = stubResource.loadSubmitResponseTemplate(calculationId, detailsFeedbackId, detailsCorrelationId),
-              method = "generateReport",
-              isSandboxMode = false
-            )
+            case _ =>
+              loadTemplate(
+                loadFn = stubResource.loadSubmitResponseTemplate(calculationId, detailsFeedbackId, detailsCorrelationId),
+                method = "generateReport",
+                isSandboxMode = false
+              )
           }
         }
     }
@@ -154,7 +155,7 @@ class RdsController @Inject()(cc: ControllerComponents, stubResource: StubResour
     Future.successful(result)
   }
 
-  def acknowledgeReport(): Action[JsValue] = Action.async(parse.json) { (request: Request[JsValue])=>
+  def acknowledgeReport(): Action[JsValue] = Action.async(parse.json) { (request: Request[JsValue]) =>
     logger.info("[RdsController][acknowledgeReport] Invoked RDS for report acknowledgement")
 
     val result: Result = request.body.validate[RdsRequest] match {
@@ -178,16 +179,17 @@ class RdsController @Inject()(cc: ControllerComponents, stubResource: StubResour
           )
         } else {
           (requestFeedbackId, requestCorrelationId) match {
-            case (FeedbackForBadRequest.feedbackId, _) => BadRequest(invalidBodyError)
-            case (RdsNotAvailable404.feedbackId, _) => NotFound(rdsNotAvailableError)
-            case (RdsTimeout408.feedbackId, _) => RequestTimeout(rdsRequestTimeoutError)
+            case (FeedbackForBadRequest.feedbackId, _)     => BadRequest(invalidBodyError)
+            case (RdsNotAvailable404.feedbackId, _)        => NotFound(rdsNotAvailableError)
+            case (RdsTimeout408.feedbackId, _)             => RequestTimeout(rdsRequestTimeoutError)
             case (RdsInternalServerError500.feedbackId, _) => InternalServerError(rdsInternalServerError)
             case (RdsServiceNotAvailable503.feedbackId, _) => ServiceUnavailable(rdsServiceUnavailableError)
-            case (`detailsFeedbackId`, `detailsCorrelationId`) => loadTemplate(
-              loadFn = stubResource.loadAckResponseTemplate(requestFeedbackId, requestNino, successAckResponseFile),
-              method = "acknowledgeReport",
-              isSandboxMode = false
-            )
+            case (`detailsFeedbackId`, `detailsCorrelationId`) =>
+              loadTemplate(
+                loadFn = stubResource.loadAckResponseTemplate(requestFeedbackId, requestNino, successAckResponseFile),
+                method = "acknowledgeReport",
+                isSandboxMode = false
+              )
             case _ =>
               logger.info("[RdsController][acknowledgeReport] Combination not found")
               loadTemplate(
@@ -201,4 +203,5 @@ class RdsController @Inject()(cc: ControllerComponents, stubResource: StubResour
 
     Future.successful(result)
   }
+
 }

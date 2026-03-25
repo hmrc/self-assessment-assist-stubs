@@ -26,19 +26,27 @@ object NRSSubmission {
   implicit val formats: OFormat[NRSSubmission] = Json.format[NRSSubmission]
 }
 
-
-case class MetaData(businessId: String, notableEvent: String, payloadContentType: String, payloadSha256Checksum: String, userSubmissionTimestamp: LocalDateTime, identityData: JsObject, userAuthToken: String, headerData: JsObject, searchKeys: SearchKeys)
+case class MetaData(businessId: String,
+                    notableEvent: String,
+                    payloadContentType: String,
+                    payloadSha256Checksum: String,
+                    userSubmissionTimestamp: LocalDateTime,
+                    identityData: JsObject,
+                    userAuthToken: String,
+                    headerData: JsObject,
+                    searchKeys: SearchKeys)
 
 object MetaData {
   implicit val formats: OFormat[MetaData] = Json.format[MetaData]
 }
 
-
 case class SearchKeys(searchKey: String)
 
 object SearchKeys {
+
   implicit val reads: Reads[SearchKeys] =
-    (__ \ "reportId").read[String]
+    (__ \ "reportId")
+      .read[String]
       .map(SearchKeys(_))
 
   implicit val writes: OWrites[SearchKeys] = Json.writes[SearchKeys]

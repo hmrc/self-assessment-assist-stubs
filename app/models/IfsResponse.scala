@@ -18,7 +18,6 @@ package models
 
 import play.api.libs.json.{Json, Writes}
 
-
 case class IfsResponse(ifsResponse: String)
 
 object IfsResponse {

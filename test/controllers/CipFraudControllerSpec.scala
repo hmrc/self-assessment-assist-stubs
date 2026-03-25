@@ -50,10 +50,7 @@ class CipFraudControllerSpec extends SpecBase {
     controller.submitFraudInfo().apply(request)
   }
 
-  private def testSubmitFraudInfo(controller: CipFraudController,
-                                  nino: String,
-                                  expectedStatus: Int,
-                                  expectedBody: Option[JsValue]): Unit = {
+  private def testSubmitFraudInfo(controller: CipFraudController, nino: String, expectedStatus: Int, expectedBody: Option[JsValue]): Unit = {
     val requestBody: JsValue = Json.toJson(fraudRiskRequest(nino))
 
     val result: Future[Result] = callSubmitFraudInfo(controller, requestBody)
@@ -92,7 +89,10 @@ class CipFraudControllerSpec extends SpecBase {
 
           "return the expected response for NINO AA088213C" in new Test(disableErrorResponses) {
             val (expectedStatus, expectedResponse): (Int, Option[JsValue]) = expectedOutcome(
-              controller, disableErrorResponses, INTERNAL_SERVER_ERROR, None
+              controller,
+              disableErrorResponses,
+              INTERNAL_SERVER_ERROR,
+              None
             )
 
             testSubmitFraudInfo(controller, "AA088213C", expectedStatus, expectedResponse)
@@ -100,7 +100,10 @@ class CipFraudControllerSpec extends SpecBase {
 
           "return the expected response for NINO ME636062B" in new Test(disableErrorResponses) {
             val (expectedStatus, expectedResponse): (Int, Option[JsValue]) = expectedOutcome(
-              controller, disableErrorResponses, REQUEST_TIMEOUT, None
+              controller,
+              disableErrorResponses,
+              REQUEST_TIMEOUT,
+              None
             )
 
             testSubmitFraudInfo(controller, "ME636062B", expectedStatus, expectedResponse)
@@ -108,7 +111,10 @@ class CipFraudControllerSpec extends SpecBase {
 
           "return the expected response for NINO JL530692C" in new Test(disableErrorResponses) {
             val (expectedStatus, expectedResponse): (Int, Option[JsValue]) = expectedOutcome(
-              controller, disableErrorResponses, BAD_REQUEST, Some(controller.failureResponse)
+              controller,
+              disableErrorResponses,
+              BAD_REQUEST,
+              Some(controller.failureResponse)
             )
 
             testSubmitFraudInfo(controller, "JL530692C", expectedStatus, expectedResponse)
@@ -124,4 +130,5 @@ class CipFraudControllerSpec extends SpecBase {
       }
     }
   }
+
 }

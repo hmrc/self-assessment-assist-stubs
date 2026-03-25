@@ -20,6 +20,6 @@ import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 
 @Singleton
-class AppConfig @Inject()(config: Configuration) {
+class AppConfig @Inject() (config: Configuration) {
   val disableErrorResponses: Boolean = config.getOptional[Boolean]("feature-switch.disable-error-responses").getOrElse(true)
 }

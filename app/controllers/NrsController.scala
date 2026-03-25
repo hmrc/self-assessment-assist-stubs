@@ -17,7 +17,19 @@
 package controllers
 
 import controllers.actions.NrsHeaderValidatorAction
-import models.{NRSSubmission, NrsAccepted, NrsBadGateway, NrsBadRequest, NrsChecksumFailed, NrsGatewayTimeout, NrsInternalServerError, NrsNetworkTimeout, NrsNotFound, NrsServiceUnavailable, NrsUnauthorised}
+import models.{
+  NRSSubmission,
+  NrsAccepted,
+  NrsBadGateway,
+  NrsBadRequest,
+  NrsChecksumFailed,
+  NrsGatewayTimeout,
+  NrsInternalServerError,
+  NrsNetworkTimeout,
+  NrsNotFound,
+  NrsServiceUnavailable,
+  NrsUnauthorised
+}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Request}
@@ -29,11 +41,9 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
-class NrsController @Inject()(headerValidator: NrsHeaderValidatorAction,
-                              hashUtil: HashUtil,
-                              cc: ControllerComponents
-                             )(implicit ec: ExecutionContext)
-  extends BackendController(cc) with Logging {
+class NrsController @Inject() (headerValidator: NrsHeaderValidatorAction, hashUtil: HashUtil, cc: ControllerComponents)(implicit ec: ExecutionContext)
+    extends BackendController(cc)
+    with Logging {
 
   private final val ChecksumFailed = new Status(419)
 
@@ -51,23 +61,24 @@ class NrsController @Inject()(headerValidator: NrsHeaderValidatorAction,
               logger.debug(s"[StubNonRepudiationServiceController] Payload received: ${request.body}")
               val feedbackId = getReportId(value)
               feedbackId match {
-                case NrsBadRequest.feedbackId           => BadRequest
-                case NrsInternalServerError.feedbackId  => InternalServerError(JsString("Internal NRS Submission API error"))
-                case NrsBadGateway.feedbackId           => BadGateway
-                case NrsServiceUnavailable.feedbackId   => ServiceUnavailable
-                case NrsGatewayTimeout.feedbackId       => GatewayTimeout
-                case NrsAccepted.feedbackId             => Accepted(requestSuccessfulFake)
-                case NrsNetworkTimeout.feedbackId       => RequestTimeout
-                case NrsNotFound.feedbackId             => NotFound
-                case NrsChecksumFailed.feedbackId       => ChecksumFailed
-                case NrsUnauthorised.feedbackId         => Unauthorized
-                case _                                  => Accepted(requestSuccessfulFake)
+                case NrsBadRequest.feedbackId          => BadRequest
+                case NrsInternalServerError.feedbackId => InternalServerError(JsString("Internal NRS Submission API error"))
+                case NrsBadGateway.feedbackId          => BadGateway
+                case NrsServiceUnavailable.feedbackId  => ServiceUnavailable
+                case NrsGatewayTimeout.feedbackId      => GatewayTimeout
+                case NrsAccepted.feedbackId            => Accepted(requestSuccessfulFake)
+                case NrsNetworkTimeout.feedbackId      => RequestTimeout
+                case NrsNotFound.feedbackId            => NotFound
+                case NrsChecksumFailed.feedbackId      => ChecksumFailed
+                case NrsUnauthorised.feedbackId        => Unauthorized
+                case _                                 => Accepted(requestSuccessfulFake)
               }
             } else {
               logger.error(s"Nrs checksum failed")
               ChecksumFailed
             }
-          case JsError(errors) => logger.error(s"Nrs validation failed")
+          case JsError(errors) =>
+            logger.error(s"Nrs validation failed")
             BadRequest(errors.toString())
         }
       }
@@ -76,11 +87,12 @@ class NrsController @Inject()(headerValidator: NrsHeaderValidatorAction,
 
   private def validChecksum(submission: NRSSubmission): Boolean = {
     val payload = Json.stringify(hashUtil.decode(submission.payload))
-    val hash = hashUtil.getSha256Hex(payload)
+    val hash    = hashUtil.getSha256Hex(payload)
     submission.metadata.payloadSha256Checksum == hash
   }
 
   private def getReportId(submission: NRSSubmission): String = {
     (hashUtil.decode(submission.payload) \ "reportId").as[String]
   }
+
 }
