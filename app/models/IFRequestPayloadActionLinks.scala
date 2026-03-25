@@ -18,9 +18,7 @@ package models
 
 import play.api.libs.json.{Format, Json}
 
-case class IFRequestPayloadActionLinks(linkTitle: String, linkUrl: String) {
-
-}
+case class IFRequestPayloadActionLinks(linkTitle: String, linkUrl: String) {}
 
 object IFRequestPayloadActionLinks {
   implicit val formats: Format[IFRequestPayloadActionLinks] = Json.format[IFRequestPayloadActionLinks]

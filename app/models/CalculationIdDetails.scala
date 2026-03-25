@@ -24,138 +24,138 @@ trait CalculationIdDetails {
 
 case object FeedbackForDefaultResponse extends CalculationIdDetails {
   override val calculationId = "000090b4-06e3-4fef-a555-6fd0877dc7de"
-  override val feedbackId = "a465c0b4-06e3-4fef-a555-16fd0877dc7c"
+  override val feedbackId    = "a465c0b4-06e3-4fef-a555-16fd0877dc7c"
   override val correlationId = "g5fht738957jfjf845jgjf855"
 }
 
 case object FeedbackForBadRequest extends CalculationIdDetails {
   override val calculationId = "640090b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "579800fe-06e3-4fef-a555-16fd0877dc7c"
+  override val feedbackId    = "579800fe-06e3-4fef-a555-16fd0877dc7c"
   override val correlationId = "efht938957jfjf845jgjf999"
 }
 
 case object RdsInvalidRespWithMissingCalculationId extends CalculationIdDetails {
   override val calculationId = "101090b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "a565c0b4-06e3-4fef-a555-16fd0877dc7c"
+  override val feedbackId    = "a565c0b4-06e3-4fef-a555-16fd0877dc7c"
   override val correlationId = "mfht938957jfjf845jgjf999"
 }
 
 case object FeedbackHttp201ResponseCode204 extends CalculationIdDetails {
   override val calculationId = "620490b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "c204c0b4-06e3-4fef-a555-16fd0877dc7c"
+  override val feedbackId    = "c204c0b4-06e3-4fef-a555-16fd0877dc7c"
   override val correlationId = "mfht938957jfjf845jgjf999"
 }
 
 case object FeedbackHttp201ResponseCode404 extends CalculationIdDetails {
   override val calculationId = "640490b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "c404c0b4-06e3-4fef-a555-16fd0877dc7c"
+  override val feedbackId    = "c404c0b4-06e3-4fef-a555-16fd0877dc7c"
   override val correlationId = "mfht938957jfjf845jgjf999"
 }
 
 case object RdsNotAvailable404 extends CalculationIdDetails {
   override val calculationId = "404404b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "c204c0b4-06e3-4fef-a555-16fd0404dc7c"
+  override val feedbackId    = "c204c0b4-06e3-4fef-a555-16fd0404dc7c"
   override val correlationId = "a5fht738957jfjf845jgjf777"
 }
 
 case object RdsTimeout408 extends CalculationIdDetails {
   override val calculationId = "408408b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "c204c0b4-06e3-4fef-a555-16fd0404dd7d"
+  override val feedbackId    = "c204c0b4-06e3-4fef-a555-16fd0404dd7d"
   override val correlationId = "a5fht738957jfjf845jgjf777"
 }
 
 case object RdsInternalServerError500 extends CalculationIdDetails {
   override val calculationId = "500500b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "c204c0b4-06e3-4fef-a500-16fd0404dd7d"
+  override val feedbackId    = "c204c0b4-06e3-4fef-a500-16fd0404dd7d"
   override val correlationId = "a5fht738957jfjf500jgjf777"
 }
 
 case object RdsServiceNotAvailable503 extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "c204c0b4-06e3-4fef-a503-16fd0404dd7d"
+  override val feedbackId    = "c204c0b4-06e3-4fef-a503-16fd0404dd7d"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
 case object NrsBadRequest extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a111-6fd0877dc7ba"
-  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770400"
+  override val feedbackId    = "a365c0b4-06e3-4fef-a555-16fd08770400"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
 case object NrsInternalServerError extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a211-6fd0877dc7ba"
-  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08775500"
+  override val feedbackId    = "a365c0b4-06e3-4fef-a555-16fd08775500"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
 case object NrsBadGateway extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a311-6fd0877dc7ba"
-  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770502"
+  override val feedbackId    = "a365c0b4-06e3-4fef-a555-16fd08770502"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
 case object NrsServiceUnavailable extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a411-6fd0877dc7ba"
-  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770503"
+  override val feedbackId    = "a365c0b4-06e3-4fef-a555-16fd08770503"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
 case object NrsGatewayTimeout extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a511-6fd0877dc7ba"
-  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770504"
+  override val feedbackId    = "a365c0b4-06e3-4fef-a555-16fd08770504"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
 case object NrsAccepted extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a555-6fd0877dc7ba"
-  override val feedbackId = "a365c0b4-06e3-4fef-a555-16fd08770202"
+  override val feedbackId    = "a365c0b4-06e3-4fef-a555-16fd08770202"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
 case object NrsUnauthorised extends CalculationIdDetails {
   override val calculationId = "401401b4-06e3-4fef-a555-6fd0877dc7ba"
-  override val feedbackId = "a366c0b4-06e3-4fef-a401-16fd08770202"
+  override val feedbackId    = "a366c0b4-06e3-4fef-a401-16fd08770202"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
 case object NrsChecksumFailed extends CalculationIdDetails {
   override val calculationId = "419419b4-06e3-4fef-a555-6fd0877dc7ba"
-  override val feedbackId = "a365c0b4-06e3-4fef-a419-16fd08770202"
+  override val feedbackId    = "a365c0b4-06e3-4fef-a419-16fd08770202"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
 case object NrsNotFound extends CalculationIdDetails {
   override val calculationId = "404404b4-06e3-4fef-a404-6fd0877dc7ba"
-  override val feedbackId = "a366c0b4-06e3-4fef-a404-16fd08770202"
+  override val feedbackId    = "a366c0b4-06e3-4fef-a404-16fd08770202"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
 case object NrsNetworkTimeout extends CalculationIdDetails {
   override val calculationId = "408408b4-06e3-4fef-a555-6fd0877dc7ba"
-  override val feedbackId = "a366c0b4-06e3-4fef-a408-16fd08770202"
+  override val feedbackId    = "a366c0b4-06e3-4fef-a408-16fd08770202"
   override val correlationId = "a5fht738957jfjf503jgjf777"
 }
 
 case object IfsServiceBadRequest400 extends CalculationIdDetails {
   override val calculationId = "400500b4-06e3-4fef-a555-6fd0877dc7ca"
-  override val feedbackId = "a365c0b4-06e3-4fef-a400-16fd08770202"
+  override val feedbackId    = "a365c0b4-06e3-4fef-a400-16fd08770202"
   override val correlationId = "a5fht738957jfjf500jgjf777"
 }
 
 case object IfsServiceRequestTimeout408 extends CalculationIdDetails {
   override val calculationId = "408503b4-06e3-4fef-a555-5fd0877dc7ca"
-  override val feedbackId = "a365c0b4-06e3-4fef-a408-16fd08770202"
+  override val feedbackId    = "a365c0b4-06e3-4fef-a408-16fd08770202"
   override val correlationId = "a5fht738957jfjf503jgjf778"
 }
 
 case object IfsInternalServerError500 extends CalculationIdDetails {
   override val calculationId = "500500b4-06e3-4fef-a555-4fd0877dc7ca"
-  override val feedbackId = "a365c0b4-06e3-4fef-a500-16fd08770202"
+  override val feedbackId    = "a365c0b4-06e3-4fef-a500-16fd08770202"
   override val correlationId = "a5fht738957jfjf500jgjf779"
 }
 
 case object IfsServiceNotAvailable503 extends CalculationIdDetails {
   override val calculationId = "503503b4-06e3-4fef-a555-3fd0877dc7ca"
-  override val feedbackId = "a365c0b4-06e3-4fef-a503-16fd08770202"
+  override val feedbackId    = "a365c0b4-06e3-4fef-a503-16fd08770202"
   override val correlationId = "a8fht738957jfjf503jgjf777"
 }

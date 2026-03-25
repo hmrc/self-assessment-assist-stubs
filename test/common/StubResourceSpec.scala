@@ -33,14 +33,19 @@ class StubResourceSpec extends SpecBase {
     val stubResource: StubResource = new StubResource(appConfig) {
       override def findResource(path: String): Option[String] = if (forceMissingResource) None else super.findResource(path)
     }
+
   }
 
   private val featureSwitchTestCases: Seq[(Boolean, String)] = Seq((true, "enabled"), (false, "disabled"))
 
   private def expectedJsonFromFile(stubResource: StubResource, fileName: String, replacements: (String, String)*): JsValue =
-    stubResource.findResource(fileName).map { content =>
-      replacements.foldLeft(content) { case (c, (from, to)) => c.replace(from, to) }
-    }.map(Json.parse).get
+    stubResource
+      .findResource(fileName)
+      .map { content =>
+        replacements.foldLeft(content) { case (c, (from, to)) => c.replace(from, to) }
+      }
+      .map(Json.parse)
+      .get
 
   "StubResource" when {
     featureSwitchTestCases.foreach { case (disableErrorResponses, scenario) =>
@@ -65,7 +70,7 @@ class StubResourceSpec extends SpecBase {
             val expectedJson: JsValue = expectedJsonFromFile(
               stubResource,
               "response/submit/default-success-response.json",
-              "replaceFeedbackId" -> s"fb-$calcId",
+              "replaceFeedbackId"    -> s"fb-$calcId",
               "replaceCalculationId" -> calcId,
               "replaceCorrelationId" -> s"corr-$calcId"
             )
@@ -90,7 +95,7 @@ class StubResourceSpec extends SpecBase {
             val expectedJson: JsValue = expectedJsonFromFile(
               stubResource,
               s"response/submit/$calcId-response.json",
-              "replaceFeedbackId" -> s"fb-$calcId",
+              "replaceFeedbackId"    -> s"fb-$calcId",
               "replaceCalculationId" -> calcId,
               "replaceCorrelationId" -> s"corr-$calcId"
             )
@@ -117,7 +122,7 @@ class StubResourceSpec extends SpecBase {
           val expectedJson: JsValue = expectedJsonFromFile(
             stubResource,
             expectedFileName,
-            "replaceFeedbackId" -> s"fb-$calcId",
+            "replaceFeedbackId"    -> s"fb-$calcId",
             "replaceCalculationId" -> calcId,
             "replaceCorrelationId" -> s"corr-$calcId"
           )
@@ -151,7 +156,7 @@ class StubResourceSpec extends SpecBase {
           stubResource,
           fileName,
           "replaceFeedbackId" -> "fbAck001",
-          "replaceNino" -> "AA123456A"
+          "replaceNino"       -> "AA123456A"
         )
 
         result mustBe expectedJson
@@ -168,4 +173,5 @@ class StubResourceSpec extends SpecBase {
       }
     }
   }
+
 }

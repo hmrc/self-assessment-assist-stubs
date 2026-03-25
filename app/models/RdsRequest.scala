@@ -176,8 +176,8 @@ object RdsRequest {
         .and((JsPath \ "value").write[Boolean]) { i =>
           (i.name, i.value)
         }
-  }
 
+  }
 
   object ObjectPart {
 

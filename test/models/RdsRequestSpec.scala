@@ -90,6 +90,7 @@ class RdsRequestSpec extends UnitSpec {
     }
 
   }
+
   "InputWithBoolean JSON format" should {
 
     "read name and value when value is present" in {

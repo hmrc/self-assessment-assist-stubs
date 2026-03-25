@@ -6,6 +6,7 @@ ThisBuild / scalacOptions ++= Seq(
   "-Werror",
   "-Wconf:msg=Flag.*repeatedly:s"
 )
+ThisBuild / scalafmtOnCompile := true
 
 val appName = "self-assessment-assist-stubs"
 

@@ -36,10 +36,12 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
 
   private def onSubmit(value: JsValue, withValidHeaders: Boolean = true): Future[Result] = {
     val request: FakeRequest[JsValue] = if (withValidHeaders) {
-      FakeRequest("POST", "/submission").withBody(value).withHeaders(
-        CONTENT_TYPE_HEADER -> "application/json",
-        API_KEY_HEADER -> "dummy-api-key"
-      )
+      FakeRequest("POST", "/submission")
+        .withBody(value)
+        .withHeaders(
+          CONTENT_TYPE_HEADER -> "application/json",
+          API_KEY_HEADER      -> "dummy-api-key"
+        )
     } else {
       FakeRequest("POST", "/submission").withBody(value)
     }
@@ -82,7 +84,7 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
     }
 
     "return 401 Unauthorised when invalid headers received" in {
-      val json = Json.parse(s"""{"test": "value"}""")
+      val json   = Json.parse(s"""{"test": "value"}""")
       val result = onSubmit(json, withValidHeaders = false)
       status(result) must be(UNAUTHORIZED)
     }
@@ -92,7 +94,7 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
 
     def runTest(harness: TestHarness): Unit = {
       s"${harness.name}" in {
-        val json = jsonFromFile(harness.resourcePath)
+        val json   = jsonFromFile(harness.resourcePath)
         val result = onSubmit(json)
         status(result) must be(harness.response)
       }
@@ -102,8 +104,15 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
 
     val errorTests = Seq(
       TestHarness("return 400 when invalid nrs json received", s"/${NrsBadRequest.feedbackId}-invalidNrsEventAcknowledge.json", BAD_REQUEST),
-      TestHarness("return 419 Checksum Failed received when decoded payload does match the sha/checksum", "/a365c0b4-06e3-4fef-a555-16fd08770419-RegistrationWithBadChecksumEvent.json", 419),
-      TestHarness("return 500 when there is an internal server error", s"/${NrsInternalServerError.feedbackId}-nrsServiceErrorEvent.json", INTERNAL_SERVER_ERROR),
+      TestHarness(
+        "return 419 Checksum Failed received when decoded payload does match the sha/checksum",
+        "/a365c0b4-06e3-4fef-a555-16fd08770419-RegistrationWithBadChecksumEvent.json",
+        419
+      ),
+      TestHarness(
+        "return 500 when there is an internal server error",
+        s"/${NrsInternalServerError.feedbackId}-nrsServiceErrorEvent.json",
+        INTERNAL_SERVER_ERROR),
       TestHarness("return 502 when NRS returns a Bad Gateway error", s"/${NrsBadGateway.feedbackId}-nrsBadGatewayEvent.json", BAD_GATEWAY),
       TestHarness("return 503 when NRS is unavailable", s"/${NrsServiceUnavailable.feedbackId}-nrsServiceUnavailableEvent.json", SERVICE_UNAVAILABLE),
       TestHarness("return 504 when NRS gateway times out", s"/${NrsGatewayTimeout.feedbackId}-nrsGatewayTimeoutEvent.json", GATEWAY_TIMEOUT)
@@ -112,4 +121,5 @@ class StubNonRepudiationServiceControllerSpec extends SpecBase with HeaderValida
     errorTests.foreach(runTest)
 
   }
+
 }

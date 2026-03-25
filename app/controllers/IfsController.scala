@@ -114,7 +114,7 @@ class IfsController @Inject() (headerValidator: HeaderValidatorAction, cc: Contr
                 case Some(IfsServiceBadRequest400.calculationId)     => BadRequest(invalidCorrelationIdError)
                 case Some(IfsServiceNotAvailable503.calculationId)   => ServiceUnavailable(serviceUnavailableError)
                 case Some(_)                                         => NoContent
-                case None                                            =>
+                case None =>
                   logger.error("[IfsController][submit] Calculation ID not found bad request")
                   BadRequest(invalidPayloadError)
               }
@@ -146,4 +146,5 @@ class IfsController @Inject() (headerValidator: HeaderValidatorAction, cc: Contr
       }
     }
   }
+
 }

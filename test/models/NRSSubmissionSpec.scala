@@ -120,4 +120,5 @@ class NRSSubmissionSpec extends UnitSpec {
       submission.metadata.searchKeys shouldBe SearchKeys("report-123")
     }
   }
+
 }

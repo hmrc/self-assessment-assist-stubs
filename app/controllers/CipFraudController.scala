@@ -27,8 +27,9 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CipFraudController @Inject()(cc: ControllerComponents, appConfig: AppConfig)(implicit ec: ExecutionContext)
-  extends BackendController(cc) with Logging {
+class CipFraudController @Inject() (cc: ControllerComponents, appConfig: AppConfig)(implicit ec: ExecutionContext)
+    extends BackendController(cc)
+    with Logging {
 
   val successResponse: JsValue = Json.parse(
     """
@@ -56,12 +57,12 @@ class CipFraudController @Inject()(cc: ControllerComponents, appConfig: AppConfi
 
   private val isSandboxMode: Boolean = appConfig.disableErrorResponses
 
-  def submitFraudInfo(): Action[JsValue] = Action.async(parse.json) {
-    implicit request =>
-      Future {
-        logger.info("[CipFraudController][submitFraudInfo] Invoked CIP for fraud risk report")
-        request.body.validate[FraudRiskRequest] match {
-          case JsSuccess(value, _) => value.nino match {
+  def submitFraudInfo(): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    Future {
+      logger.info("[CipFraudController][submitFraudInfo] Invoked CIP for fraud risk report")
+      request.body.validate[FraudRiskRequest] match {
+        case JsSuccess(value, _) =>
+          value.nino match {
             case Some(nino) if isSandboxMode =>
               logger.info(s"[CipFraudController][submitFraudInfo] Sandbox mode enabled - returning success response for nino: $nino")
               Ok(successResponse)
@@ -72,12 +73,9 @@ class CipFraudController @Inject()(cc: ControllerComponents, appConfig: AppConfi
               BadRequest(failureResponse)
             case _ => Ok(successResponse)
           }
-          case JsError(errors) => BadRequest(errors.toString())
-        }
+        case JsError(errors) => BadRequest(errors.toString())
       }
+    }
   }
+
 }
-
-
-
-

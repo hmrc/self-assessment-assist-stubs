@@ -26,7 +26,7 @@ import scala.io.Source
 import scala.util.Using
 
 @Singleton
-class StubResource @Inject()(appConfig: AppConfig) extends Logging {
+class StubResource @Inject() (appConfig: AppConfig) extends Logging {
 
   val isSandboxMode: Boolean = appConfig.disableErrorResponses
 
@@ -80,4 +80,5 @@ class StubResource @Inject()(appConfig: AppConfig) extends Logging {
         Using(stream)(Source.fromInputStream(_).mkString).toOption
       }
   }
+
 }

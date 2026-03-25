@@ -19,49 +19,49 @@ package models
 import models.FraudRiskRequest.FraudRiskHeaders
 import play.api.libs.json.{Json, OFormat}
 
-case class FraudRiskRequest(
-                             nino: Option[String]=None,
-                             taxYear: Option[String]=None,
-                             utr:Option[UTR]=None,
-                             deviceId:Option[String]=None,
-                             userId:Option[UserId]=None,
-                             ipAddress:Option[String]=None,
-                             bankAccountSortCode:Option[BankAccountSortCode]=None,
-                             bankAccountNumber:Option[BankAccountNumber]=None,
-                             email:Option[String]=None,
-                             submissionId:Option[String]=None,
-                             fraudRiskHeaders: FraudRiskHeaders)
+case class FraudRiskRequest(nino: Option[String] = None,
+                            taxYear: Option[String] = None,
+                            utr: Option[UTR] = None,
+                            deviceId: Option[String] = None,
+                            userId: Option[UserId] = None,
+                            ipAddress: Option[String] = None,
+                            bankAccountSortCode: Option[BankAccountSortCode] = None,
+                            bankAccountNumber: Option[BankAccountNumber] = None,
+                            email: Option[String] = None,
+                            submissionId: Option[String] = None,
+                            fraudRiskHeaders: FraudRiskHeaders)
 
 object FraudRiskRequest {
   type FraudRiskHeaders = Map[String, String]
-  implicit val utrFormat: OFormat[UTR] = UTR.format
+  implicit val utrFormat: OFormat[UTR]                  = UTR.format
   implicit val bascFormat: OFormat[BankAccountSortCode] = BankAccountSortCode.format
-  implicit val banFormat: OFormat[BankAccountNumber] = BankAccountNumber.format
-  implicit val format: OFormat[FraudRiskRequest] = Json.format[FraudRiskRequest]
+  implicit val banFormat: OFormat[BankAccountNumber]    = BankAccountNumber.format
+  implicit val format: OFormat[FraudRiskRequest]        = Json.format[FraudRiskRequest]
 }
 
-case class UTR private(value:String)
+case class UTR private (value: String)
 
-object UTR{
-  def apply(value: String): UTR = new UTR(value)
+object UTR {
+  def apply(value: String): UTR     = new UTR(value)
   implicit val format: OFormat[UTR] = Json.format[UTR]
 }
 
-case class UserId(value:String)
-object UserId{
+case class UserId(value: String)
+
+object UserId {
   implicit val format: OFormat[UserId] = Json.format[UserId]
 }
 
+case class BankAccountSortCode private (value: String)
 
-case class BankAccountSortCode private(value:String)
-object BankAccountSortCode{
-  def apply(value: String): BankAccountSortCode = new BankAccountSortCode(value)
+object BankAccountSortCode {
+  def apply(value: String): BankAccountSortCode     = new BankAccountSortCode(value)
   implicit val format: OFormat[BankAccountSortCode] = Json.format[BankAccountSortCode]
 }
 
+case class BankAccountNumber private (value: String)
 
-case class BankAccountNumber private(value:String)
-object BankAccountNumber{
-  def apply(value: String): BankAccountNumber = new BankAccountNumber(value)
+object BankAccountNumber {
+  def apply(value: String): BankAccountNumber     = new BankAccountNumber(value)
   implicit val format: OFormat[BankAccountNumber] = Json.format[BankAccountNumber]
 }
