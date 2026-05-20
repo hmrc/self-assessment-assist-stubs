@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,10 @@ class NRSSubmissionSpec extends UnitSpec {
       val json = Json.toJson(model)
 
       (json \ "searchKey").as[String] shouldBe "report-456"
+    }
+
+    "return error when JSON is invalid" in {
+      JsObject.empty.validate[SearchKeys] shouldBe a[JsError]
     }
   }
 
@@ -86,7 +90,50 @@ class NRSSubmissionSpec extends UnitSpec {
 
       val json = Json.toJson(model)
 
+      (json \ "businessId").as[String] shouldBe "business-2"
+      (json \ "notableEvent").as[String] shouldBe "event-2"
+      (json \ "payloadContentType").as[String] shouldBe "application/json"
+      (json \ "payloadSha256Checksum").as[String] shouldBe "checksum-2"
+      (json \ "userAuthToken").as[String] shouldBe "token-2"
       (json \ "searchKeys" \ "searchKey").as[String] shouldBe "report-456"
+    }
+
+    "fail deserialization when required fields are missing" in {
+      val json = Json.parse(
+        """
+          |{
+          |  "businessId": "business-1"
+          |}
+          |""".stripMargin
+      )
+
+      json.validate[MetaData].isError shouldBe true
+    }
+
+    "fail deserialization when timestamp is invalid" in {
+      val json = Json.parse(
+        """
+          |{
+          |  "businessId": "business-1",
+          |  "notableEvent": "event-1",
+          |  "payloadContentType": "application/json",
+          |  "payloadSha256Checksum": "checksum",
+          |  "userSubmissionTimestamp": "invalid-date",
+          |  "identityData": {},
+          |  "userAuthToken": "token",
+          |  "headerData": {},
+          |  "searchKeys": {
+          |    "reportId": "report-123"
+          |  }
+          |}
+          |""".stripMargin
+      )
+
+      json.validate[MetaData].isError shouldBe true
+    }
+
+    "return error when JSON is invalid" in {
+      JsObject.empty.validate[MetaData] shouldBe a[JsError]
     }
   }
 
@@ -118,6 +165,10 @@ class NRSSubmissionSpec extends UnitSpec {
 
       submission.payload shouldBe "encoded-payload"
       submission.metadata.searchKeys shouldBe SearchKeys("report-123")
+    }
+
+    "return error when JSON is invalid" in {
+      JsObject.empty.validate[NRSSubmission] shouldBe a[JsError]
     }
   }
 

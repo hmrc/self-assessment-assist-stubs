@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,6 +134,10 @@ class RdsRequestSpec extends UnitSpec {
 
       (json \ "name").as[String] shouldBe "someFlag"
       (json \ "value").as[Boolean] shouldBe true
+    }
+
+    "return error when JSON is invalid" in {
+      JsObject.empty.validate[InputWithBoolean] shouldBe a[JsError]
     }
   }
 

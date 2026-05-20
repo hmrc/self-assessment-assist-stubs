@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -96,6 +96,10 @@ class FraudRiskRequestSpec extends UnitSpec {
 
       Json.toJson(model).validate[FraudRiskRequest] shouldBe JsSuccess(model)
     }
+
+    "return error when JSON is invalid" in {
+      JsObject.empty.validate[FraudRiskRequest] shouldBe a[JsError]
+    }
   }
 
   "UTR, UserId, BankAccountSortCode, BankAccountNumber JSON formats" should {
@@ -110,6 +114,13 @@ class FraudRiskRequestSpec extends UnitSpec {
       Json.toJson(userId).validate[UserId].get shouldBe userId
       Json.toJson(sortCode).validate[BankAccountSortCode].get shouldBe sortCode
       Json.toJson(accountNumber).validate[BankAccountNumber].get shouldBe accountNumber
+    }
+
+    "return error when JSON is invalid" in {
+      JsObject.empty.validate[UTR] shouldBe a[JsError]
+      JsObject.empty.validate[UserId] shouldBe a[JsError]
+      JsObject.empty.validate[BankAccountSortCode] shouldBe a[JsError]
+      JsObject.empty.validate[BankAccountNumber] shouldBe a[JsError]
     }
   }
 
